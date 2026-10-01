@@ -9786,7 +9786,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       var acc = [
         {icon:'📄', label:'Descargar ficha en PDF', sub:'Con pedigrí, para compartir', onClick:function(){ if(window.__pdfAnimal) window.__pdfAnimal(r.id); }},
         {icon:'📋', label:'Ver ficha completa', sub:'Todo el detalle en el panel', onClick:function(){ cerrar(); if(window.__abrirFicha) window.__abrirFicha(r.id); }},
-        {icon:'⚖', label:'Agregar a comparación', onClick:function(){ if(window.__comparador){ window.__comparador.add(r.id); this.querySelector('b').textContent='✓ Agregado a comparación'; } }}
+        {icon:'⚖', label:'Agregar a comparación', onClick:function(){ if(window.__comparador){ window.__comparador.add(r.id); this.querySelector('b').textContent='✓ Agregado a comparación'; } }},
+        {icon:'📋', label:'Agregar a visita ASOCEBU', sub:'Registrar lo que dice el técnico', onClick:function(){ if(window.__visitaAsocebu) window.__visitaAsocebu.add(r.id); }}
       ];
       if(r.activo==='ACTIVO'){
         acc.push({icon:'⚖', label:'Registrar un pesaje', onClick:function(){ ctx={animal:r}; go(pes2, 'Pesaje'); }});
@@ -9963,5 +9964,419 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   if(pref !== 'clasico') abrir();
 })();
 </script>
+<!-- ================= VISITA TÉCNICA ASOCEBU (módulo) ================= -->
+<style>
+  #avFab{ position:fixed; left:14px; bottom:calc(16px + env(safe-area-inset-bottom,0px)); z-index:1120; background:var(--rust); color:#fff; border:none; border-radius:999px; padding:12px 16px; font-family:'IBM Plex Sans',sans-serif; font-weight:700; font-size:14px; cursor:pointer; box-shadow:0 6px 16px rgba(0,0,0,.25); }
+  #avFab b{ background:#fff; color:var(--rust); border-radius:999px; padding:1px 8px; margin-left:4px; font-family:'IBM Plex Mono',monospace; }
+  body.av-open #avFab{ display:none; }
+  @media (max-width:1099.98px){ body.guia-abierta.av-open #guia{ bottom:64vh; } body.guia-abierta.av-open.av-is-min #guia{ bottom:70px; } }
+  @media (min-width:1100px){ body.guia-abierta.av-open #guia{ right:410px; } }
+  #fh-vis-btn.av-on{ background:#F2EDE0 !important; color:var(--rust) !important; box-shadow:none; }
+  .av-panel{ position:fixed; z-index:1150; background:var(--card); border:2px solid var(--green-deep); box-shadow:0 -10px 30px rgba(36,29,20,.28); display:flex; flex-direction:column; font-family:'IBM Plex Sans',sans-serif; color:var(--ink); font-size:14.5px; }
+  @media (min-width:1100px){
+    .av-panel{ top:0; right:0; bottom:0; width:410px; border-width:0 0 0 2px; }
+    body.av-open{ padding-right:410px; }
+  }
+  @media (max-width:1099.98px){
+    .av-panel{ left:0; right:0; bottom:0; height:64vh; border-width:2px 0 0; border-radius:14px 14px 0 0; padding-bottom:env(safe-area-inset-bottom,0px); }
+    .av-panel.av-min{ height:auto; }
+    body.av-open{ padding-bottom:64vh; }
+    body.av-open.av-is-min{ padding-bottom:70px; }
+  }
+  .av-panel.av-min .av-nav, .av-panel.av-min .av-body, .av-panel.av-min .av-foot{ display:none; }
+  .av-head{ display:flex; align-items:center; gap:8px; padding:9px 12px; background:var(--green-deep); color:#F7F3E9; }
+  .av-panel:not(.av-min) .av-head{ border-radius:inherit; border-bottom-left-radius:0; border-bottom-right-radius:0; }
+  .av-head .av-t{ flex:1; min-width:0; cursor:pointer; }
+  .av-head .av-t b{ display:block; font-family:'Fraunces',Georgia,serif; font-size:16px; line-height:1.15; }
+  .av-head .av-t span{ font-family:'IBM Plex Mono',monospace; font-size:11px; opacity:.85; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .av-hb{ background:transparent; border:1px solid rgba(247,243,233,.6); color:#F7F3E9; border-radius:6px; padding:5px 10px; cursor:pointer; font-size:14px; font-weight:700; }
+  .av-net{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; padding:2px 7px; border-radius:999px; background:rgba(247,243,233,.15); white-space:nowrap; }
+  .av-net.off{ background:#AD8A3C; color:#fff; }
+  .av-nav{ display:flex; border-bottom:1px solid var(--line); background:var(--paper-light); overflow-x:auto; }
+  .av-nav button{ flex:1; border:none; background:none; padding:9px 8px; font-weight:600; font-size:13px; color:var(--ink-soft); border-bottom:3px solid transparent; cursor:pointer; white-space:nowrap; font-family:inherit; }
+  .av-nav button.on{ color:var(--green-deep); border-bottom-color:var(--rust); }
+  .av-nav .n{ font-family:'IBM Plex Mono',monospace; font-size:11px; background:var(--green-pale); border-radius:999px; padding:0 6px; margin-left:3px; }
+  .av-body{ flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:12px; -webkit-overflow-scrolling:touch; }
+  .av-foot{ display:flex; gap:8px; padding:9px 12px; border-top:1px solid var(--line); background:var(--paper-light); align-items:center; flex-wrap:wrap; }
+  .av-foot:empty{ display:none; }
+  .av-btn{ border:1px solid var(--green-deep); background:var(--green-deep); color:#F7F3E9; border-radius:6px; padding:9px 13px; font-weight:700; cursor:pointer; font-size:13.5px; font-family:inherit; }
+  .av-btn.ghost{ background:transparent; color:var(--green-deep); }
+  .av-btn.rust{ background:var(--rust); border-color:var(--rust); }
+  .av-btn.danger{ background:transparent; border-color:#7C2B21; color:#7C2B21; }
+  .av-btn.sm{ padding:6px 10px; font-size:12.5px; }
+  .av-body h4{ margin:0; font-family:'Fraunces',Georgia,serif; font-size:17px; color:var(--green-deep); }
+  .av-eb{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--brass); font-weight:600; margin:0 0 5px; }
+  .av-body label.f{ display:flex; flex-direction:column; gap:3px; font-size:12px; font-weight:600; color:var(--ink-soft); min-width:0; }
+  .av-body input[type=text], .av-body input[type=date], .av-body input[type=number], .av-body input[type=search], .av-body select, .av-body textarea{ background:#FFFDF7; border:1px solid var(--line); border-radius:6px; padding:8px 9px; font-size:15px; width:100%; color:var(--ink); font-family:inherit; font-weight:400; box-sizing:border-box; }
+  .av-body textarea{ min-height:58px; resize:vertical; }
+  .av-g2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .av-chips{ display:flex; gap:5px; flex-wrap:wrap; }
+  .av-chip{ border:1px solid var(--line); background:#FFFDF7; border-radius:999px; padding:6px 11px; font-size:12.5px; cursor:pointer; font-weight:500; font-family:inherit; color:var(--ink); }
+  .av-chip[aria-pressed="true"]{ background:var(--green-deep); color:#fff; border-color:var(--green-deep); }
+  .av-chip.res[aria-pressed="true"][data-tone="warn"]{ background:var(--brass); border-color:var(--brass); }
+  .av-chip.res[aria-pressed="true"][data-tone="bad"]{ background:#7C2B21; border-color:#7C2B21; }
+  .av-animal{ border:1px solid var(--line); border-radius:8px; padding:9px 11px; background:var(--paper-light); display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
+  .av-animal b{ font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--green-deep); }
+  .av-animal small{ display:block; color:var(--ink-soft); font-size:12px; }
+  .av-score{ display:grid; grid-template-columns:1fr; gap:4px; padding:6px 0; border-bottom:1px dashed var(--line); }
+  .av-score:last-child{ border-bottom:none; }
+  .av-score .lb{ font-size:13px; font-weight:600; display:flex; justify-content:space-between; gap:6px; }
+  .av-score .lb span{ font-weight:400; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; font-size:11.5px; }
+  .av-steps{ display:grid; grid-template-columns:repeat(8,1fr); gap:3px; }
+  .av-steps button{ padding:7px 0; border:1px solid var(--line); background:#FFFDF7; border-radius:5px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; cursor:pointer; color:var(--ink); }
+  .av-steps button[aria-pressed="true"]{ background:var(--green-deep); color:#fff; border-color:var(--green-deep); }
+  .av-sug{ border:1px solid var(--line); border-radius:6px; overflow:hidden; background:#FFFDF7; }
+  .av-sug:empty{ display:none; }
+  .av-it{ display:flex; justify-content:space-between; gap:8px; width:100%; padding:8px 10px; border:none; border-bottom:1px solid var(--line); background:transparent; cursor:pointer; text-align:left; font-family:inherit; color:var(--ink); font-size:13px; }
+  .av-it:last-child{ border-bottom:none; }
+  .av-it:hover{ background:var(--paper-light); }
+  .av-it b{ font-family:'IBM Plex Mono',monospace; color:var(--green-deep); }
+  .av-it .r{ text-align:right; color:var(--ink-soft); font-size:11.5px; font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
+  .av-it .l{ min-width:0; }
+  .av-it .l small{ display:block; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .av-pill{ display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; padding:1px 7px; border-radius:999px; background:var(--green-pale); color:var(--green-deep); white-space:nowrap; }
+  .av-pill.warn{ background:#F3E7C8; color:#8a6a22; } .av-pill.bad{ background:#F2DCD6; color:#7C2B21; }
+  .av-note{ background:#F3E7C8; border-radius:6px; padding:8px 10px; font-size:12.5px; }
+  .av-kpis{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+  .av-kpi{ border:1px solid var(--line); border-radius:6px; padding:7px 8px; background:#FFFDF7; }
+  .av-kpi b{ display:block; font-family:'IBM Plex Mono',monospace; font-size:19px; color:var(--green-deep); }
+  .av-kpi span{ font-size:11px; color:var(--ink-soft); line-height:1.2; display:block; }
+  .av-tw{ overflow-x:auto; border:1px solid var(--line); border-radius:6px; }
+  .av-tw table{ border-collapse:collapse; width:100%; font-size:12.5px; }
+  .av-tw th,.av-tw td{ padding:5px 7px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; }
+  .av-tw th{ font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); background:var(--paper-light); }
+  .av-tw td.w{ white-space:normal; min-width:150px; }
+  .av-txt{ white-space:pre-wrap; background:#FFFDF7; border:1px solid var(--line); border-radius:6px; padding:9px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; max-height:220px; overflow:auto; margin:0; }
+  .av-row{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .av-confirm{ background:#F2DCD6; border-radius:6px; padding:8px 10px; font-size:12.5px; display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .av-muted{ color:var(--ink-soft); font-size:12.5px; margin:0; }
+  .av-empty{ text-align:center; color:var(--ink-soft); padding:16px 8px; font-size:13px; }
+  .av-toast{ position:fixed; left:50%; transform:translateX(-50%); top:calc(14px + env(safe-area-inset-top,0px)); background:#241D14; color:#F7F3E9; padding:9px 15px; border-radius:6px; font-size:13.5px; z-index:2000; box-shadow:0 6px 16px rgba(0,0,0,.3); max-width:90vw; font-family:'IBM Plex Sans',sans-serif; }
+  .av-body button:focus-visible, .av-body input:focus, .av-body select:focus, .av-body textarea:focus{ outline:2px solid var(--rust); outline-offset:1px; }
+  @media print{ #avFab, #avPanel{ display:none !important; } }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script>
+/* ---------- Visita técnica ASOCEBU ----------
+   Igual que el comparador: botón "➕ Visita ASOCEBU" en la ficha y barra flotante.
+   El panel queda abierto al lado (computador) o abajo (celular) para seguir
+   consultando el dashboard mientras se registra cada animal que pasa.
+   Todo se guarda en el equipo (funciona sin señal). */
+(function(){
+  var RAW = window.__BD__ || [];
+  if(!RAW.length) return;
+  var PROD = {OK:1,CACHO:1,TNJ:1};
+  var byNum = {}; RAW.forEach(function(r){ if(r && r.numero){ var k=r.numero.trim(); if(!byNum[k] || PROD[r.finca]) byNum[k]=r; } });
+  var RASGOS = [['temp','Temperamento'],['ombligo','Ombligo'],['caract','Caracterización racial'],['conf','Conformación'],['musc','Musculatura'],['aplo','Aplomos'],['tamano_fs','Tamaño'],['dorso','Dorso'],['longitud_corp','Longitud corporal']];
+  var OBJETIVOS = ['Inscripción de crías','Calificación lineal','Registro definitivo','Revisión de genealogía','Pesaje','Inspección sanitaria','Asesoría reproductiva'];
+  var MOTIVOS = ['Inscripción','Calificación','Registro definitivo','Pesaje','Genealogía','Otro'];
+  var RESULTADOS = [['Inscrita','ok'],['Calificada','ok'],['Aprobada registro definitivo','ok'],['Observada / condicionada','warn'],['Pendiente','warn'],['Rechazada','bad']];
+  var RAZAS = {BR:'Brahman',GZ:'Guzerá',GOL:'Girolando',JE:'Jersey',JY:'Jersey'};
+  var PASOS = [1,2,2.5,3,3.5,4,4.5,5];
+
+  /* ---------- almacenamiento local ---------- */
+  var KEY = 'hatos_visita_asocebu_v1';
+  function hoy(){ var d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  function nuevaVisita(){ return {fecha:hoy(), finca:'OK', tecnico:'', acomp:'', obj:['Inscripción de crías','Calificación lineal'], obs:'', comp:''}; }
+  var S; try{ S = JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ S=null; }
+  if(!S || !S.visita || !S.regs) S = {visita:nuevaVisita(), regs:{}, open:false, min:false, tab:'reg'};
+  if(!Object.keys(S.regs).some(function(k){ return !S.regs[k].deleted; }) && S.visita.fecha!==hoy()) S.visita.fecha=hoy();
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('No hay espacio para guardar en este equipo. Guarde un respaldo.'); } }
+  function regs(){ return Object.keys(S.regs).map(function(k){ return S.regs[k]; }).filter(function(r){ return !r.deleted; }).sort(function(a,b){ return a.createdAt-b.createdAt; }); }
+  function regDe(animalId){ var a=regs(); for(var i=a.length-1;i>=0;i--) if(a[i].animalId===animalId) return a[i]; return null; }
+  function uid(){ return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+  /* ---------- utilidades ---------- */
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function regBD(r){ var v=r&&r.registro; v=(v==null?'':String(v).trim()); return (v===''||v==='0')?null:v; }
+  function edad(fn){ if(!fn) return null; return (new Date(S.visita.fecha+'T00:00:00') - new Date(fn+'T00:00:00'))/(365.25*864e5); }
+  function edadTxt(fn){ var e=edad(fn); if(e==null||isNaN(e)) return '—'; return e<2 ? Math.round(e*12)+' m' : e.toFixed(1)+' a'; }
+  function fmt(v,d){ return (v==null||v===''||isNaN(v)) ? '—' : Number(v).toFixed(d==null?1:d); }
+  function tono(res){ for(var i=0;i<RESULTADOS.length;i++) if(RESULTADOS[i][0]===res) return RESULTADOS[i][1]==='ok'?'':RESULTADOS[i][1]; return ''; }
+  function calif(r){ var s=0,n=0; RASGOS.forEach(function(k){ var v=r.scores[k[0]]; if(v!=null){ s+=+v; n++; } }); return n?s/n:null; }
+  function norm(s){ return String(s||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/-/g,'/'); }
+  var tt; function toast(t){ var el=document.getElementById('avToast'); if(!el){ el=document.createElement('div'); el.id='avToast'; el.className='av-toast'; document.body.appendChild(el); } el.textContent=t; el.hidden=false; clearTimeout(tt); tt=setTimeout(function(){ el.hidden=true; },2300); }
+
+  /* ---------- botón flotante y panel ---------- */
+  var fab=document.createElement('button'); fab.id='avFab'; fab.type='button'; document.body.appendChild(fab);
+  fab.onclick=function(){ S.open=true; S.min=false; save(); paint(); };
+  var P=document.createElement('div'); P.id='avPanel'; P.className='av-panel'; P.setAttribute('role','region'); P.setAttribute('aria-label','Visita técnica ASOCEBU');
+  P.innerHTML='<div class="av-head"><div class="av-t" id="avTitle"><b>Visita ASOCEBU</b><span id="avSub"></span></div><span class="av-net" id="avNet"></span>'+
+    '<button class="av-hb" id="avMin" title="Minimizar">▾</button><button class="av-hb" id="avClose" title="Cerrar panel (no borra nada)">×</button></div>'+
+    '<nav class="av-nav"><button data-t="reg">Registrar</button><button data-t="lista">Revisados <span class="n" id="avN">0</span></button><button data-t="res">Resumen</button><button data-t="vis">Datos visita</button></nav>'+
+    '<div class="av-body" id="avBody"></div><div class="av-foot" id="avFoot"></div>';
+  document.body.appendChild(P);
+  P.querySelectorAll('.av-nav button').forEach(function(b){ b.onclick=function(){ if(S.tab==='reg' && dirty() && b.dataset.t!=='reg'){ /* el borrador queda guardado en memoria */ } S.tab=b.dataset.t; save(); paint(); }; });
+  document.getElementById('avMin').onclick=function(){ S.min=!S.min; save(); paint(); };
+  document.getElementById('avTitle').onclick=function(){ if(S.min){ S.min=false; save(); paint(); } };
+  document.getElementById('avClose').onclick=function(){ S.open=false; save(); paint(); };
+  function net(){ var el=document.getElementById('avNet'); var on=navigator.onLine!==false; el.textContent=on?'en línea':'sin señal · guarda igual'; el.className='av-net'+(on?'':' off'); }
+  window.addEventListener('online',net); window.addEventListener('offline',net);
+
+  /* ---------- animal en pantalla (ficha) ---------- */
+  var enFicha=null, draft=null;
+  window.addEventListener('ficha:change',function(e){ enFicha=e.detail; renderFichaBtn();
+    if(S.open && S.tab==='reg' && !dirty() && enFicha){ abrirForm(enFicha.id,null,true); } });
+  function renderFichaBtn(){
+    var b=document.getElementById('fh-vis-btn');
+    if(!b){ var c=document.getElementById('fh-cmp-btn'); if(!c) return; b=document.createElement('button'); b.id='fh-vis-btn'; b.className='btn-pdf-prominent'; b.type='button'; c.parentNode.insertBefore(b,c.nextSibling);
+      b.onclick=function(){ if(!enFicha) return; if(dirty() && (!draft || draft.animalId!==enFicha.id)){ S.open=true; S.min=false; S.tab='reg'; paint(); toast('Guarde o descarte el animal que está registrando'); return; }
+        abrirForm(enFicha.id); S.open=true; S.min=false; S.tab='reg'; save(); paint(); }; }
+    var r=enFicha && regDe(enFicha.id);
+    b.textContent = r ? '✓ En visita ASOCEBU' : '➕ Visita ASOCEBU';
+    b.classList.toggle('av-on', !!r);
+  }
+  function verFicha(id){ var tb=document.querySelector('.tab-btn[data-view="ficha"]'); if(tb && !tb.classList.contains('active')) tb.click(); setTimeout(function(){ if(window.__selectAnimal) window.__selectAnimal(id); },60); }
+
+  /* ---------- formulario de registro ---------- */
+  function vacio(r){ return { id:uid(), animalId:r?r.id:null, numero:r?r.numero:'', nombre:r?(r.nombre||''):'', finca:r?r.finca:S.visita.finca, sexo:r?((r.sexo||'').toUpperCase()==='H'?'H':'M'):'H', raza:r?r.raza:'BR',
+    fecha_nac:r?(r.fecha_nac||''):'', padre:r?(r.padre||''):'', madre:r?(r.madre||''):'', nuevo:!r, motivo:[], resultado:'', registroAsignado:'', tatuaje:'', peso:'', scores:{}, obs:'', tarea:'', createdAt:Date.now(), updatedAt:0 }; }
+  function abrirForm(animalId, regId, silent){
+    var ex = regId ? S.regs[regId] : (animalId!=null ? regDe(animalId) : null);
+    draft = ex ? JSON.parse(JSON.stringify(ex)) : vacio(animalId!=null?RAW[animalId]:null);
+    if(!silent){ S.tab='reg'; }
+    if(S.open) paint();
+  }
+  function dirty(){ if(!draft) return false; var base=S.regs[draft.id]&&!S.regs[draft.id].deleted ? S.regs[draft.id] : null;
+    if(base) return JSON.stringify(base)!==JSON.stringify(draft);
+    var d=draft; return !!(d.motivo.length||d.resultado||d.registroAsignado||d.tatuaje||d.peso||Object.keys(d.scores).length||d.obs||d.tarea||(d.nuevo&&d.numero)); }
+
+  function vistaReg(){
+    var h='<div><p class="av-eb">Agregar animal que pasa</p><input type="search" id="avQ" placeholder="Escriba el número: 4270/4, 812-6…" autocomplete="off"><div class="av-sug" id="avSug" style="margin-top:4px"></div></div>';
+    if(!draft){
+      h+='<div class="av-empty">Busque el número arriba, o abra la <b>Ficha Individual</b> de un animal y toque <b>➕ Visita ASOCEBU</b>.<br><br><button class="av-btn ghost sm" id="avNuevo">+ Animal que no está en la base</button></div>';
+      return {h:h,f:''};
+    }
+    var d=draft, r=d.animalId!=null?RAW[d.animalId]:null, ya=S.regs[d.id]&&!S.regs[d.id].deleted;
+    if(r){
+      h+='<div class="av-animal"><div><b>'+esc(r.numero)+'</b><small>'+esc([r.nombre, r.finca, (d.sexo==='H'?'Hembra':'Macho'), RAZAS[r.raza]||r.raza, edadTxt(r.fecha_nac)].filter(Boolean).join(' · '))+'</small>'+
+        '<small>Registro en la base: <b style="font-size:12px">'+esc(regBD(r)||'sin registro')+'</b>'+(r.padre?' · P: '+esc(r.padre):'')+'</small></div>'+
+        '<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">'+(ya?'<span class="av-pill">ya registrado</span>':'<span class="av-pill warn">sin guardar</span>')+'<button class="av-btn ghost sm" id="avVer">Ver ficha</button></div></div>';
+    } else {
+      h+='<div class="av-note">Animal que no aparece en la base. Llene los datos básicos para pasarlo luego al Excel.</div><div class="av-g2">'+
+        '<label class="f">Número<input type="text" id="avnNum" value="'+esc(d.numero)+'" placeholder="Ej: 812/6"></label>'+
+        '<label class="f">Nombre<input type="text" id="avnNom" value="'+esc(d.nombre)+'"></label>'+
+        '<label class="f">Sexo<select id="avnSex"><option value="H"'+(d.sexo==='H'?' selected':'')+'>Hembra</option><option value="M"'+(d.sexo==='M'?' selected':'')+'>Macho</option></select></label>'+
+        '<label class="f">Raza<select id="avnRaz">'+['BR','GZ','GOL','JE'].map(function(k){ return '<option value="'+k+'"'+(d.raza===k?' selected':'')+'>'+RAZAS[k]+'</option>'; }).join('')+'</select></label>'+
+        '<label class="f">Nacimiento<input type="date" id="avnFn" value="'+esc(d.fecha_nac)+'"></label>'+
+        '<label class="f">Finca<select id="avnFin">'+['OK','CACHO','TNJ'].map(function(f){ return '<option'+(d.finca===f?' selected':'')+'>'+f+'</option>'; }).join('')+'</select></label>'+
+        '<label class="f">Padre<input type="text" id="avnPad" value="'+esc(d.padre)+'" list="avDlP"></label>'+
+        '<label class="f">Madre<input type="text" id="avnMad" value="'+esc(d.madre)+'" list="avDlM"></label></div>';
+    }
+    h+='<div><p class="av-eb">Motivo</p><div class="av-chips" id="avMot">'+MOTIVOS.map(function(m){ return '<button type="button" class="av-chip" data-m="'+esc(m)+'" aria-pressed="'+(d.motivo.indexOf(m)>=0)+'">'+esc(m)+'</button>'; }).join('')+'</div></div>';
+    h+='<div><p class="av-eb">Resultado</p><div class="av-chips" id="avRes">'+RESULTADOS.map(function(x){ return '<button type="button" class="av-chip res" data-tone="'+x[1]+'" data-r="'+esc(x[0])+'" aria-pressed="'+(d.resultado===x[0])+'">'+esc(x[0])+'</button>'; }).join('')+'</div></div>';
+    h+='<div class="av-g2"><label class="f">Registro asignado<input type="text" id="avReg" value="'+esc(d.registroAsignado)+'" placeholder="'+esc(r&&regBD(r)?'Actual: '+regBD(r):'Ej: HBR1234567')+'"></label>'+
+      '<label class="f">Peso hoy (kg)<input type="number" inputmode="decimal" id="avPeso" value="'+esc(d.peso)+'" min="0" step="1"></label>'+
+      '<label class="f" style="grid-column:1/-1">Tatuaje / marca verificada<input type="text" id="avTat" value="'+esc(d.tatuaje)+'"></label></div>';
+    h+='<div><p class="av-eb">Calificación lineal (0–5)</p><p class="av-muted">Toque el puntaje; otra vez para borrarlo. A la derecha, lo que tiene hoy la base.</p>'+
+      RASGOS.map(function(k){ var v=d.scores[k[0]]; return '<div class="av-score"><div class="lb">'+k[1]+'<span>base '+fmt(r?r[k[0]]:null,1)+'</span></div><div class="av-steps" data-k="'+k[0]+'">'+
+        PASOS.map(function(p){ return '<button type="button" data-v="'+p+'" aria-pressed="'+(v==p)+'">'+p+'</button>'; }).join('')+'</div></div>'; }).join('')+
+      '<p class="av-muted" id="avCal" style="margin-top:6px"></p></div>';
+    h+='<label class="f">Observaciones del técnico<textarea id="avObs" placeholder="Defectos, virtudes, recomendaciones…">'+esc(d.obs)+'</textarea></label>';
+    h+='<label class="f">Tarea pendiente<input type="text" id="avTar" value="'+esc(d.tarea)+'" placeholder="Ej: volver a pesar, corregir madre en el Excel"></label>';
+    var f=(ya?'<button class="av-btn danger sm" id="avDel">Quitar</button>':'')+'<span style="flex:1"></span><button class="av-btn ghost" id="avDesc">'+(ya?'Cerrar':'Descartar')+'</button><button class="av-btn rust" id="avSave">'+(ya?'Guardar cambios':'Guardar')+'</button>';
+    return {h:h,f:f};
+  }
+  function wireReg(){
+    var q=document.getElementById('avQ'), sug=document.getElementById('avSug');
+    q.addEventListener('input',function(){ var t=norm(q.value.trim()); if(!t){ sug.innerHTML=''; return; }
+      var out=[]; for(var i=0;i<RAW.length && out.length<12;i++){ var r=RAW[i]; if(!r||!PROD[r.finca]) continue; var n=norm(r.numero);
+        if(n.indexOf(t)===0 || norm(r.nombre).indexOf(t)>=0 || norm(r.registro)===t) out.push(r); }
+      out.sort(function(a,b){ return (b.activo==='ACTIVO')-(a.activo==='ACTIVO') || (b.finca===S.visita.finca)-(a.finca===S.visita.finca); });
+      sug.innerHTML = out.map(function(r){ var rg=regDe(r.id); return '<button class="av-it" data-id="'+r.id+'"><span class="l"><b>'+esc(r.numero)+'</b> '+(rg?'<span class="av-pill">en visita</span>':'')+'<small>'+esc([r.nombre,r.padre?'P: '+r.padre:''].filter(Boolean).join(' · '))+'</small></span><span class="r">'+esc(r.finca)+' · '+((r.sexo||'').toUpperCase()==='H'?'H':'M')+' · '+edadTxt(r.fecha_nac)+'<br>'+esc(r.activo||'')+'</span></button>'; }).join('')+
+        '<button class="av-it" data-nuevo="1"><span class="l"><b>+ '+esc(q.value.trim())+'</b><small>No está en la base: registrarlo como animal nuevo</small></span></button>'; });
+    q.addEventListener('keydown',function(e){ if(e.key==='Enter'){ var f=sug.querySelector('.av-it'); if(f) f.click(); } });
+    sug.addEventListener('click',function(e){ var b=e.target.closest('.av-it'); if(!b) return;
+      if(dirty()){ toast('Guarde o descarte el animal actual primero'); return; }
+      if(b.dataset.nuevo){ draft=vacio(null); draft.numero=q.value.trim(); paint(); return; }
+      var id=+b.dataset.id; abrirForm(id); verFicha(id); paint(); });
+    var nv=document.getElementById('avNuevo'); if(nv) nv.onclick=function(){ draft=vacio(null); paint(); };
+    if(!draft) return;
+    var d=draft, body=document.getElementById('avBody');
+    var ver=document.getElementById('avVer'); if(ver) ver.onclick=function(){ verFicha(d.animalId); if(window.innerWidth<1100){ S.min=true; save(); paint(); } };
+    body.querySelectorAll('#avMot .av-chip').forEach(function(b){ b.onclick=function(){ var i=d.motivo.indexOf(b.dataset.m); if(i>=0) d.motivo.splice(i,1); else d.motivo.push(b.dataset.m); b.setAttribute('aria-pressed',i<0); }; });
+    body.querySelectorAll('#avRes .av-chip').forEach(function(b){ b.onclick=function(){ d.resultado = d.resultado===b.dataset.r?'':b.dataset.r; body.querySelectorAll('#avRes .av-chip').forEach(function(x){ x.setAttribute('aria-pressed', x.dataset.r===d.resultado); }); }; });
+    body.querySelectorAll('.av-steps').forEach(function(g){ g.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; var k=g.dataset.k, v=+b.dataset.v;
+      if(d.scores[k]==v) delete d.scores[k]; else d.scores[k]=v;
+      g.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', d.scores[k]==+x.dataset.v); }); calTxt(); }); });
+    var map={avReg:'registroAsignado',avPeso:'peso',avTat:'tatuaje',avObs:'obs',avTar:'tarea',avnNum:'numero',avnNom:'nombre',avnSex:'sexo',avnRaz:'raza',avnFn:'fecha_nac',avnFin:'finca',avnPad:'padre',avnMad:'madre'};
+    Object.keys(map).forEach(function(id){ var el=document.getElementById(id); if(el) el.addEventListener('input',function(){ d[map[id]]=el.value; }); });
+    document.getElementById('avSave').onclick=guardar;
+    document.getElementById('avDesc').onclick=function(){ draft=null; paint(); };
+    var del=document.getElementById('avDel'); if(del) del.onclick=function(){
+      document.getElementById('avFoot').innerHTML='<span class="av-confirm" style="flex:1">¿Quitar '+esc(d.numero)+' de la visita?</span><button class="av-btn ghost sm" id="avNo">No</button><button class="av-btn danger sm" id="avSi">Sí, quitar</button>';
+      document.getElementById('avNo').onclick=paint;
+      document.getElementById('avSi').onclick=function(){ S.regs[d.id].deleted=true; S.regs[d.id].updatedAt=Date.now(); save(); draft=null; toast('Quitado de la visita'); paint(); renderFichaBtn(); }; };
+    calTxt();
+  }
+  function calTxt(){ var el=document.getElementById('avCal'); if(!el||!draft) return; var c=calif(draft), n=Object.keys(draft.scores).length, r=draft.animalId!=null?RAW[draft.animalId]:null;
+    el.innerHTML = c!=null ? 'Promedio de los <b>'+n+'</b> rasgos calificados hoy: <b>'+c.toFixed(2)+'</b> / 5'+(r&&r.calif_conf_justa!=null?' · en la base: '+r.calif_conf_justa.toFixed(2):'') : 'Sin rasgos calificados todavía.'; }
+  function guardar(){
+    var d=draft;
+    if(d.nuevo && !String(d.numero).trim()){ toast('Escriba el número del animal nuevo'); return; }
+    if(!d.resultado && !d.motivo.length && !Object.keys(d.scores).length && !d.obs && !d.peso && !d.registroAsignado && !d.tarea){ toast('Marque al menos un motivo, resultado, puntaje u observación'); return; }
+    d.updatedAt=Date.now(); d.deleted=false; S.regs[d.id]=JSON.parse(JSON.stringify(d)); save();
+    toast('Guardado: '+(d.numero||'animal nuevo')+' · '+regs().length+' en la visita');
+    draft=null; paint(); renderFichaBtn();
+    var q=document.getElementById('avQ'); if(q && window.innerWidth>=1100) q.focus();
+  }
+
+  /* ---------- lista de revisados ---------- */
+  function vistaLista(){
+    var a=regs().slice().reverse();
+    if(!a.length) return {h:'<div class="av-empty">Todavía no hay animales revisados.</div>',f:''};
+    return {h:'<p class="av-muted">'+a.length+' animales · toque uno para corregirlo y ver su ficha.</p><div class="av-sug">'+a.map(function(r){ var c=calif(r);
+      return '<button class="av-it" data-r="'+r.id+'"><span class="l"><b>'+esc(r.numero||'(sin número)')+'</b> '+(r.resultado?'<span class="av-pill '+tono(r.resultado)+'">'+esc(r.resultado)+'</span>':'')+(r.nuevo?' <span class="av-pill warn">nuevo</span>':'')+
+        '<small>'+esc([r.motivo.join(', '), r.registroAsignado?'Reg '+r.registroAsignado:'', r.peso?r.peso+' kg':'', r.obs].filter(Boolean).join(' · ')||'—')+'</small></span><span class="r">'+(r.sexo==='H'?'H':'M')+(c!=null?'<br>'+c.toFixed(2):'')+'</span></button>'; }).join('')+'</div>', f:''};
+  }
+  function wireLista(){ var b=document.getElementById('avBody'); b.querySelectorAll('.av-it[data-r]').forEach(function(x){ x.onclick=function(){
+    if(dirty()){ S.tab='reg'; paint(); toast('Guarde o descarte el animal actual primero'); return; }
+    var r=S.regs[x.dataset.r]; abrirForm(r.animalId, r.id); S.tab='reg'; save(); if(r.animalId!=null) verFicha(r.animalId); paint(); }; }); }
+
+  /* ---------- resumen ---------- */
+  function datos(){
+    var a=regs(), s={a:a,byRes:{},byMot:{},H:0,M:0,califs:[],pesos:[],nuevos:0,asig:0,pend:[],cambios:[]};
+    a.forEach(function(r){
+      var k=r.resultado||'Sin resultado'; s.byRes[k]=(s.byRes[k]||0)+1;
+      r.motivo.forEach(function(m){ s.byMot[m]=(s.byMot[m]||0)+1; });
+      if(r.sexo==='H') s.H++; else s.M++;
+      var c=calif(r); if(c!=null) s.califs.push(c);
+      if(r.peso!==''&&r.peso!=null&&!isNaN(r.peso)) s.pesos.push(+r.peso);
+      if(r.nuevo) s.nuevos++; if(r.registroAsignado) s.asig++;
+      if(r.tarea || r.resultado==='Pendiente' || r.resultado==='Observada / condicionada') s.pend.push(r);
+      var bd=r.animalId!=null?RAW[r.animalId]:null;
+      if(r.nuevo) s.cambios.push([r.numero,'Crear animal: '+[r.sexo==='H'?'hembra':'macho',RAZAS[r.raza]||r.raza,'nac. '+(r.fecha_nac||'?'),'P: '+(r.padre||'?'),'M: '+(r.madre||'?')].join(', ')]);
+      if(r.registroAsignado && (!bd || regBD(bd)!==r.registroAsignado.trim())) s.cambios.push([r.numero,'Registro: '+(bd&&regBD(bd)?regBD(bd):'vacío')+' → '+r.registroAsignado]);
+      RASGOS.forEach(function(k){ var v=r.scores[k[0]]; if(v!=null && (!bd || bd[k[0]]!=v)) s.cambios.push([r.numero, k[1]+': '+(bd&&bd[k[0]]!=null?fmt(bd[k[0]],1):'vacío')+' → '+v]); });
+      if(r.peso) s.cambios.push([r.numero,'CONTROL PESOS '+S.visita.fecha+': '+r.peso+' kg']);
+    });
+    return s;
+  }
+  function avg(x){ return x.length ? x.reduce(function(a,b){ return a+b; },0)/x.length : null; }
+  function tabla(head, rows, wcol){ if(!rows.length) return '<p class="av-muted">Nada por ahora.</p>'; return '<div class="av-tw"><table><thead><tr>'+head.map(function(h){ return '<th>'+esc(h)+'</th>'; }).join('')+'</tr></thead><tbody>'+
+    rows.map(function(r){ return '<tr>'+r.map(function(c,i){ return '<td'+(i===wcol?' class="w"':'')+'>'+esc(c==null||c===''?'—':c)+'</td>'; }).join('')+'</tr>'; }).join('')+'</tbody></table></div>'; }
+  function vistaRes(){
+    var s=datos(), v=S.visita, h='';
+    h+='<div><p class="av-eb">'+esc(v.fecha)+' · finca '+esc(v.finca)+(v.tecnico?' · '+esc(v.tecnico):'')+'</p><h4>Resumen de la visita</h4></div>';
+    h+='<div class="av-kpis">'+[[s.a.length,'revisados'],[s.H+' / '+s.M,'hembras / machos'],[s.asig,'registros asignados'],
+      [s.califs.length?avg(s.califs).toFixed(2):'—','calif. promedio'],[s.pesos.length?Math.round(avg(s.pesos)):'—','peso prom. (kg)'],[s.pend.length,'con pendientes']]
+      .map(function(k){ return '<div class="av-kpi"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>'; }).join('')+'</div>';
+    h+='<div><p class="av-eb">Por resultado</p>'+tabla(['Resultado','Animales'], Object.keys(s.byRes).sort(function(a,b){ return s.byRes[b]-s.byRes[a]; }).map(function(k){ return [k,s.byRes[k]]; }))+'</div>';
+    h+='<div><p class="av-eb">Listado</p>'+tabla(['Número','Sexo','Edad','Resultado','Registro','Calif.','Peso','Observación'], s.a.map(function(r){ var c=calif(r); return [r.numero,r.sexo,edadTxt(r.fecha_nac),r.resultado,r.registroAsignado,c!=null?c.toFixed(2):'',r.peso?r.peso+' kg':'',r.obs]; }),7)+'</div>';
+    h+='<div><p class="av-eb">Pendientes</p>'+tabla(['Número','Resultado','Tarea'], s.pend.map(function(r){ return [r.numero,r.resultado,r.tarea||r.obs]; }),2)+'</div>';
+    h+='<div><p class="av-eb">Cambios para pasar al Excel</p>'+tabla(['Número','Cambio'], s.cambios,1)+'</div>';
+    h+='<div><p class="av-eb">Resumen en texto</p><pre class="av-txt" id="avTxt">'+esc(texto(s))+'</pre></div>';
+    var f='<button class="av-btn" id="avXlsx">⬇ Excel de la visita</button><button class="av-btn ghost" id="avCopy">Copiar para WhatsApp</button>';
+    return {h:h,f:f,s:s};
+  }
+  function wireRes(s){
+    document.getElementById('avXlsx').onclick=function(){ exportar(s); };
+    document.getElementById('avCopy').onclick=function(){ var t=texto(s);
+      var sel=function(){ var el=document.getElementById('avTxt'), rg=document.createRange(); rg.selectNodeContents(el); var g=getSelection(); g.removeAllRanges(); g.addRange(rg); toast('Texto seleccionado: cópielo con el menú'); };
+      try{ navigator.clipboard.writeText(t).then(function(){ toast('Resumen copiado'); }, sel); }catch(e){ sel(); } };
+  }
+  function texto(s){
+    var v=S.visita, L=['VISITA TÉCNICA ASOCEBU — FINCA '+v.finca+' — '+v.fecha];
+    if(v.tecnico) L.push('Técnico: '+v.tecnico); if(v.acomp) L.push('Acompañante: '+v.acomp); if(v.obj.length) L.push('Objetivos: '+v.obj.join(', '));
+    L.push('','Animales revisados: '+s.a.length+' ('+s.H+' hembras, '+s.M+' machos)');
+    Object.keys(s.byRes).forEach(function(k){ L.push('  • '+k+': '+s.byRes[k]); });
+    if(s.asig) L.push('Registros asignados: '+s.asig);
+    if(s.califs.length) L.push('Calificación promedio: '+avg(s.califs).toFixed(2)+' / 5 ('+s.califs.length+' animales)');
+    if(s.pesos.length) L.push('Peso promedio: '+Math.round(avg(s.pesos))+' kg ('+s.pesos.length+' animales)');
+    if(s.nuevos) L.push('Animales nuevos (no estaban en la base): '+s.nuevos);
+    L.push('','LISTADO');
+    s.a.forEach(function(r){ var c=calif(r); L.push('- '+r.numero+(r.nombre?' '+r.nombre:'')+' ('+r.sexo+') · '+(r.resultado||'sin resultado')+(r.registroAsignado?' · Reg '+r.registroAsignado:'')+(c!=null?' · Calif '+c.toFixed(2):'')+(r.peso?' · '+r.peso+' kg':'')+(r.obs?' · '+r.obs:'')); });
+    if(s.pend.length){ L.push('','PENDIENTES'); s.pend.forEach(function(r){ L.push('- '+r.numero+': '+(r.tarea||r.obs||r.resultado)); }); }
+    if(v.obs) L.push('','Observaciones generales: '+v.obs); if(v.comp) L.push('Compromisos: '+v.comp);
+    return L.join('\n');
+  }
+  function bajar(nombre, blob){ try{ var u=URL.createObjectURL(blob), a=document.createElement('a'); a.href=u; a.download=nombre; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(u); a.remove(); },800); }catch(e){ toast('No se pudo descargar el archivo'); } }
+  function filas(s){
+    var v=S.visita;
+    var head=['Finca','Número','Nombre','Sexo','Raza','F. nacimiento','Padre','Madre','Nuevo','Motivo','Resultado','Registro BD','Registro asignado','Tatuaje','Peso (kg)'].concat(RASGOS.map(function(k){ return k[1]; })).concat(['Calif. visita','Calif. conf. BD','Observaciones','Tarea pendiente']);
+    var rows=s.a.map(function(r){ var bd=r.animalId!=null?RAW[r.animalId]:null, c=calif(r);
+      return [r.finca,r.numero,r.nombre,r.sexo,r.raza,r.fecha_nac,r.padre,r.madre,r.nuevo?'SI':'',r.motivo.join(', '),r.resultado,bd?(regBD(bd)||''):'',r.registroAsignado,r.tatuaje,r.peso!==''?+r.peso:'']
+        .concat(RASGOS.map(function(k){ return r.scores[k[0]]!=null?r.scores[k[0]]:''; })).concat([c!=null?+c.toFixed(2):'', bd&&bd.calif_conf_justa!=null?+bd.calif_conf_justa.toFixed(2):'', r.obs, r.tarea]); });
+    var vis=[['Campo','Valor'],['Fecha',v.fecha],['Finca',v.finca],['Técnico ASOCEBU',v.tecnico],['Acompañante',v.acomp],['Objetivos',v.obj.join(', ')],['Observaciones generales',v.obs],['Compromisos',v.comp],
+      ['Animales revisados',s.a.length],['Hembras',s.H],['Machos',s.M],['Registros asignados',s.asig],['Calificación promedio',s.califs.length?+avg(s.califs).toFixed(2):''],['Peso promedio (kg)',s.pesos.length?Math.round(avg(s.pesos)):''],['Animales nuevos',s.nuevos]]
+      .concat(Object.keys(s.byRes).map(function(k){ return ['Resultado: '+k, s.byRes[k]]; }));
+    return {head:head, rows:rows, vis:vis};
+  }
+  function exportar(s){
+    var v=S.visita, F=filas(s), base='VISITA_ASOCEBU_'+v.finca+'_'+v.fecha;
+    if(!window.XLSX){ // sin la librería (abierto sin señal por primera vez): CSV que abre en Excel
+      var csv=[F.head].concat(F.rows).map(function(r){ return r.map(function(c){ c=String(c==null?'':c); return /[;"\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c; }).join(';'); }).join('\r\n');
+      bajar(base+'.csv', new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'})); toast('Descargado en CSV (abre en Excel)'); return; }
+    var wb=XLSX.utils.book_new();
+    function hoja(rows, widths, name){ var ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=widths.map(function(w){ return {wch:w}; });
+      if(rows.length>1) ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:rows.length-1,c:rows[0].length-1}})};
+      XLSX.utils.book_append_sheet(wb,ws,name); }
+    hoja(F.vis,[28,70],'VISITA');
+    hoja([F.head].concat(F.rows), F.head.map(function(x,i){ return i<3?16:(i>=F.head.length-2?42:12); }),'REGISTROS');
+    hoja([['Número','Resultado','Tarea / observación']].concat(s.pend.map(function(r){ return [r.numero,r.resultado,r.tarea||r.obs]; })),[16,26,70],'PENDIENTES');
+    hoja([['Número','Cambio para la BD']].concat(s.cambios),[18,80],'CAMBIOS_BD');
+    bajar(base+'.xlsx', new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+    toast('Excel descargado');
+  }
+
+  /* ---------- datos de la visita ---------- */
+  function vistaVis(){
+    var v=S.visita;
+    var h='<div class="av-g2"><label class="f">Fecha<input type="date" id="avvFecha" value="'+esc(v.fecha)+'"></label>'+
+      '<label class="f">Finca<select id="avvFinca">'+[['OK','OK · Toluviejo'],['CACHO','CACHO · Orocué'],['TNJ','TNJ · Arboletes']].map(function(f){ return '<option value="'+f[0]+'"'+(v.finca===f[0]?' selected':'')+'>'+f[1]+'</option>'; }).join('')+'</select></label>'+
+      '<label class="f">Técnico ASOCEBU<input type="text" id="avvTecnico" value="'+esc(v.tecnico)+'"></label>'+
+      '<label class="f">Acompañante<input type="text" id="avvAcomp" value="'+esc(v.acomp)+'"></label></div>'+
+      '<div><p class="av-eb">Objetivos</p><div class="av-chips" id="avObj">'+OBJETIVOS.map(function(o){ return '<button type="button" class="av-chip" data-o="'+esc(o)+'" aria-pressed="'+(v.obj.indexOf(o)>=0)+'">'+esc(o)+'</button>'; }).join('')+'</div></div>'+
+      '<label class="f">Observaciones generales<textarea id="avvObs" placeholder="Estado del hato, potreros, sanidad, recomendaciones…">'+esc(v.obs)+'</textarea></label>'+
+      '<label class="f">Compromisos y próximos pasos<textarea id="avvComp">'+esc(v.comp)+'</textarea></label>'+
+      '<div><p class="av-eb">Respaldo</p><p class="av-muted">Todo queda guardado en este equipo aunque no haya señal. El respaldo sirve para pasar la visita a otro teléfono o computador.</p></div>'+
+      '<div class="av-row"><button class="av-btn ghost sm" id="avBk">⬇ Guardar respaldo</button><label class="av-btn ghost sm" style="display:inline-block">Cargar respaldo<input type="file" id="avRs" accept=".json,application/json" hidden></label><button class="av-btn danger sm" id="avReset">Empezar visita nueva</button></div>'+
+      '<div class="av-confirm" id="avResetC" hidden>Se borran los '+regs().length+' registros de esta visita en este equipo. Guarde antes el Excel o el respaldo. <button class="av-btn danger sm" id="avResetY">Sí, borrar</button><button class="av-btn ghost sm" id="avResetN">Cancelar</button></div>';
+    return {h:h,f:''};
+  }
+  function wireVis(){
+    var map={avvFecha:'fecha',avvFinca:'finca',avvTecnico:'tecnico',avvAcomp:'acomp',avvObs:'obs',avvComp:'comp'};
+    Object.keys(map).forEach(function(id){ var el=document.getElementById(id); el.addEventListener('input',function(){ S.visita[map[id]]=el.value; save(); head(); }); });
+    document.querySelectorAll('#avObj .av-chip').forEach(function(b){ b.onclick=function(){ var o=b.dataset.o, i=S.visita.obj.indexOf(o); if(i>=0) S.visita.obj.splice(i,1); else S.visita.obj.push(o); b.setAttribute('aria-pressed',i<0); save(); }; });
+    document.getElementById('avBk').onclick=function(){ bajar('respaldo_visita_asocebu_'+S.visita.fecha+'.json', new Blob([JSON.stringify({visita:S.visita,regs:S.regs},null,1)],{type:'application/json'})); };
+    document.getElementById('avRs').onchange=function(e){ var f=e.target.files[0]; if(!f) return; var rd=new FileReader(); rd.onload=function(){ try{ var o=JSON.parse(rd.result); if(!o.visita||!o.regs) throw 0;
+      Object.keys(o.regs).forEach(function(k){ var r=o.regs[k], m=S.regs[k]; if(!m || (r.updatedAt||0)>(m.updatedAt||0)) S.regs[k]=r; }); S.visita=o.visita; save(); paint(); renderFichaBtn(); toast('Respaldo cargado'); }catch(err){ toast('Ese archivo no es un respaldo de la visita'); } }; rd.readAsText(f); };
+    document.getElementById('avReset').onclick=function(){ document.getElementById('avResetC').hidden=false; };
+    document.getElementById('avResetN').onclick=function(){ document.getElementById('avResetC').hidden=true; };
+    document.getElementById('avResetY').onclick=function(){ S.regs={}; S.visita=nuevaVisita(); draft=null; save(); paint(); renderFichaBtn(); toast('Visita nueva lista'); };
+  }
+
+  /* ---------- pintar ---------- */
+  function head(){ var n=regs().length; document.getElementById('avSub').textContent=S.visita.fecha+' · '+S.visita.finca+' · '+n+' revisados'+(draft&&S.min?' · editando '+(draft.numero||'nuevo'):''); document.getElementById('avN').textContent=n; fab.innerHTML='📋 Visita ASOCEBU <b>'+n+'</b>'; }
+  function paint(){
+    document.body.classList.toggle('av-open', !!S.open); document.body.classList.toggle('av-is-min', !!(S.open&&S.min));
+    P.hidden=!S.open; P.classList.toggle('av-min', !!S.min); document.getElementById('avMin').textContent=S.min?'▴':'▾'; document.getElementById('avMin').title=S.min?'Expandir':'Minimizar';
+    head(); net();
+    if(!S.open || S.min) return;
+    P.querySelectorAll('.av-nav button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===S.tab); });
+    var body=document.getElementById('avBody'), foot=document.getElementById('avFoot'), st=body.scrollTop, v;
+    if(S.tab==='reg'){ v=vistaReg(); body.innerHTML=v.h; foot.innerHTML=v.f; wireReg(); }
+    else if(S.tab==='lista'){ v=vistaLista(); body.innerHTML=v.h; foot.innerHTML=v.f; wireLista(); body.scrollTop=st; }
+    else if(S.tab==='res'){ v=vistaRes(); body.innerHTML=v.h; foot.innerHTML=v.f; wireRes(v.s); }
+    else { v=vistaVis(); body.innerHTML=v.h; foot.innerHTML=v.f; wireVis(); }
+  }
+  /* listas para padre/madre de animales nuevos */
+  (function(){ var Pd={},Md={}; RAW.forEach(function(r){ if(!r||!PROD[r.finca]) return; if(r.padre) Pd[r.padre]=1; if(r.madre) Md[r.madre]=1; });
+    function dl(id,o){ var el=document.createElement('datalist'); el.id=id; el.innerHTML=Object.keys(o).sort().map(function(k){ return '<option value="'+esc(k)+'">'; }).join(''); document.body.appendChild(el); }
+    dl('avDlP',Pd); dl('avDlM',Md); })();
+  window.__visitaAsocebu = { add:function(id){
+    if(dirty() && (!draft || draft.animalId!==id)){ S.open=true; S.min=false; S.tab='reg'; save(); paint(); toast('Guarde o descarte el animal que está registrando'); return false; }
+    abrirForm(id); S.open=true; S.min=false; S.tab='reg'; save(); paint(); renderFichaBtn(); return true; } };
+  window.addEventListener('beforeunload',function(e){ if(dirty()){ e.preventDefault(); e.returnValue=''; } });
+  paint();
+})();
+
+/* ---------- Funcionamiento sin señal ---------- */
+if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
+  window.addEventListener('load',function(){ navigator.serviceWorker.register('./sw.js').catch(function(){}); });
+}
+</script>
+<!-- ================= FIN VISITA ASOCEBU ================= -->
+
 </body>
 </html>

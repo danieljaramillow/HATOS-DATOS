@@ -16,14 +16,14 @@
    de que el tablero lea sus datos.
    ===================================================================== */
 (function(){
-  var K = { edits:'hatosDJW_edits_v1', updates:'hatosDJW_updates_v1', visita:'hatos_visita_asocebu_v1', cortes:'hatos_cortes_letras_v1' };
+  var K = { edits:'hatosDJW_edits_v1', updates:'hatosDJW_updates_v1', visita:'hatos_visita_asocebu_v1', cortes:'hatos_cortes_letras_v1', notas:'hatos_notas_v1' };
   var BASE_KEY = 'hatosSync_base_v1', REM_KEY = 'hatosSync_remoto_v1', CFG_KEY = 'hatosSync_cfg_v1';
 
   function get(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
   function set(k, v){ try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
   function J(x){ return x === undefined ? undefined : JSON.stringify(x); }
 
-  function leerLocal(){ return { edits:get(K.edits), updates:get(K.updates), visita:get(K.visita), cortes:get(K.cortes) }; }
+  function leerLocal(){ return { edits:get(K.edits), updates:get(K.updates), visita:get(K.visita), cortes:get(K.cortes), notas:get(K.notas) }; }
 
   function updKey(u){ return [u.id, u.tipo, u.numero, u.fecha].join('|'); }
   function histKey(h){ var v = h.visita || {}; return [v.fecha, v.finca, Object.keys(h.regs || {}).sort().join(',')].join('|'); }
@@ -41,6 +41,7 @@
       (v.hist || []).forEach(function(h){ p['v:h:' + histKey(h)] = h; });
     }
     if(st.cortes && typeof st.cortes === 'object') p['c:'] = st.cortes;
+    (Array.isArray(st.notas) ? st.notas : []).forEach(function(n){ if(n && n.id) p['n:' + n.id] = n; });
     return p;
   }
   function hoy(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
@@ -51,7 +52,7 @@
     var vistas = {}, orden = [];
     Object.keys(aPlano(local)).forEach(function(k){ if(k in p){ orden.push(k); vistas[k] = 1; } });
     Object.keys(p).forEach(function(k){ if(!vistas[k]) orden.push(k); });
-    var edits = [], updates = [], regs = {}, hist = [], cab = null, hayVisita = false, cortes = null;
+    var edits = [], updates = [], regs = {}, hist = [], cab = null, hayVisita = false, cortes = null, notas = [];
     orden.forEach(function(k){
       var x = p[k];
       if(k.indexOf('e:') === 0) edits.push(x);
@@ -60,6 +61,7 @@
       else if(k.indexOf('v:r:') === 0){ regs[k.slice(4)] = x; hayVisita = true; }
       else if(k.indexOf('v:h:') === 0){ hist.push(x); hayVisita = true; }
       else if(k === 'c:') cortes = x;
+      else if(k.indexOf('n:') === 0) notas.push(x);
     });
     var visita = null;
     if(hayVisita){
@@ -70,14 +72,14 @@
         open: !!lv.open, min: !!lv.min, tab: lv.tab || 'reg'
       };
     }
-    return { edits:edits, updates:updates, visita:visita, cortes:cortes };
+    return { edits:edits, updates:updates, visita:visita, cortes:cortes, notas:notas };
   }
   /* Para el archivo cambios.json: sin lo que es solo de pantalla. */
   function paraArchivo(p){
     var st = dePlano(p, {});
     if(st.visita){ delete st.visita.open; delete st.visita.min; delete st.visita.tab; }
     return { version:1, tablero:'Hatos Datos', actualizado:new Date().toISOString(),
-             edits:st.edits, updates:st.updates, visita:st.visita, cortes:st.cortes };
+             edits:st.edits, updates:st.updates, visita:st.visita, cortes:st.cortes, notas:st.notas };
   }
 
   function marca(x){ return x ? (x.ts || x.updatedAt || 0) : 0; }
@@ -109,6 +111,7 @@
     else if(antes.visita != null) set(K.visita, null);
     if(st.cortes) set(K.cortes, st.cortes);
     else if(antes.cortes != null) set(K.cortes, null);
+    if(st.notas.length || antes.notas != null) set(K.notas, st.notas);
   }
 
   /* Al abrir: aplicar lo que llegó de otros dispositivos la vez anterior. */
@@ -1263,7 +1266,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 7 oct 2026 · 3:50 p.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 7 oct 2026 · 5:45 p.m. · notas y descartes</b>
     </div>
   </header>
 
@@ -7697,6 +7700,8 @@ body{ overflow-x:clip; }
 }
 #backToTopBtn:hover{ transform:scale(1.06); }
 #backToTopBtn.show{ display:flex; }
+/* En computador el botón «Visita ASOCEBU» ocupa esta esquina: subir la flecha por encima */
+@media (min-width:701px){ #backToTopBtn{ bottom:84px; left:20px; } }
 @media (max-width:640px){
   #backToTopBtn{ bottom:16px; left:16px; width:46px; height:46px; font-size:19px; }
 }
@@ -11266,6 +11271,367 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
 </script>
 <!-- ================= FIN VISITA ASOCEBU ================= -->
 
+<!-- ================= NOTAS Y DESCARTES (ficha individual) ================= -->
+<style>
+  .nt-wrap{ margin:16px 0 4px; }
+  .nt-panel{ background:var(--card,#FBF8F1); border:1px solid var(--line,#CDC3A8); border-radius:10px; padding:14px 16px; box-shadow:var(--shadow); }
+  .nt-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+  .nt-head h3{ margin:0; font-family:'Fraunces',serif; color:var(--green-deep,#1E3626); font-size:18px; }
+  .nt-head h3 small{ font:500 11px 'IBM Plex Mono',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--brass,#AD8A3C); margin-left:6px; }
+  .nt-form textarea{ width:100%; min-height:72px; box-sizing:border-box; border:1px solid var(--line); border-radius:8px; padding:9px 10px; font:inherit; font-size:14.5px; background:#fff; color:var(--ink); resize:vertical; }
+  .nt-form textarea:focus, .nt-form input:focus{ outline:2px solid rgba(169,72,26,.35); border-color:var(--rust); }
+  .nt-row{ display:flex; align-items:center; gap:10px 14px; flex-wrap:wrap; margin-top:8px; }
+  .nt-row label.nt-f{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-soft,#5F5744); }
+  .nt-row input[type=date]{ border:1px solid var(--line); border-radius:8px; padding:6px 8px; font:inherit; background:#fff; color:var(--ink); }
+  .nt-desc{ display:inline-flex; align-items:center; gap:7px; font-weight:700; color:var(--red,#7C2B21); cursor:pointer; user-select:none; padding:5px 10px; border:1px dashed rgba(124,43,33,.45); border-radius:8px; background:#fff; }
+  .nt-desc input{ width:18px; height:18px; accent-color:#B23A1E; margin:0; }
+  .nt-desc.on{ background:#FBE9E3; border-style:solid; }
+  .nt-motivo{ flex:1; min-width:200px; border:1px solid var(--line); border-radius:8px; padding:7px 9px; font:inherit; background:#fff; color:var(--ink); }
+  .nt-motivo[hidden]{ display:none; }
+  .nt-btn{ border:none; border-radius:999px; padding:8px 15px; font:600 13.5px 'IBM Plex Sans',sans-serif; cursor:pointer; background:var(--green-deep,#1E3626); color:#fff; }
+  .nt-btn:hover{ filter:brightness(1.12); }
+  .nt-btn.ghost{ background:#fff; color:var(--green-deep); border:1px solid var(--line); }
+  .nt-btn.rust{ background:var(--rust,#A9481A); }
+  .nt-btn.sm{ padding:5px 11px; font-size:12.5px; }
+  .nt-list{ list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .nt-item{ border:1px solid var(--line); border-left:4px solid var(--brass,#AD8A3C); border-radius:8px; padding:9px 11px; background:#fff; }
+  .nt-item.desc{ border-left-color:#B23A1E; background:#FDF3EF; }
+  .nt-item.edit{ outline:2px solid var(--rust); }
+  .nt-meta{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; font:500 11.5px 'IBM Plex Mono',monospace; color:var(--ink-soft,#5F5744); }
+  .nt-tag{ background:#B23A1E; color:#fff; border-radius:999px; padding:1px 8px; font-weight:700; letter-spacing:.03em; }
+  .nt-txt{ margin:5px 0 0; white-space:pre-wrap; font-size:14.5px; color:var(--ink); }
+  .nt-acts{ margin-left:auto; display:flex; gap:2px; }
+  .nt-acts button{ border:none; background:none; color:var(--green-deep); cursor:pointer; font-size:12.5px; text-decoration:underline; padding:2px 5px; font-family:'IBM Plex Sans',sans-serif; }
+  .nt-acts button.del{ color:var(--red,#7C2B21); }
+  .nt-empty{ color:var(--ink-soft); font-size:13.5px; margin:12px 0 0; }
+  .chip.nt-chip-desc{ background:#B23A1E !important; color:#fff !important; border-color:#B23A1E !important; cursor:pointer; }
+  .chip.nt-chip-notas{ cursor:pointer; }
+
+  .nt-modal{ position:fixed; inset:0; background:rgba(36,29,20,.5); z-index:1200; display:none; align-items:flex-start; justify-content:center; padding:24px 12px; overflow-y:auto; }
+  .nt-modal.on{ display:flex; }
+  .nt-box{ background:var(--card,#FBF8F1); border-radius:12px; max-width:1040px; width:100%; padding:18px 20px 20px; box-shadow:0 20px 50px rgba(0,0,0,.35); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; }
+  .nt-box h2{ margin:0; font-family:'Fraunces',serif; color:var(--green-deep); font-size:22px; }
+  .nt-box .nt-x{ border:1px solid var(--line); background:#fff; border-radius:6px; width:32px; height:32px; cursor:pointer; font-size:16px; color:var(--green-deep); }
+  .nt-tabs{ display:flex; gap:6px; margin:14px 0 10px; flex-wrap:wrap; }
+  .nt-tabs button{ border:1px solid var(--line); background:#fff; color:var(--green-deep); border-radius:999px; padding:7px 14px; font:600 13.5px 'IBM Plex Sans',sans-serif; cursor:pointer; }
+  .nt-tabs button.on{ background:var(--green-deep); color:#fff; border-color:var(--green-deep); }
+  .nt-tabs button.on.d{ background:#B23A1E; border-color:#B23A1E; }
+  .nt-tabs b{ font-family:'IBM Plex Mono',monospace; margin-left:4px; }
+  .nt-fil{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; padding:10px 12px; background:var(--paper-light,#F7F3E9); border:1px solid var(--line); border-radius:8px; }
+  .nt-fil .nt-chips{ display:flex; gap:5px; flex-wrap:wrap; }
+  .nt-fil .nt-chips button{ border:1px solid var(--line); background:#fff; border-radius:999px; padding:4px 10px; font:500 12px 'IBM Plex Mono',monospace; cursor:pointer; color:var(--ink); }
+  .nt-fil .nt-chips button.on{ background:var(--rust); color:#fff; border-color:var(--rust); }
+  .nt-fil label{ font-size:12.5px; color:var(--ink-soft); display:inline-flex; gap:5px; align-items:center; }
+  .nt-fil input, .nt-fil select{ border:1px solid var(--line); border-radius:6px; padding:5px 7px; font:inherit; font-size:13px; background:#fff; color:var(--ink); }
+  .nt-sum{ margin:10px 0 6px; font-size:13.5px; color:var(--ink-soft); }
+  .nt-tbl-wrap{ overflow-x:auto; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  table.nt-tbl{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  table.nt-tbl th{ text-align:left; background:var(--green-deep); color:#fff; font:600 11.5px 'IBM Plex Mono',monospace; letter-spacing:.04em; text-transform:uppercase; padding:8px 9px; position:sticky; top:0; white-space:nowrap; }
+  table.nt-tbl td{ padding:7px 9px; border-top:1px solid #ECE5D3; vertical-align:top; }
+  table.nt-tbl tr.desc td{ background:#FDF3EF; }
+  table.nt-tbl td.nt-t{ white-space:pre-wrap; min-width:240px; }
+  table.nt-tbl a{ color:var(--rust-deep,#7E3413); font-weight:700; cursor:pointer; text-decoration:underline; }
+  .nt-foot{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; align-items:center; }
+  .nt-foot .hint{ margin:0 0 0 auto; font-size:12px; color:var(--ink-soft); }
+  .nt-toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:24px; background:#241D14; color:#F7F3E9; padding:9px 15px; border-radius:8px; font-size:13.5px; z-index:2100; box-shadow:0 6px 16px rgba(0,0,0,.3); display:none; }
+  @media (max-width:700px){
+    .nt-panel{ padding:12px; }
+    .nt-box{ padding:14px 12px; }
+    .nt-modal{ padding:8px 6px; }
+    table.nt-tbl{ font-size:13px; }
+  }
+  @media print{
+    body.nt-print > *:not(#ntModal){ display:none !important; }
+    body.nt-print #ntModal{ position:static; display:block; background:none; padding:0; }
+    body.nt-print .nt-box{ box-shadow:none; max-width:none; }
+    body.nt-print .nt-x, body.nt-print .nt-fil, body.nt-print .nt-foot, body.nt-print .nt-tabs{ display:none !important; }
+    body.nt-print .nt-tbl-wrap{ overflow:visible; border:none; }
+  }
+</style>
+<script>
+/* =====================================================================
+   NOTAS Y DESCARTES
+   En la Ficha Individual se puede escribir una nota o anotación sobre el
+   animal y marcarla como DESCARTE. Las notas se guardan en este equipo y,
+   con la llave de GitHub, viajan a los demás dispositivos (cambios.json).
+   El botón «Resumen de notas y descartes» saca dos listas: las notas
+   nuevas y los animales marcados para descarte, con salida a Excel,
+   texto para copiar e impresión.
+   ===================================================================== */
+(function(){
+  var KEY = 'hatos_notas_v1', VISTO = 'hatos_notas_visto_v1';
+  var RAW = window.__BD__ || [];
+  var PROD = {OK:1, CACHO:1, TNJ:1};
+  var MOTIVOS = ['Vacía repetida / baja fertilidad','IEP largo','Edad','Aplomos','Conformación','Ubre / pezones','Temperamento','Sanidad','Baja producción','Bajo peso / crecimiento','Fuera de tipo racial'];
+
+  function load(){ try{ var a = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(a) ? a.filter(function(n){ return n && n.id; }) : []; }catch(e){ return []; } }
+  function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); return true; }catch(e){ toast('No hay espacio para guardar en este equipo.'); return false; } }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function hoy(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  function haceDias(n){ var d = new Date(); d.setDate(d.getDate() - n); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  function fmtF(f){ if(!f) return '—'; var p = String(f).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : f; }
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function toast(m){ var t = document.getElementById('ntToast'); if(!t){ t = document.createElement('div'); t.id = 'ntToast'; t.className = 'nt-toast'; document.body.appendChild(t); }
+    t.textContent = m; t.style.display = 'block'; clearTimeout(toast._t); toast._t = setTimeout(function(){ t.style.display = 'none'; }, 2600); }
+
+  var porNumero = {};
+  RAW.forEach(function(r){ if(r && r.numero != null){ var k = String(r.numero).trim(); if(!porNumero[k]) porNumero[k] = []; porNumero[k].push(r); } });
+  function animal(n){ var l = porNumero[String(n.numero).trim()] || []; for(var i = 0; i < l.length; i++){ if(l[i].finca === n.finca) return l[i]; } return l[0] || null; }
+  function edadAnios(r){ if(!r || !r.fecha_nac) return null; return (Date.now() - new Date(r.fecha_nac + 'T00:00:00').getTime()) / (365.25 * 864e5); }
+  function orden(a, b){ return (b.fecha || '').localeCompare(a.fecha || '') || (b.ts || 0) - (a.ts || 0); }
+  function delAnimal(r){ var num = String(r.numero).trim(); return load().filter(function(n){ return String(n.numero).trim() === num && (n.finca || '') === (r.finca || ''); }).sort(orden); }
+
+  /* ---------- Sección dentro de la ficha ---------- */
+  var cur = null, editId = null;
+  function montarSeccion(){
+    if(document.getElementById('nt-wrap')) return true;
+    var strip = document.getElementById('fh-spec-strip'); if(!strip) return false;
+    var w = document.createElement('div'); w.id = 'nt-wrap'; w.className = 'nt-wrap';
+    w.innerHTML =
+      '<div class="nt-panel">' +
+        '<div class="nt-head"><h3>Notas y anotaciones<small id="ntCuenta"></small></h3>' +
+          '<button type="button" class="nt-btn ghost sm" id="ntResumenBtn">📋 Resumen de notas y descartes</button></div>' +
+        '<div class="nt-form">' +
+          '<textarea id="ntTxt" placeholder="Escriba aquí la nota sobre este animal (observación, tratamiento, pendiente, comentario…)"></textarea>' +
+          '<div class="nt-row">' +
+            '<label class="nt-f">Fecha <input type="date" id="ntFecha"></label>' +
+            '<label class="nt-desc" id="ntDescLbl"><input type="checkbox" id="ntDesc"> Marcar para DESCARTE</label>' +
+            '<input type="text" class="nt-motivo" id="ntMotivo" list="ntMotivos" placeholder="Motivo del descarte (opcional)" hidden>' +
+            '<datalist id="ntMotivos">' + MOTIVOS.map(function(m){ return '<option value="' + esc(m) + '">'; }).join('') + '</datalist>' +
+          '</div>' +
+          '<div class="nt-row"><button type="button" class="nt-btn rust" id="ntGuardar">Guardar nota</button>' +
+            '<button type="button" class="nt-btn ghost" id="ntCancelar" hidden>Cancelar edición</button></div>' +
+        '</div>' +
+        '<ul class="nt-list" id="ntLista"></ul>' +
+      '</div>';
+    strip.parentNode.insertBefore(w, strip.nextSibling);
+    var cb = document.getElementById('ntDesc');
+    cb.onchange = function(){ document.getElementById('ntMotivo').hidden = !cb.checked; document.getElementById('ntDescLbl').classList.toggle('on', cb.checked); };
+    document.getElementById('ntGuardar').onclick = guardar;
+    document.getElementById('ntCancelar').onclick = function(){ limpiarForm(); pintar(); };
+    document.getElementById('ntResumenBtn').onclick = function(){ abrirResumen(); };
+    document.getElementById('ntLista').addEventListener('click', function(e){
+      var b = e.target.closest('button[data-a]'); if(!b) return;
+      var id = b.getAttribute('data-id'), a = load(), n = a.filter(function(x){ return x.id === id; })[0]; if(!n) return;
+      if(b.getAttribute('data-a') === 'del'){
+        if(!confirm('¿Borrar esta nota del ' + fmtF(n.fecha) + '?')) return;
+        save(a.filter(function(x){ return x.id !== id; })); if(editId === id) limpiarForm(); pintar(); toast('Nota borrada');
+      } else if(b.getAttribute('data-a') === 'edit'){
+        editId = id;
+        document.getElementById('ntTxt').value = n.texto || '';
+        document.getElementById('ntFecha').value = n.fecha || hoy();
+        cb.checked = !!n.descarte; document.getElementById('ntMotivo').value = n.motivo || ''; cb.onchange();
+        document.getElementById('ntGuardar').textContent = 'Guardar cambios';
+        document.getElementById('ntCancelar').hidden = false;
+        pintar(); document.getElementById('ntTxt').focus();
+      } else if(b.getAttribute('data-a') === 'quitar'){
+        n.descarte = false; n.motivo = ''; n.ts = Date.now(); save(a); pintar(); toast('Se quitó la marca de descarte');
+      }
+    });
+    return true;
+  }
+  function limpiarForm(){
+    editId = null;
+    var t = document.getElementById('ntTxt'); if(!t) return;
+    t.value = ''; document.getElementById('ntFecha').value = hoy();
+    var cb = document.getElementById('ntDesc'); cb.checked = false; document.getElementById('ntMotivo').value = ''; cb.onchange();
+    document.getElementById('ntGuardar').textContent = 'Guardar nota';
+    document.getElementById('ntCancelar').hidden = true;
+  }
+  function guardar(){
+    if(!cur) return;
+    var txt = document.getElementById('ntTxt').value.trim(), desc = document.getElementById('ntDesc').checked;
+    var motivo = desc ? document.getElementById('ntMotivo').value.trim() : '';
+    if(!txt && !desc){ toast('Escriba la nota o marque la casilla de descarte.'); document.getElementById('ntTxt').focus(); return; }
+    var a = load(), fecha = document.getElementById('ntFecha').value || hoy();
+    if(editId){
+      var n = a.filter(function(x){ return x.id === editId; })[0];
+      if(n){ n.texto = txt; n.fecha = fecha; n.descarte = desc; n.motivo = motivo; n.ts = Date.now(); }
+    } else {
+      a.push({ id:uid(), numero:String(cur.numero).trim(), finca:cur.finca || '', fecha:fecha, texto:txt, descarte:desc, motivo:motivo, creado:Date.now(), ts:Date.now() });
+    }
+    if(save(a)){ toast(editId ? 'Nota actualizada' : (desc ? 'Nota guardada · animal marcado para descarte' : 'Nota guardada')); limpiarForm(); pintar(); }
+  }
+  function pintar(){
+    if(!cur || !montarSeccion()) return;
+    var l = delAnimal(cur), hayDesc = l.some(function(n){ return n.descarte; });
+    document.getElementById('ntCuenta').textContent = l.length ? l.length + (l.length === 1 ? ' nota' : ' notas') : '';
+    document.getElementById('ntLista').innerHTML = l.length ? l.map(function(n){
+      return '<li class="nt-item' + (n.descarte ? ' desc' : '') + (n.id === editId ? ' edit' : '') + '">' +
+        '<div class="nt-meta"><span>' + fmtF(n.fecha) + '</span>' + (n.descarte ? '<span class="nt-tag">DESCARTE' + (n.motivo ? ' · ' + esc(n.motivo) : '') + '</span>' : '') +
+        '<span class="nt-acts"><button type="button" data-a="edit" data-id="' + n.id + '">Editar</button>' +
+        (n.descarte ? '<button type="button" data-a="quitar" data-id="' + n.id + '">Quitar descarte</button>' : '') +
+        '<button type="button" class="del" data-a="del" data-id="' + n.id + '">Borrar</button></span></div>' +
+        (n.texto ? '<p class="nt-txt">' + esc(n.texto) + '</p>' : '') + '</li>';
+    }).join('') : '';
+    if(!l.length) document.getElementById('ntLista').innerHTML = '<li class="nt-empty">Este animal todavía no tiene notas.</li>';
+    /* Aviso en el encabezado de la ficha */
+    var tags = document.getElementById('fh-tags');
+    if(tags){
+      [].slice.call(tags.querySelectorAll('.nt-chip-desc,.nt-chip-notas')).forEach(function(x){ x.remove(); });
+      if(hayDesc){ var s = document.createElement('span'); s.className = 'chip nt-chip-desc'; s.textContent = '⚠ PARA DESCARTE'; s.title = 'Ver notas'; s.onclick = irANotas; tags.appendChild(s); }
+      else if(l.length){ var s2 = document.createElement('span'); s2.className = 'chip nt-chip-notas'; s2.textContent = '📝 ' + l.length + (l.length === 1 ? ' NOTA' : ' NOTAS'); s2.title = 'Ver notas'; s2.onclick = irANotas; tags.appendChild(s2); }
+    }
+  }
+  function irANotas(){ var w = document.getElementById('nt-wrap'); if(w) w.scrollIntoView({behavior:'smooth', block:'start'}); }
+
+  window.addEventListener('ficha:change', function(e){
+    var nuevo = e.detail; if(cur && nuevo && cur.id !== nuevo.id) limpiarForm();
+    cur = nuevo; setTimeout(function(){ montarSeccion(); if(!editId) { var f = document.getElementById('ntFecha'); if(f && !f.value) f.value = hoy(); } pintar(); }, 0);
+  });
+
+  /* ---------- Resumen ---------- */
+  var R = { tab:'notas', rango:'nuevas', desde:'', hasta:'', finca:'prod', q:'' };
+  function visto(){ try{ return +localStorage.getItem(VISTO) || 0; }catch(e){ return 0; } }
+  function montarModal(){
+    if(document.getElementById('ntModal')) return;
+    var m = document.createElement('div'); m.id = 'ntModal'; m.className = 'nt-modal';
+    m.innerHTML = '<div class="nt-box" role="dialog" aria-labelledby="ntResTit">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 id="ntResTit">Resumen de notas y descartes</h2><button type="button" class="nt-x" id="ntCerrar" aria-label="Cerrar">✕</button></div>' +
+      '<div class="nt-tabs"><button type="button" data-t="notas">📝 Notas y anotaciones <b id="ntNN">0</b></button><button type="button" data-t="desc" class="d">⚠ Descartes <b id="ntND">0</b></button></div>' +
+      '<div class="nt-fil">' +
+        '<div class="nt-chips" id="ntRangos"><button type="button" data-r="nuevas">Nuevas</button><button type="button" data-r="7">7 días</button><button type="button" data-r="30">30 días</button><button type="button" data-r="todas">Todas</button></div>' +
+        '<label>Desde <input type="date" id="ntDesde"></label><label>Hasta <input type="date" id="ntHasta"></label>' +
+        '<label>Finca <select id="ntFinca"></select></label>' +
+        '<label>Buscar <input type="search" id="ntQ" placeholder="número o texto" style="width:130px"></label>' +
+      '</div>' +
+      '<p class="nt-sum" id="ntSum"></p>' +
+      '<div class="nt-tbl-wrap"><table class="nt-tbl" id="ntTbl"></table></div>' +
+      '<div class="nt-foot"><button type="button" class="nt-btn" id="ntXls">⬇ Descargar Excel</button><button type="button" class="nt-btn ghost" id="ntCopiar">Copiar texto</button>' +
+      '<button type="button" class="nt-btn ghost" id="ntImprimir">Imprimir</button><button type="button" class="nt-btn ghost" id="ntVisto">✓ Marcar todas como revisadas</button>' +
+      '<p class="hint" id="ntVistoTxt"></p></div>' +
+    '</div>';
+    document.body.appendChild(m);
+    m.addEventListener('click', function(e){ if(e.target === m) cerrarResumen(); });
+    document.getElementById('ntCerrar').onclick = cerrarResumen;
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && m.classList.contains('on')) cerrarResumen(); });
+    [].forEach.call(m.querySelectorAll('.nt-tabs button'), function(b){ b.onclick = function(){ R.tab = b.getAttribute('data-t'); if(R.tab === 'desc' && R.rango === 'nuevas') R.rango = 'todas'; pintarResumen(); }; });
+    [].forEach.call(m.querySelectorAll('#ntRangos button'), function(b){ b.onclick = function(){ R.rango = b.getAttribute('data-r'); R.desde = ''; R.hasta = ''; pintarResumen(); }; });
+    document.getElementById('ntDesde').onchange = function(){ R.desde = this.value; R.rango = ''; pintarResumen(); };
+    document.getElementById('ntHasta').onchange = function(){ R.hasta = this.value; R.rango = R.rango === 'nuevas' ? '' : R.rango; pintarResumen(); };
+    document.getElementById('ntFinca').onchange = function(){ R.finca = this.value; pintarResumen(); };
+    document.getElementById('ntQ').oninput = function(){ R.q = this.value.trim().toLowerCase(); pintarResumen(); };
+    document.getElementById('ntTbl').addEventListener('click', function(e){
+      var a = e.target.closest('a[data-num]'); if(!a) return; e.preventDefault();
+      var r = animal({numero:a.getAttribute('data-num'), finca:a.getAttribute('data-finca')});
+      if(r && window.__abrirFicha){ cerrarResumen(); window.__abrirFicha(r.id); setTimeout(irANotas, 450); }
+      else toast('Ese animal no está en la base de datos.');
+    });
+    document.getElementById('ntXls').onclick = excel;
+    document.getElementById('ntCopiar').onclick = copiar;
+    document.getElementById('ntImprimir').onclick = function(){ document.body.classList.add('nt-print'); setTimeout(function(){ window.print(); document.body.classList.remove('nt-print'); }, 50); };
+    document.getElementById('ntVisto').onclick = function(){ try{ localStorage.setItem(VISTO, String(Date.now())); }catch(e){} toast('Listo: las notas quedan como revisadas en este equipo.'); pintarResumen(); };
+  }
+  function abrirResumen(tab){
+    montarModal();
+    if(tab) R.tab = tab;
+    var hayNuevas = load().some(function(n){ return (n.ts || 0) > visto(); });
+    if(R.rango === 'nuevas' && !hayNuevas) R.rango = '30';
+    document.getElementById('ntModal').classList.add('on'); document.body.style.overflow = 'hidden';
+    pintarResumen();
+  }
+  function cerrarResumen(){ var m = document.getElementById('ntModal'); if(m) m.classList.remove('on'); document.body.style.overflow = ''; }
+  window.__notasResumen = abrirResumen;
+
+  function filtrar(lista){
+    var vt = visto(), d = R.desde, h = R.hasta;
+    if(R.rango === '7') d = haceDias(7); else if(R.rango === '30') d = haceDias(30);
+    return lista.filter(function(n){
+      if(R.rango === 'nuevas' && (n.ts || 0) <= vt) return false;
+      if(d && (n.fecha || '') < d) return false;
+      if(h && (n.fecha || '') > h) return false;
+      if(R.finca === 'prod' && !PROD[n.finca]) return false;
+      if(R.finca !== 'prod' && R.finca !== 'todas' && n.finca !== R.finca) return false;
+      if(R.q && (String(n.numero) + ' ' + (n.texto || '') + ' ' + (n.motivo || '')).toLowerCase().indexOf(R.q) < 0) return false;
+      return true;
+    });
+  }
+  /* Descartes: un renglón por animal, con la nota de descarte más reciente. */
+  function descartes(l){
+    var por = {};
+    l.filter(function(n){ return n.descarte; }).sort(orden).forEach(function(n){
+      var k = n.numero + '|' + n.finca; if(!por[k]) por[k] = { n:n, todas:[] }; por[k].todas.push(n);
+    });
+    return Object.keys(por).map(function(k){ return por[k]; });
+  }
+  function filas(){
+    var l = filtrar(load()).sort(orden);
+    var notas = l.map(function(n){ var r = animal(n);
+      return { n:n, r:r, cells:[fmtF(n.fecha), n.numero, n.finca || '', r && r.nombre ? r.nombre : '', n.texto || '', n.descarte ? 'SÍ' + (n.motivo ? ' — ' + n.motivo : '') : ''] }; });
+    var desc = descartes(l).map(function(g){ var n = g.n, r = animal(n), e = edadAnios(r);
+      return { n:n, r:r, cells:[n.numero, n.finca || '', r && r.nombre ? r.nombre : '', r ? (r.sexo === 'H' ? 'Hembra' : r.sexo === 'M' ? 'Macho' : (r.sexo || '')) : '', r ? (r.raza || '') : '',
+        e != null ? e.toFixed(1) : '', r ? (r.activo || '') : '', fmtF(n.fecha), n.motivo || '', n.texto || ''] }; });
+    return { notas:notas, desc:desc };
+  }
+  var CAB_N = ['Fecha','Número','Finca','Nombre','Nota','Descarte'];
+  var CAB_D = ['Número','Finca','Nombre','Sexo','Raza','Edad (años)','Estado','Fecha marcado','Motivo','Nota'];
+  function pintarResumen(){
+    var m = document.getElementById('ntModal'); if(!m) return;
+    var fincas = {}; load().forEach(function(n){ if(n.finca) fincas[n.finca] = 1; });
+    var sel = document.getElementById('ntFinca');
+    sel.innerHTML = '<option value="prod">Productivas (OK, CACHO, TNJ)</option><option value="todas">Todas</option>' + Object.keys(fincas).sort().map(function(f){ return '<option value="' + esc(f) + '">' + esc(f) + '</option>'; }).join('');
+    sel.value = R.finca; if(sel.value !== R.finca){ R.finca = 'prod'; sel.value = 'prod'; }
+    [].forEach.call(m.querySelectorAll('#ntRangos button'), function(b){ b.classList.toggle('on', b.getAttribute('data-r') === R.rango); });
+    var d = R.desde, h = R.hasta; if(R.rango === '7') d = haceDias(7); else if(R.rango === '30') d = haceDias(30); else if(R.rango === 'todas' || R.rango === 'nuevas'){ d = R.desde; }
+    document.getElementById('ntDesde').value = d || ''; document.getElementById('ntHasta').value = h || '';
+    [].forEach.call(m.querySelectorAll('.nt-tabs button'), function(b){ b.classList.toggle('on', b.getAttribute('data-t') === R.tab); });
+    var F = filas();
+    document.getElementById('ntNN').textContent = F.notas.length; document.getElementById('ntND').textContent = F.desc.length;
+    var vt = visto();
+    document.getElementById('ntVistoTxt').textContent = vt ? 'Última revisión en este equipo: ' + new Date(vt).toLocaleString('es-CO', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}) : 'Aún no se ha marcado ninguna revisión en este equipo.';
+    var rangoTxt = R.rango === 'nuevas' ? 'notas nuevas desde la última revisión' : R.rango === '7' ? 'últimos 7 días' : R.rango === '30' ? 'últimos 30 días' : (R.desde || R.hasta) ? 'del ' + fmtF(R.desde || '…') + ' al ' + fmtF(R.hasta || hoy()) : 'todas las fechas';
+    var tbl = document.getElementById('ntTbl');
+    function link(n){ return '<a data-num="' + esc(n.numero) + '" data-finca="' + esc(n.finca) + '" title="Abrir la ficha">' + esc(n.numero) + '</a>'; }
+    if(R.tab === 'notas'){
+      var nd = F.notas.filter(function(x){ return x.n.descarte; }).length;
+      document.getElementById('ntSum').textContent = F.notas.length + (F.notas.length === 1 ? ' nota' : ' notas') + ' · ' + rangoTxt + (nd ? ' · ' + nd + ' con marca de descarte' : '') + '. Toque el número para abrir la ficha.';
+      tbl.innerHTML = '<thead><tr>' + CAB_N.map(function(c){ return '<th>' + c + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        (F.notas.length ? F.notas.map(function(x){ var c = x.cells;
+          return '<tr' + (x.n.descarte ? ' class="desc"' : '') + '><td style="white-space:nowrap">' + c[0] + '</td><td style="white-space:nowrap">' + link(x.n) + '</td><td>' + esc(c[2]) + '</td><td>' + esc(c[3]) + '</td><td class="nt-t">' + esc(c[4]) + '</td><td>' + (x.n.descarte ? '<span class="nt-tag">' + esc(c[5]) + '</span>' : '') + '</td></tr>'; }).join('')
+          : '<tr><td colspan="6" class="nt-empty" style="padding:16px">No hay notas en este rango.</td></tr>') + '</tbody>';
+    } else {
+      document.getElementById('ntSum').textContent = F.desc.length + (F.desc.length === 1 ? ' animal marcado' : ' animales marcados') + ' para descarte · ' + rangoTxt + '. Para quitar un animal de la lista, abra su ficha y toque «Quitar descarte».';
+      tbl.innerHTML = '<thead><tr>' + CAB_D.map(function(c){ return '<th>' + c + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        (F.desc.length ? F.desc.map(function(x){ var c = x.cells;
+          return '<tr class="desc"><td style="white-space:nowrap">' + link(x.n) + '</td>' + c.slice(1, 7).map(function(v){ return '<td>' + esc(v) + '</td>'; }).join('') + '<td>' + esc(c[7]) + '</td><td>' + esc(c[8]) + '</td><td class="nt-t">' + esc(c[9]) + '</td></tr>'; }).join('')
+          : '<tr><td colspan="10" class="nt-empty" style="padding:16px">No hay animales marcados para descarte en este rango.</td></tr>') + '</tbody>';
+    }
+  }
+  function bajar(n, blob){ var u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = n; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(u); a.remove(); }, 800); }
+  function excel(){
+    var F = filas(), f = hoy();
+    var rn = [CAB_N].concat(F.notas.map(function(x){ return x.cells; }));
+    var rd = [CAB_D].concat(F.desc.map(function(x){ var c = x.cells.slice(); c[5] = c[5] === '' ? '' : +c[5]; return c; }));
+    var nombre = 'NOTAS_Y_DESCARTES_' + f;
+    if(!window.XLSX){
+      var csv = rn.map(function(r){ return r.map(function(c){ c = String(c); return /[;"\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(';'); }).join('\r\n');
+      bajar(nombre + '.csv', new Blob(['﻿' + csv], {type:'text/csv;charset=utf-8'})); return;
+    }
+    var wb = XLSX.utils.book_new();
+    function hoja(r, w, n){ var ws = XLSX.utils.aoa_to_sheet(r); ws['!cols'] = w.map(function(x){ return {wch:x}; });
+      ws['!autofilter'] = {ref:XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:Math.max(r.length - 1, 1), c:r[0].length - 1}})}; ws['!freeze'] = {xSplit:0, ySplit:1}; ws['!rows'] = [{hpt:38}];
+      XLSX.utils.book_append_sheet(wb, ws, n); }
+    hoja(rn, [11,14,8,18,70,24], 'NOTAS');
+    hoja(rd, [14,8,18,8,6,10,10,13,26,60], 'DESCARTES');
+    var rango = R.rango === 'nuevas' ? 'Nuevas desde la última revisión' : R.rango === '7' ? 'Últimos 7 días' : R.rango === '30' ? 'Últimos 30 días' : (R.desde || R.hasta) ? (R.desde || '…') + ' a ' + (R.hasta || f) : 'Todas';
+    hoja([['Campo','Valor'],['Fecha del resumen',f],['Rango',rango],['Fincas',R.finca === 'prod' ? 'OK, CACHO, TNJ' : R.finca === 'todas' ? 'Todas' : R.finca],['Búsqueda',R.q || '—'],
+      ['NOTAS','Cada nota o anotación escrita en la Ficha Individual, de la más reciente a la más antigua.'],
+      ['DESCARTES','Un renglón por animal marcado para descarte, con la nota de descarte más reciente.']], [18,80], 'GUIA');
+    bajar(nombre + '.xlsx', new Blob([XLSX.write(wb, {bookType:'xlsx', type:'array'})], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  }
+  function copiar(){
+    var F = filas(), t;
+    if(R.tab === 'notas') t = '📝 NOTAS Y ANOTACIONES (' + F.notas.length + ')\n' + F.notas.map(function(x){ var c = x.cells; return '• ' + c[0] + ' — ' + c[1] + ' (' + c[2] + ')' + (x.n.descarte ? ' [DESCARTE' + (x.n.motivo ? ': ' + x.n.motivo : '') + ']' : '') + (c[4] ? ': ' + c[4] : ''); }).join('\n');
+    else t = '⚠ DESCARTES (' + F.desc.length + ')\n' + F.desc.map(function(x){ var c = x.cells; return '• ' + c[0] + ' (' + c[1] + ')' + (c[3] ? ' · ' + c[3] : '') + (c[5] ? ' · ' + c[5] + ' años' : '') + (c[8] ? ' — ' + c[8] : '') + (c[9] ? ': ' + c[9] : ''); }).join('\n');
+    function ok(){ toast('Texto copiado. Puede pegarlo en WhatsApp o en un correo.'); }
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, function(){ viejo(t); ok(); });
+    else { viejo(t); ok(); }
+    function viejo(s){ var ta = document.createElement('textarea'); ta.value = s; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e){} ta.remove(); }
+  }
+})();
+</script>
+<!-- ================= FIN NOTAS Y DESCARTES ================= -->
+
 <!-- =================== SINCRONIZACIÓN CON GITHUB — ventana =================== -->
 <style>
   .hs-btn{ margin-top:8px; display:inline-flex; align-items:center; gap:7px; font:600 12.5px 'IBM Plex Mono', monospace;
@@ -11495,7 +11861,8 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       ['Correcciones en la ficha', Array.isArray(st.edits) ? st.edits.length : 0],
       ['Actualizaciones (pesajes, palpaciones, crías…)', Array.isArray(st.updates) ? st.updates.length : 0],
       ['Animales en la visita ASOCEBU', regs],
-      ['Cortes de calificación', st.cortes ? 'propios' : 'por defecto']
+      ['Cortes de calificación', st.cortes ? 'propios' : 'por defecto'],
+      ['Notas y descartes de la ficha', Array.isArray(st.notas) ? st.notas.length : 0]
     ];
   }
   function pintar(){

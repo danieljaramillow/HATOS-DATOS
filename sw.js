@@ -25,6 +25,8 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   const propio = url.origin === location.origin;
+  // datos compartidos entre dispositivos: siempre directo a la red, nunca guardados aquí
+  if (url.hostname === 'api.github.com' || /\/cambios\.json$/.test(url.pathname)) return;
 
   if (req.mode === 'navigate' || (propio && /\/($|index\.html$)/.test(url.pathname))) {
     const red = fetch(req).then(r => { if (r.ok) { const cp = r.clone(); caches.open(CACHE).then(c => { c.put(req, cp.clone()); c.put('./', cp); }); } return r; });

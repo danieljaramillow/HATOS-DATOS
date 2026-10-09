@@ -144,6 +144,23 @@
   };
 })();
 </script>
+<script>
+/* IEP promedio de una vaca = (fecha del último parto − fecha del primer parto)
+   ÷ (número de partos − 1), en meses. Equivale a promediar TODOS sus
+   intervalos: un parto mal fechado en medio no cambia el resultado, porque
+   lo que acorta un intervalo lo alarga el siguiente. Los gemelos cuentan
+   como un solo parto (vienen ya agrupados en la lista de partos). */
+window.iepRango = function(partos){
+  var f = (partos || []).map(function(p){ return p && (p.fecha || p.fecha_nac); }).filter(Boolean).sort();
+  if(f.length < 2) return null;
+  var dias = (new Date(f[f.length-1]) - new Date(f[0])) / 86400000;
+  return Math.round((dias / 30.4375 / (f.length - 1)) * 100) / 100;
+};
+window.fertConIep = function(F){
+  Object.keys(F || {}).forEach(function(k){ var x = F[k]; if(x && x.partos) x.x_iep = window.iepRango(x.partos); });
+  return F;
+};
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>if(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches))document.documentElement.classList.add("app")</script>
 <title>Hatos Datos — GANCEBU</title>
@@ -1317,7 +1334,7 @@ window.__renderReproHead = function(o){
     var iep = (o.fert && o.fert.x_iep!=null) ? o.fert.x_iep : null;
     var ara = (o.araProm!=null && !isNaN(o.araProm)) ? o.araProm : null;
     kpis = '<div class="rp-kpis">'+
-      '<div class="rp-kpi" title="Intervalo entre partos promedio"><div class="k">IEP promedio</div><div class="v">'+(iep!==null ? iep.toFixed(1)+' <small>meses</small>' : '—')+'</div></div>'+
+      '<div class="rp-kpi" title="IEP promedio = (fecha del último parto − fecha del primer parto) ÷ (número de partos − 1), en meses"><div class="k">IEP promedio</div><div class="v">'+(iep!==null ? iep.toFixed(1)+' <small>meses</small>' : '—')+'</div></div>'+
       '<div class="rp-kpi" title="Aporte Real Anual: kg destetados por año de intervalo"><div class="k">ARA promedio</div><div class="v">'+(ara!==null ? ara.toFixed(1)+' <small>kg/año</small>' : '—')+'</div></div>'+
     '</div>';
   }
@@ -2381,7 +2398,7 @@ window.__renderReproHead = function(o){
 
   // ---------- IEP (Intervalo Entre Partos) para el KPI de Panel General ----------
   var FERT_KPI = {};
-  try{ FERT_KPI = JSON.parse(document.getElementById('fert-source').textContent); }catch(e){ FERT_KPI = {}; }
+  try{ FERT_KPI = fertConIep(JSON.parse(document.getElementById('fert-source').textContent)); }catch(e){ FERT_KPI = {}; }
   var byIdKpi = {}; RAW.forEach(function(r){ byIdKpi[r.id]=r; });
   var MIN_IEP_PLAUSIBLE_MESES_KPI = 9;
   function computeOwnPartosKpi(criasDeduped){
@@ -2564,6 +2581,8 @@ window.__renderReproHead = function(o){
     var edades = d.map(r=>r.edad_actual).filter(v=>v!==null && v>=0);
     var edadProm = edades.length? (edades.reduce((a,b)=>a+b,0)/edades.length) : 0;
 
+    // IEP promedio del hato = promedio de los IEP de cada vaca, y el de cada
+    // vaca = (último parto − primer parto) ÷ (partos − 1), sin excluir intervalos.
     // IEP promedio (Intervalo Entre Partos) sobre las vacas potencialmente
     // fértiles de la selección actual: activas y en edad reproductiva (31
     // meses o más — 22 de exposición a monta + 9 de gestación, el mismo
@@ -2579,14 +2598,11 @@ window.__renderReproHead = function(o){
       var numKey = r.numero ? r.numero.trim() : null;
       var fert = (numKey && !criasEspeciales((r.crias_ids||[]).map(function(cid){ return byIdKpi[cid]; }))) ? FERT_KPI[numKey] : null;
       if(fert && fert.partos && fert.partos.length){
-        fert.partos.forEach(function(p){
-          if(p.iep_meses!==null && p.iep_meses!==undefined && !p.anomalia) iepValores.push(p.iep_meses);
-        });
+        if(fert.x_iep!=null) iepValores.push(fert.x_iep);
       } else if(r.crias_ids && r.crias_ids.length){
         var crias = dedupeCriasKpi(r.crias_ids.map(function(cid){ return byIdKpi[cid]; }).filter(Boolean));
-        computeOwnPartosKpi(crias).forEach(function(iep){
-          if(iep >= MIN_IEP_PLAUSIBLE_MESES_KPI) iepValores.push(iep);
-        });
+        var ivs = computeOwnPartosKpi(crias);   // intervalos entre partos consecutivos
+        if(ivs.length) iepValores.push(ivs.reduce(function(a,b){ return a+b; },0) / ivs.length); // = (último − primero) ÷ (partos − 1)
       }
     });
     var iepProm = iepValores.length ? (iepValores.reduce((a,b)=>a+b,0)/iepValores.length) : null;
@@ -3512,7 +3528,7 @@ window.__renderReproHead = function(o){
 
   // ================= Rendimiento y grupos contemporáneos =================
   var FERT = {};
-  try{ FERT = JSON.parse(document.getElementById('fert-source').textContent); }catch(e){ FERT = {}; }
+  try{ FERT = fertConIep(JSON.parse(document.getElementById('fert-source').textContent)); }catch(e){ FERT = {}; }
 
   function avg(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null; }
 
@@ -3939,7 +3955,7 @@ window.__renderReproHead = function(o){
   var PESOS = JSON.parse(document.getElementById('pesos-source').textContent);
   var PALP = JSON.parse(document.getElementById('palp-source').textContent);
   var ENTORES = JSON.parse(document.getElementById('entores-source').textContent);
-  var FERT = JSON.parse(document.getElementById('fert-source').textContent);
+  var FERT = fertConIep(JSON.parse(document.getElementById('fert-source').textContent));
 
   var byId = {};
   var byNumero = {};
@@ -5612,8 +5628,7 @@ window.__renderReproHead = function(o){
           x_iep: null, prom_dest_real: null,
           partos: ownPartos,
         };
-        var iepC = pDatesConcl.map(function(p){ return p.iep_meses; }).filter(function(v){ return v!==null; });
-        fert.x_iep = iepC.length ? Math.round((iepC.reduce(function(a,b){return a+b;},0)/iepC.length)*100)/100 : null;
+        fert.x_iep = iepRango(ownPartos);
         var destC = pDatesConcl.map(function(p){ return p.peso_destete; });
         fert.prom_dest_real = destC.length ? Math.round((destC.reduce(function(a,b){return a+b;},0)/destC.length)) : null;
         fertIsEstimated = true;
@@ -5627,7 +5642,7 @@ window.__renderReproHead = function(o){
         ['ARA promedio', araProm!==null ? araProm.toFixed(1)+' kg/año' : '—'],
         ['Partos usados', concluidos.length + (pendientes>0 ? ' (+'+pendientes+' en curso)' : '')],
         ['Edad primer parto', fert.edad_primer_parto!==null ? fert.edad_primer_parto.toFixed(1)+' años' : '—'],
-        ['IEP promedio', fert.x_iep!==null ? fert.x_iep.toFixed(1)+' meses' : '—'],
+        ['IEP promedio', fert.x_iep!==null ? fert.x_iep.toFixed(1)+' meses<small style="display:block;font-size:10.5px;font-weight:400;opacity:.75;">(último parto − primer parto) ÷ '+(fert.partos.filter(function(p){return p.fecha;}).length-1)+'</small>' : '—'],
         ['Prom. destete real', fert.prom_dest_real!==null ? fert.prom_dest_real.toFixed(0)+' kg' : '—'],
       ].map(function(s){ return '<div class="stat-chip"><div class="k">'+s[0]+'</div><div class="v">'+s[1]+'</div></div>'; }).join('');
       var iepVals = fert.partos.map(function(p){ return p.iep_meses; }).filter(function(v){ return v!==null && v!==undefined; });
@@ -6774,7 +6789,7 @@ window.__renderReproHead = function(o){
   });
 
   var FERT = {};
-  try{ FERT = JSON.parse(document.getElementById('fert-source').textContent); }catch(e){ FERT = {}; }
+  try{ FERT = fertConIep(JSON.parse(document.getElementById('fert-source').textContent)); }catch(e){ FERT = {}; }
 
   function avg(arr){ return arr.length ? Math.round((arr.reduce(function(a,b){return a+b;},0)/arr.length)*100)/100 : null; }
   function avgField(items, field){
@@ -6876,7 +6891,7 @@ window.__renderReproHead = function(o){
       edad_primer_parto: edadPrimerParto,
       estimado: estimado,
       n_partos: partos.length, n_partos_concluidos: concluidos.length, n_partos_pendientes: pendientes,
-      avg_iep: avg(concluidos.map(function(p){ return p.iep_meses; }).filter(function(v){ return v!==null && v!==undefined; })),
+      avg_iep: iepRango(partos),
       avg_ara: avg(concluidos.map(function(p){ return p.kg_ano; }).filter(function(v){ return v!==null && v!==undefined; })),
       peso_propio: bdRec ? bdRec.peso_dest : null,
       peso_aj_propio: bdRec ? bdRec.peso_aj_8m : null,

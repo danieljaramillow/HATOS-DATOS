@@ -16,14 +16,16 @@
    de que el tablero lea sus datos.
    ===================================================================== */
 (function(){
-  var K = { edits:'hatosDJW_edits_v1', updates:'hatosDJW_updates_v1', visita:'hatos_visita_asocebu_v1', cortes:'hatos_cortes_letras_v1', notas:'hatos_notas_v1' };
+  var K = { edits:'hatosDJW_edits_v1', updates:'hatosDJW_updates_v1', visita:'hatos_visita_asocebu_v1', cortes:'hatos_cortes_letras_v1', notas:'hatos_notas_v1', historial:'hatosDJW_historial_v1' };
   var BASE_KEY = 'hatosSync_base_v1', REM_KEY = 'hatosSync_remoto_v1', CFG_KEY = 'hatosSync_cfg_v1';
 
   function get(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
   function set(k, v){ try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
   function J(x){ return x === undefined ? undefined : JSON.stringify(x); }
 
-  function leerLocal(){ return { edits:get(K.edits), updates:get(K.updates), visita:get(K.visita), cortes:get(K.cortes), notas:get(K.notas) }; }
+  function leerLocal(){ return { edits:get(K.edits), updates:get(K.updates), visita:get(K.visita), cortes:get(K.cortes), notas:get(K.notas), historial:get(K.historial) }; }
+  /* Historial de lo ingresado o modificado: cada entrada se identifica por su hora y su registro. */
+  function hKey(h){ return (h.ts || 0) + '|' + (h.ref || h.numero || ''); }
 
   function updKey(u){ return [u.id, u.tipo, u.numero, u.fecha].join('|'); }
   function histKey(h){ var v = h.visita || {}; return [v.fecha, v.finca, Object.keys(h.regs || {}).sort().join(',')].join('|'); }
@@ -42,6 +44,7 @@
     }
     if(st.cortes && typeof st.cortes === 'object') p['c:'] = st.cortes;
     (Array.isArray(st.notas) ? st.notas : []).forEach(function(n){ if(n && n.id) p['n:' + n.id] = n; });
+    (Array.isArray(st.historial) ? st.historial : []).forEach(function(h){ if(h && h.ts) p['h:' + hKey(h)] = h; });
     return p;
   }
   function hoy(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
@@ -52,7 +55,7 @@
     var vistas = {}, orden = [];
     Object.keys(aPlano(local)).forEach(function(k){ if(k in p){ orden.push(k); vistas[k] = 1; } });
     Object.keys(p).forEach(function(k){ if(!vistas[k]) orden.push(k); });
-    var edits = [], updates = [], regs = {}, hist = [], cab = null, hayVisita = false, cortes = null, notas = [];
+    var edits = [], updates = [], regs = {}, hist = [], cab = null, hayVisita = false, cortes = null, notas = [], historial = [];
     orden.forEach(function(k){
       var x = p[k];
       if(k.indexOf('e:') === 0) edits.push(x);
@@ -62,7 +65,9 @@
       else if(k.indexOf('v:h:') === 0){ hist.push(x); hayVisita = true; }
       else if(k === 'c:') cortes = x;
       else if(k.indexOf('n:') === 0) notas.push(x);
+      else if(k.indexOf('h:') === 0) historial.push(x);
     });
+    historial.sort(function(a, b){ return (a.ts || 0) - (b.ts || 0); });
     var visita = null;
     if(hayVisita){
       var lv = (local.visita && typeof local.visita === 'object') ? local.visita : {};
@@ -72,14 +77,14 @@
         open: !!lv.open, min: !!lv.min, tab: lv.tab || 'reg'
       };
     }
-    return { edits:edits, updates:updates, visita:visita, cortes:cortes, notas:notas };
+    return { edits:edits, updates:updates, visita:visita, cortes:cortes, notas:notas, historial:historial };
   }
   /* Para el archivo cambios.json: sin lo que es solo de pantalla. */
   function paraArchivo(p){
     var st = dePlano(p, {});
     if(st.visita){ delete st.visita.open; delete st.visita.min; delete st.visita.tab; }
     return { version:1, tablero:'Hatos Datos', actualizado:new Date().toISOString(),
-             edits:st.edits, updates:st.updates, visita:st.visita, cortes:st.cortes, notas:st.notas };
+             edits:st.edits, updates:st.updates, visita:st.visita, cortes:st.cortes, notas:st.notas, historial:st.historial };
   }
 
   function marca(x){ return x ? (x.ts || x.updatedAt || 0) : 0; }
@@ -112,6 +117,7 @@
     if(st.cortes) set(K.cortes, st.cortes);
     else if(antes.cortes != null) set(K.cortes, null);
     if(st.notas.length || antes.notas != null) set(K.notas, st.notas);
+    if(st.historial.length || antes.historial != null) set(K.historial, st.historial);
   }
 
   /* Al abrir: aplicar lo que llegó de otros dispositivos la vez anterior. */
@@ -2326,7 +2332,7 @@ window.__renderReproHead = function(o){
     </div>
 
     <div class="section-head"><h2>Últimos datos ingresados o modificados</h2><div class="rail"></div></div>
-    <p class="hint" style="margin:-6px 0 12px;">Todo lo que se ha registrado o corregido en este equipo — desde estos formularios, el modo guiado o el botón ✏ Editar datos de la ficha. Se conserva aunque se vacíe la lista de pendientes, para poder revisar qué se hizo.</p>
+    <p class="hint" style="margin:-6px 0 12px;">Todo lo que se ha registrado o corregido — desde estos formularios, el modo guiado o el botón ✏ Editar datos de la ficha. Se conserva aunque se vacíe la lista de pendientes, y en los equipos que tienen la llave de GitHub se comparte entre ellos (celular y computador) con la sincronización.</p>
     <div class="hist-filtros">
       <div class="hist-seg" id="histPeriodo" role="group" aria-label="Período">
         <button type="button" data-p="1">Hoy</button><button type="button" data-p="7" class="active">7 días</button><button type="button" data-p="30">30 días</button><button type="button" data-p="0">Todo</button>
@@ -7221,7 +7227,11 @@ window.__renderReproHead = function(o){
     HIST.sort(function(a,b){ return a.ts-b.ts; });
     histSave();
   }
-  function histAdd(x){ x.ts = Date.now(); HIST.push(x); histSave(); renderHist(); }
+  function histAdd(x){
+    x.ts = Date.now();
+    x.equipo = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Celular' : 'Computador';
+    HIST.push(x); histSave(); renderHist();
+  }
   window.__histAdd = histAdd;
 
   var HIST_TIPOS = { peso:'Pesaje', salida:'Salida', correccion:'Corrección', cria:'Cría nueva', palpacion:'Palpación', servicio:'Entore / servicio', aborto:'Aborto', edicion:'Edición en ficha' };
@@ -7265,7 +7275,7 @@ window.__renderReproHead = function(o){
       var pend = histEsPendiente(h);
       html += '<div class="hist-row"><span class="hist-hora">'+hora+'</span>'+
         '<div class="hist-main"><span class="hist-tipo">'+(HIST_TIPOS[h.tipo]||escH(h.tipo))+'</span><b>'+num+'</b>'+(h.finca?' <span class="hist-origen">· '+escH(h.finca)+'</span>':'')+
-        '<span class="hist-det">'+escH(h.texto)+'</span><span class="hist-origen">'+escH(h.origen||'')+'</span></div>'+
+        '<span class="hist-det">'+escH(h.texto)+'</span><span class="hist-origen">'+escH((h.origen||'')+(h.equipo?' · '+h.equipo:''))+'</span></div>'+
         '<span class="hist-estado '+(pend?'pend':'fuera')+'" title="'+(pend?'Todavía está en la lista de pendientes de este equipo':'Ya salió de la lista de pendientes (se envió o se quitó)')+'">'+(pend?'Pendiente':'Ya no está pendiente')+'</span></div>';
     });
     if(lista.length > histVer) html += '<button type="button" class="hist-mas" id="histMas">Ver más ('+(lista.length-histVer)+' restantes)</button>';
@@ -12249,7 +12259,8 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       ['Actualizaciones (pesajes, palpaciones, crías…)', Array.isArray(st.updates) ? st.updates.length : 0],
       ['Animales en la visita ASOCEBU', regs],
       ['Cortes de calificación', st.cortes ? 'propios' : 'por defecto'],
-      ['Notas y descartes de la ficha', Array.isArray(st.notas) ? st.notas.length : 0]
+      ['Notas y descartes de la ficha', Array.isArray(st.notas) ? st.notas.length : 0],
+      ['Historial de datos ingresados o modificados', Array.isArray(st.historial) ? st.historial.length : 0]
     ];
   }
   function pintar(){

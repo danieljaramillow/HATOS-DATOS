@@ -1042,6 +1042,11 @@
 }
 html.app header.top{display:none}
 html.app .tabs{top:env(safe-area-inset-top,0px)}
+.app-ver{display:none;font:600 12px 'IBM Plex Mono',monospace;color:var(--rust,#A9481A);margin:2px 0 10px;letter-spacing:.02em}
+html.app .app-ver{display:block}
+@media (display-mode: standalone), (display-mode: fullscreen){ .app-ver{display:block} }
+.g-ver{font:600 12px 'IBM Plex Mono',monospace;color:var(--rust,#A9481A);margin:14px 0 0;}
+.hs-ver{font:600 12px 'IBM Plex Mono',monospace;color:var(--rust,#A9481A);margin:-4px 0 10px;}
 </style>
 <script>
 /* Edad: en animales menores de 2 años se agregan los meses entre paréntesis */
@@ -1266,7 +1271,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 7 oct 2026 · 5:45 p.m. · notas y descartes</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 9 oct 2026 · 1:45 p.m.</b>
     </div>
   </header>
 
@@ -1289,6 +1294,7 @@ window.__renderReproHead = function(o){
     <button class="tab-btn" data-view="grupos">Grupos Contemporáneos</button>
     <button class="tab-btn" data-view="actualizar">Actualizar Datos</button>
   </div>
+  <div class="app-ver" id="appVerMini"></div>
 
   <div class="view active" id="viewGeneral">
 
@@ -10061,7 +10067,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var pie = document.createElement('div'); pie.className='g-pie';
     pie.innerHTML = '<button type="button" class="g-mini" id="gVerMapa">🗺  Ver el mapa completo</button>'+
       '<button type="button" class="g-mini" id="gSync">☁  Datos y sincronización</button>'+
-      '<label class="g-pref"><input type="checkbox" id="gPrefClasico"> Abrir siempre en el panel completo</label>';
+      '<label class="g-pref"><input type="checkbox" id="gPrefClasico"> Abrir siempre en el panel completo</label>'+
+      '<p class="g-ver">'+((document.getElementById('app-version')||{}).textContent||'')+'</p>';
     c.appendChild(pie);
     pie.querySelector('#gVerMapa').onclick = function(){ go(scrMapa, 'Mapa', 'rama'); };
     pie.querySelector('#gSync').onclick = function(){ if(window.__hsAbrir) window.__hsAbrir(); };
@@ -11680,6 +11687,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
 <div class="hs-modal" id="hsModal" role="dialog" aria-modal="true" aria-labelledby="hsTitulo">
   <div class="hs-box">
     <h3 id="hsTitulo">Datos y sincronización</h3>
+    <p class="hs-ver" id="hsVer"></p>
     <div class="hs-estado"><span class="hs-dot" id="hsDotGrande"></span><div id="hsTexto"></div></div>
 
     <div class="hs-sec">
@@ -11940,5 +11948,8 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
 })();
 </script>
 
+<script>(function(){ function f(){ var e=document.getElementById('app-version'); if(!e) return; var t=e.textContent.trim();
+  ['appVerMini','hsVer'].forEach(function(id){ var x=document.getElementById(id); if(x) x.textContent=t; }); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',f); else f(); })();</script>
 </body>
 </html>

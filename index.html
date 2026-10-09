@@ -145,21 +145,210 @@
 })();
 </script>
 <script>
-/* IEP promedio de una vaca = (fecha del último parto − fecha del primer parto)
-   ÷ (número de partos − 1), en meses. Equivale a promediar TODOS sus
-   intervalos: un parto mal fechado en medio no cambia el resultado, porque
-   lo que acorta un intervalo lo alarga el siguiente. Los gemelos cuentan
-   como un solo parto (vienen ya agrupados en la lista de partos). */
-window.iepRango = function(partos){
+/* IEP: se calcula el intervalo de CADA parto con el anterior (en meses) y el
+   IEP promedio = suma de esos IEP ÷ cantidad de IEP. El primer parto no tiene
+   IEP (no hay parto anterior). Los gemelos cuentan como un solo parto. */
+window.iepIntervalos = function(partos){
   var f = (partos || []).map(function(p){ return p && (p.fecha || p.fecha_nac); }).filter(Boolean).sort();
-  if(f.length < 2) return null;
-  var dias = (new Date(f[f.length-1]) - new Date(f[0])) / 86400000;
-  return Math.round((dias / 30.4375 / (f.length - 1)) * 100) / 100;
+  var out = [];
+  for(var i = 1; i < f.length; i++) out.push(Math.round(((new Date(f[i]) - new Date(f[i-1])) / 86400000 / 30.4375) * 100) / 100);
+  return out;
+};
+window.iepRango = function(partos){
+  var iv = window.iepIntervalos(partos);
+  if(!iv.length) return null;
+  return Math.round((iv.reduce(function(a,b){ return a+b; }, 0) / iv.length) * 100) / 100;
 };
 window.fertConIep = function(F){
   Object.keys(F || {}).forEach(function(k){ var x = F[k]; if(x && x.partos) x.x_iep = window.iepRango(x.partos); });
   return F;
 };
+/* Fila de BD que en realidad es un feto abortado (comentario ABORTO en la cría):
+   no cuenta como parto de la madre, sino como aborto. */
+window.esFetoAbortado = function(c){
+  if(!c) return false;
+  var t = ((c.comentario||'')+' '+(c.obs_salida||'')+' '+(c.causa_salida||'')+' '+(c.numero||'')).toUpperCase();
+  if(t.indexOf('ABORT') < 0) return false;
+  if(c.sexo !== 'H') return true;
+  if((c.crias_ids && c.crias_ids.length) || c.peso_dest != null) return false;   // es ella la que abortó
+  var n = c.fecha_nac ? new Date(c.fecha_nac) : null, fin = c.fecha_salida ? new Date(c.fecha_salida) : new Date();
+  return n ? (fin - n) / 86400000 < 365 : true;
+};
+window.fechaAIso = function(v){
+  v = String(v == null ? '' : v).trim();
+  var m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);
+  m = v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if(m){ var y = m[3].length === 2 ? '20'+m[3] : m[3]; var mo = +m[2], d = +m[1]; if(mo<1||mo>12||d<1||d>31) return null;
+    return y+'-'+('0'+mo).slice(-2)+'-'+('0'+d).slice(-2); }
+  return null;
+};
+
+/* ===================== BANDERAS NEGRAS ⚑ =====================
+   Por vaca y por parto:
+   ⚑ Parto muy abierto: más de 24 meses entre un parto y el siguiente, o lleva
+     más de 24 meses desde el último parto sin preñez confirmada.
+   ⚑ Destete bajo: la cría destetó por debajo del % (85 % por defecto) del
+     promedio de sus contemporáneas (misma finca, año de nacimiento y sexo),
+     comparando el peso ajustado a 8 meses.
+   ⚑ Aborto: cría registrada como aborto, pesaje "ABORTO MADRE …", registro
+     de aborto en Actualizar Datos, o comentario/nota/visita que lo mencione.
+   ⚑ Descarte sugerido: nota de la ficha marcada para descarte, visita ASOCEBU
+     rechazada o con comentario de descarte, o comentario de BD que lo diga.
+   Una vaca activa con 2 o más banderas entra a "Animales para descarte". */
+window.__BN = (function(){
+  var MESES_ABIERTA = 24, MIN_GRUPO = 5;
+  var ini = false, BD, byId, byNum, PESOS, PALP, grupos, abortosPorMadre;
+  function N(x){ return String(x == null ? '' : x).trim().toUpperCase(); }
+  function J(id){ try{ return JSON.parse(document.getElementById(id).textContent); }catch(e){ return {}; } }
+  function ls(k, d){ try{ var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; }catch(e){ return d; } }
+  function umbral(){ var u = parseFloat(ls('hatos_bn_umbral_v1', 85)); return isNaN(u) ? 85 : u; }
+  function meses(a, b){ return (new Date(b) - new Date(a)) / 86400000 / 30.4375; }
+  function hoyIso(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  function pesoCria(c){ return c.peso_aj_8m != null ? c.peso_aj_8m : (c.peso_dest != null ? c.peso_dest : null); }
+
+  function init(){
+    if(ini) return; ini = true;
+    BD = window.__BD__ || []; byId = {}; byNum = {};
+    BD.forEach(function(r){ byId[r.id] = r; if(r.numero){ var k = N(r.numero); if(!byNum[k]) byNum[k] = r; } });
+    PESOS = J('pesos-source'); PALP = J('palp-source');
+    // Promedios de contemporáneas: finca + año de nacimiento + sexo (o finca + año si el grupo es chico)
+    var g = {};
+    BD.forEach(function(r){
+      var p = pesoCria(r); if(p == null || !r.fecha_nac || esCriaTE(r)) return;
+      var y = r.fecha_nac.slice(0,4), k1 = r.finca+'|'+y+'|'+r.sexo, k2 = r.finca+'|'+y;
+      [k1, k2].forEach(function(k){ g[k] = g[k] || {s:0, n:0}; g[k].s += p; g[k].n++; });
+    });
+    grupos = g;
+    // Pesajes con nota "ABORTO MADRE xxx"
+    abortosPorMadre = {};
+    Object.keys(PESOS).forEach(function(num){
+      (PESOS[num] || []).forEach(function(p){
+        var t = N(p.nota); if(t.indexOf('ABORT') < 0) return;
+        var m = t.match(/MADRE\s+([0-9A-Z\/\-]+)/), madre = m ? m[1] : num;
+        (abortosPorMadre[madre] = abortosPorMadre[madre] || []).push({ fecha:p.fecha, texto:'Pesaje del '+fmt(p.fecha)+': «'+p.nota+'»', fuente:'Control de pesos' });
+      });
+    });
+  }
+  function promGrupo(c){
+    var y = (c.fecha_nac||'').slice(0,4), a = grupos[c.finca+'|'+y+'|'+c.sexo], b = grupos[c.finca+'|'+y];
+    var x = (a && a.n >= MIN_GRUPO) ? a : ((b && b.n >= MIN_GRUPO) ? b : null);
+    return x ? { prom:x.s/x.n, n:x.n, grupo:(x===a ? c.finca+' '+y+' '+(c.sexo==='H'?'hembras':'machos') : c.finca+' '+y) } : null;
+  }
+  function fmt(iso){ if(!iso) return '—'; var p = String(iso).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : iso; }
+
+  function criasDe(r){
+    var seen = {}, out = [];
+    (r.crias_ids || []).map(function(id){ return byId[id]; }).filter(Boolean).forEach(function(c){
+      var k = c.numero ? N(c.numero) : (c.fecha_nac+'|'+N(c.padre));
+      if(!seen[k]){ seen[k] = 1; out.push(c); }
+    });
+    return out;
+  }
+  function comentarios(r){
+    var out = [], k = N(r.numero);
+    if(r.comentario) out.push({ fuente:'Comentario BD', fecha:null, texto:String(r.comentario) });
+    if(r.obs_salida) out.push({ fuente:'Obs. salida BD', fecha:r.fecha_salida||null, texto:String(r.obs_salida) });
+    ls('hatos_notas_v1', []).forEach(function(n){
+      if(n && N(n.numero) === k) out.push({ fuente:'Nota de la ficha', fecha:n.fecha||null, texto:(n.texto||'')+(n.descarte?' [MARCADA PARA DESCARTE'+(n.motivo?': '+n.motivo:'')+']':''), descarte:!!n.descarte });
+    });
+    var V = window.__visitaAsocebu;
+    if(V && V.regsDe){ try{ V.regsDe(r).forEach(function(x){ var g = x.reg || {}, v = x.visita || {};
+      var t = [g.resultado ? 'Resultado: '+g.resultado : '', (g.motivo||[]).length ? 'Motivo: '+g.motivo.join(', ') : '', g.obs||'', g.tarea ? 'Tarea: '+g.tarea : ''].filter(Boolean).join(' · ');
+      if(t) out.push({ fuente:'Visita ASOCEBU', fecha:v.fecha||null, texto:t, rechazo:/RECHAZ|NO APT|DESCART/i.test(g.resultado||'') });
+    }); }catch(e){} }
+    return out;
+  }
+
+  /* Análisis completo de una hembra */
+  function analizar(r){
+    init();
+    var k = N(r.numero), crias = criasDe(r);
+    var vivas = crias.filter(function(c){ return !esCriaTE(c) && !window.esFetoAbortado(c) && c.fecha_nac; });
+    var grupos_ = agruparPartos(vivas).sort(function(a,b){ return a.fecha_nac.localeCompare(b.fecha_nac); });
+    var U = umbral();
+    var partos = grupos_.map(function(u, i){
+      var iep = i ? Math.round(meses(grupos_[i-1].fecha_nac, u.fecha_nac)*100)/100 : null;
+      var peso = u.peso_dest != null ? u.peso_dest : null;
+      var anom = iep != null && iep < 9;
+      var kg = (peso != null && !anom) ? (iep ? Math.round((peso/(iep/12))*100)/100 : peso) : null;
+      var flags = [];
+      if(iep != null && iep > MESES_ABIERTA) flags.push({ tipo:'abierta', texto:iep.toFixed(1)+' meses desde el parto anterior (más de '+MESES_ABIERTA+').' });
+      var crs = u.crias || [], prov = crs.some(function(c){ return c.__prov && c.__prov.fecha_nac !== undefined; });
+      if(!u.gemelar && crs[0]){
+        var c = crs[0], p = pesoCria(c), g = p != null ? promGrupo(c) : null;
+        if(g){ var pct = p / g.prom * 100;
+          if(pct < U) flags.push({ tipo:'destete', texto:'La cría '+c.numero+' pesó '+Math.round(p)+' kg (ajustado 8 m) = '+pct.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g.prom)+' kg, '+g.grupo+', '+g.n+' animales).' }); }
+      }
+      return { n:i+1, fecha:u.fecha_nac, crias:crs, gemelar:u.gemelar, peso_destete:peso, iep_meses:iep, kg_ano:kg, anomalia:anom, flags:flags, provisional:prov };
+    });
+
+    // ---- Abortos ----
+    var ab = [];
+    crias.filter(window.esFetoAbortado).forEach(function(c){ ab.push({ fecha:c.fecha_nac, texto:'Aborto registrado como '+c.numero+(c.comentario?' («'+c.comentario+'»)':''), fuente:'Registro BD' }); });
+    (abortosPorMadre[k] || []).forEach(function(a){ ab.push(a); });
+    (window.__updList ? window.__updList() : ls('hatosDJW_updates_v1', [])).forEach(function(u){
+      if(u && u.tipo === 'aborto' && N(u.numero) === k) ab.push({ fecha:(u.detalle||{}).fecha||u.fecha, texto:'Aborto registrado en Actualizar Datos'+((u.detalle||{}).meses ? ' ('+u.detalle.meses+' meses)' : '')+' — pendiente de pasar al Excel', fuente:'Actualizar Datos' });
+    });
+    var coms = comentarios(r);
+    ab.sort(function(a,b){ return (a.fecha||'').localeCompare(b.fecha||''); });
+    var abD = [];
+    ab.forEach(function(a){ var prev = abD[abD.length-1];
+      if(prev && a.fecha && prev.fecha && Math.abs(meses(prev.fecha, a.fecha)) < 3){ prev.texto += ' · '+a.texto; return; } abD.push(a); });
+    if(!abD.length){
+      var ca = coms.filter(function(c){ return /ABORT/i.test(c.texto); });
+      if(ca.length) abD.push({ fecha:ca[0].fecha, texto:'Mencionado en '+ca.map(function(c){ return c.fuente.toLowerCase()+': «'+c.texto+'»'; }).join(' · '), fuente:ca[0].fuente });
+    }
+
+    // ---- Vacía hoy más de 24 meses ----
+    var extra = [];
+    var ult = partos.length ? partos[partos.length-1].fecha : null;
+    if(ult && r.activo === 'ACTIVO'){
+      var m = meses(ult, hoyIso());
+      var preñada = (PALP[k] || []).some(function(p){ return p.fecha >= ult && /^P\s*\+|PREÑ|PREN/i.test(p.estado||''); });
+      if(m > MESES_ABIERTA && !preñada) extra.push({ tipo:'abierta', fecha:hoyIso(), texto:'Lleva '+m.toFixed(1)+' meses desde su último parto ('+fmt(ult)+') sin preñez confirmada.' });
+    }
+    // ---- Comentarios que piden descarte ----
+    // "MADRE DESCARTE" / "HIJA DE DESCARTE" hablan de otro animal, no de esta vaca
+    var cd = coms.filter(function(c){ return c.descarte || c.rechazo || (/DESCART/i.test(c.texto) && !/(MADRE|HIJ[OA]|CR[IÍ]A|PADRE)\s+(DE\s+)?(VACA\s+)?DESCART/i.test(c.texto)); });
+    if(cd.length) extra.push({ tipo:'comentario', fecha:cd[cd.length-1].fecha, texto:'Descarte sugerido en '+cd.map(function(c){ return c.fuente.toLowerCase()+(c.fecha?' ('+fmt(c.fecha)+')':'')+': «'+c.texto+'»'; }).join(' · ') });
+    // ---- Comentarios de baja fertilidad o mala crianza (solo si los datos no la marcaron ya) ----
+    var tiene = function(t){ return partos.some(function(p){ return p.flags.some(function(f){ return f.tipo===t; }); }) || extra.some(function(f){ return f.tipo===t; }); };
+    var cf = coms.filter(function(c){ return /REPETIDORA|INF[EÉ]RTIL|NO PRE[ÑN]A|NO QUEDA/i.test(c.texto); });
+    if(cf.length && !tiene('abierta')) extra.push({ tipo:'abierta', fecha:cf[0].fecha, texto:'Baja fertilidad mencionada en '+cf[0].fuente.toLowerCase()+': «'+cf[0].texto+'»' });
+    var cm = coms.filter(function(c){ return /POCA LECHE|MALA MADRE|BAJO PESO|DESTETE BAJO|CR[IÍ]A PEQUE/i.test(c.texto); });
+    if(cm.length && !tiene('destete')) extra.push({ tipo:'destete', fecha:cm[0].fecha, texto:'Mala crianza mencionada en '+cm[0].fuente.toLowerCase()+': «'+cm[0].texto+'»' });
+
+    var abortos = abD.map(function(a){ return { tipo:'aborto', fecha:a.fecha, texto:a.texto, fuente:a.fuente }; });
+    var todas = [];
+    partos.forEach(function(p){ p.flags.forEach(function(f){ todas.push({ tipo:f.tipo, fecha:p.fecha, texto:f.texto, parto:p.n }); }); });
+    abortos.forEach(function(a){ todas.push(a); });
+    extra.forEach(function(e){ todas.push(e); });
+    var iv = partos.map(function(p){ return p.iep_meses; }).filter(function(v){ return v != null; });
+    return {
+      partos:partos, abortos:abortos, extra:extra, banderas:todas, comentarios:coms,
+      iep_prom: iv.length ? Math.round(iv.reduce(function(a,b){ return a+b; },0)/iv.length*100)/100 : null, iep_lista:iv,
+      umbral:U
+    };
+  }
+  function candidatas(opts){
+    init(); opts = opts || {};
+    var min = opts.min || 2, out = [];
+    BD.forEach(function(r){
+      if(r.sexo !== 'H' || r.activo !== 'ACTIVO' || !r.numero) return;
+      if(opts.fincas && opts.fincas.indexOf(r.finca) < 0) return;
+      if(!(r.crias_ids && r.crias_ids.length) && !(r.edad_actual >= 2)) return;
+      var a = analizar(r);
+      if(a.banderas.length >= min) out.push({ r:r, a:a });
+    });
+    out.sort(function(x,y){ return y.a.banderas.length - x.a.banderas.length || String(x.r.numero).localeCompare(String(y.r.numero), 'es', {numeric:true}); });
+    return out;
+  }
+  return { analizar:analizar, candidatas:candidatas, umbral:umbral,
+    setUmbral:function(v){ try{ localStorage.setItem('hatos_bn_umbral_v1', JSON.stringify(+v)); }catch(e){} },
+    reset:function(){ ini = false; }, MESES_ABIERTA:MESES_ABIERTA,
+    ICON:{ abierta:'Parto muy abierto', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sugerido' } };
+})();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>if(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches))document.documentElement.classList.add("app")</script>
@@ -869,6 +1058,36 @@ window.fertConIep = function(F){
   .gallery-toggle:hover{ background:var(--green-pale); }
   #galleryCollapsible.collapsed{ display:none; }
   #inventarioCollapsible.collapsed{ display:none; }
+
+  /* ---------- Banderas negras ⚑ ---------- */
+  .bn-flag{ display:inline-block; color:#111; font-size:15px; line-height:1; margin-right:2px; cursor:help; }
+  .bn-flags{ color:#111; letter-spacing:1px; }
+  .stat-chip.bn-chip-alerta{ border-color:var(--rust-deep); background:#7E341312; }
+  .bn-table td{ vertical-align:top; }
+  @media (max-width:640px){ .bn-table th, .bn-table td{ padding:6px 5px; font-size:12px; } }
+  .bn-row-flag td{ background:#24180f0d; }
+  .bn-row-aborto td{ background:#7C2B2112; color:var(--rust-deep); }
+  .bn-prov{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#7a5f22; background:#AD8A3C26; border-radius:8px; padding:1px 6px; margin-left:4px; white-space:nowrap; }
+  .bn-prov-nota{ margin:0 0 10px !important; color:#7a5f22 !important; }
+  .bn-lista{ margin-top:12px; border-top:1px solid var(--line); padding-top:10px; }
+  .bn-lista-tit{ font-weight:700; font-size:13px; margin-bottom:6px; }
+  .bn-lista ul{ list-style:none; margin:0; padding:0; }
+  .bn-lista li{ font-size:12.5px; line-height:1.45; padding:6px 0; border-bottom:1px dashed var(--line); }
+  .bn-lista li:last-child{ border-bottom:0; }
+  .bn-ctrl{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; background:#24180f; color:#F2EDE0; padding:12px 14px; border-radius:10px; margin-bottom:12px; font-size:13px; }
+  .bn-ctrl select{ height:34px; border-radius:6px; border:0; padding:0 8px; margin-left:4px; font-family:inherit; font-size:13px; }
+  .bn-ctrl .bn-chk{ display:flex; align-items:center; gap:6px; }
+  .bn-desc-lista{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; margin-bottom:24px; }
+  .bn-card{ background:var(--card); border:1px solid var(--line); border-left:5px solid #111; border-radius:10px; padding:12px 14px; }
+  .bn-card.una{ border-left-color:#8a8f87; }
+  .bn-card-h{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .bn-card-h a{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:17px; color:var(--ink); cursor:pointer; text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:3px; }
+  .bn-card-h .bn-flags{ font-size:17px; white-space:nowrap; }
+  .bn-card-sub{ font-size:12px; color:var(--ink-soft); margin:2px 0 8px; }
+  .bn-card ul{ list-style:none; margin:0; padding:0; }
+  .bn-card li{ font-size:12.5px; line-height:1.4; padding:4px 0; }
+  .bn-card .bn-com{ margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); font-size:12px; color:var(--ink-soft); }
+  .bn-card .bn-com b{ color:var(--ink); }
 
   /* ---------- Historial de actualizaciones ---------- */
   .hist-filtros{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px; }
@@ -2128,6 +2347,21 @@ window.__renderReproHead = function(o){
       </div>
     </div>
 
+    <div class="section-head"><h2>Animales para descarte — banderas negras ⚑</h2><div class="rail"></div></div>
+    <p class="hint" style="margin:-6px 0 12px;">Vacas activas que acumulan <b>2 o más banderas negras</b>. Cada bandera es una de estas señales:
+      <b>⚑ parto muy abierto</b> (más de 24 meses entre partos, o más de 24 meses desde el último parto sin preñez confirmada),
+      <b>⚑ destete bajo</b> (cría por debajo del % elegido del promedio de sus contemporáneas — misma finca, año de nacimiento y sexo — en peso ajustado a 8 meses),
+      <b>⚑ aborto</b> (registro en BD, pesaje «ABORTO MADRE…», registro en Actualizar Datos, o mención en comentarios, notas o visita ASOCEBU) y
+      <b>⚑ descarte sugerido</b> (nota de la ficha marcada para descarte, visita ASOCEBU rechazada o comentario que lo pida). La lista se recalcula sola con las notas, comentarios y la visita ASOCEBU. Es una guía para decidir, no una orden.</p>
+    <div class="bn-ctrl">
+      <label>Finca <select id="bnFinca"><option value="prod">Productivas (OK, CACHO, TNJ)</option><option value="OK">OK</option><option value="CACHO">CACHO</option><option value="TNJ">TNJ</option><option value="">Todas</option></select></label>
+      <label>Destete bajo si es menor al <select id="bnUmbral"><option value="80">80 %</option><option value="85">85 %</option><option value="90">90 %</option></select> del grupo</label>
+      <label class="bn-chk"><input type="checkbox" id="bnUna"> Ver también las de 1 bandera (en observación)</label>
+      <button type="button" class="btn-pdf-prominent" id="bnDescargar" style="padding:8px 14px; font-size:12.5px;">⬇ Descargar lista (Excel)</button>
+    </div>
+    <div id="bnResumen" class="hint" style="margin:0 0 8px;"></div>
+    <div id="bnLista" class="bn-desc-lista"></div>
+
     <div class="section-head"><h2>Vacas sugeridas para descarte</h2><div class="rail"></div></div>
     <p class="hint" style="margin:-6px 0 14px;">Las de menor Aporte Real Anual entre las vacas activas — candidatas a revisar para descarte por baja productividad. Esto es una sugerencia basada en un solo indicador; considera también edad, estado de salud y valor genético antes de decidir.</p>
     <div class="filters" style="background:var(--rust-deep); margin-bottom:14px;">
@@ -2394,6 +2628,37 @@ window.__renderReproHead = function(o){
 (function(){
   var RAW = JSON.parse(document.getElementById('data-source').textContent);
   window.__BD__ = RAW;
+  /* Correcciones pendientes (Actualizar Datos → Corrección de datos, o modo
+     guiado): se aplican de una vez en la app como PROVISIONALES, para que la
+     ficha y los cálculos ya las reflejen mientras se pasan al Excel. El valor
+     original queda guardado en r.__prov. */
+  (function(){
+    var U; try{ U = JSON.parse(localStorage.getItem('hatosDJW_updates_v1') || '[]'); }catch(e){ U = []; }
+    if(!Array.isArray(U) || !U.length) return;
+    var CAMPOS = { 'SEXO':'sexo', 'PADRE':'padre', 'MADRE':'madre', 'FECHA NAC':'fecha_nac', 'RAZA':'raza', 'FINCA':'finca', 'LOTE':'lote', 'NOMBRE':'nombre', 'COMENTARIO':'comentario' };
+    function N(x){ return String(x == null ? '' : x).trim().toUpperCase(); }
+    var porNum = {}, porId = {};
+    RAW.forEach(function(r){ porId[r.id] = r; if(r.numero){ var k = N(r.numero); if(!porNum[k]) porNum[k] = r; } });
+    var aplicadas = [];
+    U.filter(function(u){ return u && u.tipo === 'correccion'; }).sort(function(a,b){ return (a.id||0) - (b.id||0); }).forEach(function(u){
+      var d = u.detalle || {}, f = CAMPOS[N(d.campo)], r = porNum[N(u.numero)];
+      var v = String(d.valor == null ? '' : d.valor).trim();
+      if(!f || !r || !v) return;
+      if(f === 'fecha_nac'){ v = window.fechaAIso ? window.fechaAIso(v) : null; if(!v) return; }
+      if(f === 'sexo'){ v = /^M/i.test(v) ? 'M' : (/^[HF]/i.test(v) ? 'H' : N(v)); }
+      if(String(r[f] == null ? '' : r[f]) === v) return;
+      r.__prov = r.__prov || {};
+      if(!(f in r.__prov)) r.__prov[f] = r[f];
+      var antes = r[f]; r[f] = v;
+      if(f === 'madre' || f === 'padre'){
+        var viejo = porNum[N(antes)], nuevo = porNum[N(v)];
+        if(viejo && viejo.crias_ids) viejo.crias_ids = viejo.crias_ids.filter(function(id){ return id !== r.id; });
+        if(nuevo){ nuevo.crias_ids = nuevo.crias_ids || []; if(nuevo.crias_ids.indexOf(r.id) < 0) nuevo.crias_ids.push(r.id); }
+      }
+      aplicadas.push({ numero:r.numero, campo:d.campo, antes:antes, despues:v });
+    });
+    window.__correccionesProvisionales = aplicadas;
+  })();
   document.getElementById('gen-date').textContent = new Date().toLocaleDateString('es-CO', {year:'numeric', month:'long', day:'numeric'});
 
   // ---------- IEP (Intervalo Entre Partos) para el KPI de Panel General ----------
@@ -5614,67 +5879,77 @@ window.__renderReproHead = function(o){
     // ARA (Aporte Real Anual) se recalcula aquí solo sobre partos con destete
     // CONCLUIDO — los partos en curso (vaca aún lactando, sin pesaje final)
     // se excluyen del promedio para no distorsionar el indicador.
-    var fert = (numKey && !criasEspeciales(crias)) ? FERT[numKey] : null;
+    // Partos, IEP y banderas negras se calculan desde las crías de BD (con las
+    // correcciones pendientes ya aplicadas como provisionales).
     var fertEl = document.getElementById('fh-fert-wrap');
-    var fertIsEstimated = false;
-    if((!fert || !fert.partos || !fert.partos.length) && r.sexo==='H' && crias.length){
-      // Esta vaca no está en la hoja FERTILIDAD del Excel — calculamos su propio
-      // IEP/ARA a partir de las fechas de nacimiento de sus crías registradas en BD.
-      var ownPartos = computeOwnPartos(crias);
-      if(ownPartos.length){
-        var pDatesConcl = ownPartos.filter(function(p){ return p.peso_destete!==null; });
-        fert = {
-          edad_primer_parto: (r.fecha_nac && ownPartos[0].fecha) ? Math.round(((new Date(ownPartos[0].fecha)-new Date(r.fecha_nac))/(1000*3600*24*365.25))*100)/100 : null,
-          x_iep: null, prom_dest_real: null,
-          partos: ownPartos,
-        };
-        fert.x_iep = iepRango(ownPartos);
-        var destC = pDatesConcl.map(function(p){ return p.peso_destete; });
-        fert.prom_dest_real = destC.length ? Math.round((destC.reduce(function(a,b){return a+b;},0)/destC.length)) : null;
-        fertIsEstimated = true;
-      }
-    }
-    if(fert && fert.partos && fert.partos.length){
-      var concluidos = fert.partos.filter(function(p){ return p.kg_ano!==null && p.peso_destete!==null; });
-      var pendientes = fert.partos.length - concluidos.length;
-      var araProm = concluidos.length ? concluidos.reduce(function(a,p){return a+p.kg_ano;},0)/concluidos.length : null;
+    var BNa = (r.sexo==='H' && window.__BN) ? window.__BN.analizar(r) : null;
+    var fert = null, araProm = null;
+    if(BNa && (BNa.partos.length || BNa.abortos.length || BNa.extra.length)){
+      var P = BNa.partos;
+      var conDest = P.filter(function(p){ return p.peso_destete!==null; });
+      fert = { partos:P, x_iep:BNa.iep_prom,
+        edad_primer_parto: (r.fecha_nac && P.length) ? Math.round(((new Date(P[0].fecha)-new Date(r.fecha_nac))/(1000*3600*24*365.25))*100)/100 : null,
+        prom_dest_real: conDest.length ? Math.round(conDest.reduce(function(a,p){ return a+p.peso_destete; },0)/conDest.length) : null };
+      var concluidos = P.filter(function(p){ return p.kg_ano!==null && p.peso_destete!==null; });
+      var pendientes = P.filter(function(p){ return p.peso_destete===null; }).length;
+      araProm = concluidos.length ? concluidos.reduce(function(a,p){return a+p.kg_ano;},0)/concluidos.length : null;
+      var L = BNa.iep_lista;
+      var iepExpl = L.length>1 ? '('+L.map(function(v){ return v.toFixed(1); }).join(' + ')+') ÷ '+L.length : (L.length===1 ? 'un solo intervalo' : 'necesita 2 partos');
+      var nBan = BNa.banderas.length;
       var strip = [
         ['ARA promedio', araProm!==null ? araProm.toFixed(1)+' kg/año' : '—'],
-        ['Partos usados', concluidos.length + (pendientes>0 ? ' (+'+pendientes+' en curso)' : '')],
+        ['Partos', P.length + (pendientes>0 ? ' <small>('+pendientes+' sin destete)</small>' : '')],
         ['Edad primer parto', fert.edad_primer_parto!==null ? fert.edad_primer_parto.toFixed(1)+' años' : '—'],
-        ['IEP promedio', fert.x_iep!==null ? fert.x_iep.toFixed(1)+' meses<small style="display:block;font-size:10.5px;font-weight:400;opacity:.75;">(último parto − primer parto) ÷ '+(fert.partos.filter(function(p){return p.fecha;}).length-1)+'</small>' : '—'],
+        ['IEP promedio', (fert.x_iep!==null ? fert.x_iep.toFixed(1)+' meses' : '—')+'<small style="display:block;font-size:10.5px;font-weight:400;opacity:.75;">'+iepExpl+'</small>'],
         ['Prom. destete real', fert.prom_dest_real!==null ? fert.prom_dest_real.toFixed(0)+' kg' : '—'],
-      ].map(function(s){ return '<div class="stat-chip"><div class="k">'+s[0]+'</div><div class="v">'+s[1]+'</div></div>'; }).join('');
-      var iepVals = fert.partos.map(function(p){ return p.iep_meses; }).filter(function(v){ return v!==null && v!==undefined; });
+        ['Banderas negras', nBan ? '<span class="bn-flags">'+'⚑'.repeat(Math.min(nBan,6))+'</span> '+nBan+(nBan>=2?'<small style="display:block;font-size:10.5px;font-weight:600;color:var(--rust-deep);">Candidata a descarte</small>':'') : '0']
+      ].map(function(s){ return '<div class="stat-chip'+(s[0]==='Banderas negras'&&nBan>=2?' bn-chip-alerta':'')+'"><div class="k">'+s[0]+'</div><div class="v">'+s[1]+'</div></div>'; }).join('');
+      var iepVals = P.map(function(p){ return p.iep_meses; }).filter(function(v){ return v!==null && v!==undefined; });
       var iepMin = iepVals.length ? Math.min.apply(null, iepVals) : null;
       var iepMax = iepVals.length ? Math.max.apply(null, iepVals) : null;
       function iepColor(v){
         if(v===null || v===undefined || iepMin===null || iepMax===iepMin) return null;
-        var t = (v - iepMin) / (iepMax - iepMin); // 0 = más corto (mejor), 1 = más largo (peor)
-        var c1 = [30,54,38], c2 = [169,72,26]; // verde -> rojo (paleta de la app)
-        var rgb = c1.map(function(c,i){ return Math.round(c + (c2[i]-c)*t); });
-        return 'rgb('+rgb.join(',')+')';
+        var t = (v - iepMin) / (iepMax - iepMin);
+        var c1 = [30,54,38], c2 = [169,72,26];
+        return 'rgb('+c1.map(function(c,i){ return Math.round(c + (c2[i]-c)*t); }).join(',')+')';
       }
-      var rows = fert.partos.map(function(p){
-        var enCurso = (p.peso_destete===null);
-        var anomalia = !!p.anomalia;
+      function escT(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+      function banderasCelda(fl){ return fl.length ? fl.map(function(f){ return '<span class="bn-flag" title="'+escT(f.texto)+'">⚑</span>'; }).join('') : ''; }
+      var filas = P.map(function(p){ return { fecha:p.fecha, p:p }; }).concat(BNa.abortos.map(function(a){ return { fecha:a.fecha||'', a:a }; }));
+      filas.sort(function(x,y){ return (x.fecha||'9999').localeCompare(y.fecha||'9999'); });
+      var rows = filas.map(function(f){
+        if(f.a){
+          return '<tr class="bn-row-aborto"><td>—</td><td>'+(f.a.fecha?fmtDate(f.a.fecha):'—')+'</td><td colspan="2"><b>Aborto</b> <span class="hint" style="margin:0;">'+escT(f.a.fuente)+'</span></td><td>'+banderasCelda([f.a])+'</td><td colspan="2"></td></tr>';
+        }
+        var p = f.p, sinPeso = (p.peso_destete===null), anomalia = !!p.anomalia;
+        var enCurso = sinPeso && p.fecha && (Date.now() - new Date(p.fecha)) / 86400000 < 300;
         var iepCol = iepColor(p.iep_meses);
         var iepStyle = iepCol ? ' style="color:'+iepCol+'; font-weight:700;"' : '';
-        var pesoCell = enCurso ? '<span class="pill inact">En curso</span>' : (p.peso_destete+' kg');
-        var araCell = anomalia ? '<span class="pill inact" title="Intervalo entre partos menor a '+MIN_IEP_PLAUSIBLE_MESES+' meses — biológicamente imposible, probable error de datos (número duplicado o cría mal asignada). Excluido del promedio.">⚠ Dato irreal</span>' : (p.kg_ano!==null?p.kg_ano.toFixed(1)+' kg/año':'—');
-        return '<tr'+((enCurso||anomalia)?' style="opacity:.65;"':'')+'><td>'+p.n+'</td><td>'+fmtDate(p.fecha)+'</td>'+
-          '<td>'+pesoCell+'</td>'+
-          '<td'+iepStyle+'>'+(p.iep_meses!==null?p.iep_meses.toFixed(1):'—')+'</td>'+
-          '<td>'+araCell+'</td></tr>';
+        var pesoCell = sinPeso ? '<span class="pill inact">'+(enCurso ? 'En curso' : 'Sin dato')+'</span>' : (p.peso_destete+' kg');
+        var araCell = anomalia ? '<span class="pill inact" title="Intervalo menor a '+MIN_IEP_PLAUSIBLE_MESES+' meses — biológicamente imposible, probable fecha mal escrita o cría mal asignada. No se calcula el ARA de este parto.">⚠ Revisar</span>' : (p.kg_ano!==null?p.kg_ano.toFixed(1)+' kg/año':'—');
+        var criasTxt = p.crias.map(function(c){ return escT(c.numero); }).join(' + ')+(p.gemelar?' <small>(gemelar)</small>':'')+(p.provisional?' <span class="bn-prov" title="Fecha corregida en Actualizar Datos, pendiente de pasar al Excel">provisional</span>':'');
+        return '<tr'+(p.flags.length?' class="bn-row-flag"':'')+'><td>'+p.n+'</td><td>'+fmtDate(p.fecha)+'</td><td>'+criasTxt+'</td>'+
+          '<td'+iepStyle+'>'+(p.iep_meses!==null?p.iep_meses.toFixed(1):'<span class="hint" style="margin:0;">1.er</span>')+'</td>'+
+          '<td>'+banderasCelda(p.flags)+'</td><td>'+pesoCell+'</td><td>'+araCell+'</td></tr>';
       }).join('');
-      var anomaliaCount = fert.partos.filter(function(p){ return p.anomalia; }).length;
-      fertEl.innerHTML = (fertIsEstimated ? '<p class="hint" style="margin:0 0 10px;">⚠ Esta vaca no tiene registro en la hoja FERTILIDAD del Excel — el IEP y el ARA se calcularon a partir de las fechas de nacimiento y pesos de destete de sus crías registradas en BD.</p>' : '') +
+      var listaBan = BNa.banderas.map(function(b){
+        var donde = b.parto ? 'Parto '+b.parto : (b.tipo==='aborto' ? 'Aborto'+(b.fecha?' · '+fmtDate(b.fecha):'') : (b.fecha?fmtDate(b.fecha):''));
+        return '<li><span class="bn-flag">⚑</span><b>'+window.__BN.ICON[b.tipo]+'</b>'+(donde?' <span class="hint" style="margin:0;">· '+donde+'</span>':'')+'<br>'+escT(b.texto)+'</li>';
+      }).join('');
+      var provs = [];
+      if(r.__prov) Object.keys(r.__prov).forEach(function(k){ provs.push(r.numero+': '+k+' '+(r.__prov[k]||'(vacío)')+' → '+r[k]); });
+      P.forEach(function(p){ p.crias.forEach(function(c){ if(c.__prov) Object.keys(c.__prov).forEach(function(k){ provs.push(c.numero+': '+(k==='fecha_nac'?'fecha de nacimiento':k)+' '+(k==='fecha_nac'?fmtDate(c.__prov[k]):c.__prov[k])+' → '+(k==='fecha_nac'?fmtDate(c[k]):c[k])); }); }); });
+      fertEl.innerHTML =
         '<div class="stat-strip">'+strip+'</div>'+
-        (pendientes>0 ? '<p class="hint" style="margin:0 0 10px;">Esta vaca tiene '+pendientes+' parto(s) con destete aún pendiente — no se incluyen en el promedio de ARA.</p>' : '')+
-        (anomaliaCount>0 ? '<p class="hint" style="margin:0 0 10px; color:var(--rust-deep);">⚠ '+anomaliaCount+' ciclo(s) con intervalo menor a '+MIN_IEP_PLAUSIBLE_MESES+' meses entre partos — biológicamente imposible, probable error de datos (número duplicado o cría mal asignada a esta madre). Se excluyeron del promedio de ARA.</p>' : '')+
-        '<div class="panel"><h3>Detalle de partos <span class="hint" style="margin:0;">(IEP: <span style="color:rgb(30,54,38);font-weight:700;">verde</span> = más corto, <span style="color:rgb(169,72,26);font-weight:700;">rojo</span> = más largo)</span></h3><table class="mini-table"><thead><tr><th>#</th><th>Fecha parto</th><th>Peso al destete</th><th>IEP (meses)</th><th>ARA del ciclo</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+        (provs.length ? '<p class="hint bn-prov-nota">✎ Incluye correcciones pendientes de pasar al Excel (provisionales): '+provs.map(escT).join(' · ')+'</p>' : '')+
+        '<div class="panel"><h3>Resumen de partos</h3>'+
+        '<p class="hint" style="margin:0 0 8px;">IEP de cada parto = meses desde el parto anterior (<span style="color:rgb(30,54,38);font-weight:700;">verde</span> = más corto, <span style="color:rgb(169,72,26);font-weight:700;">rojo</span> = más largo). IEP promedio = suma de los IEP ÷ cantidad de IEP. ⚑ = bandera negra: parto con más de '+window.__BN.MESES_ABIERTA+' meses de intervalo, cría destetada por debajo del '+BNa.umbral+' % del promedio de sus contemporáneas, o aborto. Toca ⚑ para ver el motivo.</p>'+
+        '<div style="overflow-x:auto;"><table class="mini-table bn-table"><thead><tr><th>#</th><th>Fecha parto</th><th>Cría</th><th>IEP (m)</th><th>⚑</th><th>Destete</th><th>ARA</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+        (listaBan ? '<div class="bn-lista"><div class="bn-lista-tit">⚑ '+nBan+' bandera'+(nBan===1?'':'s')+' negra'+(nBan===1?'':'s')+(nBan>=2?' — <b>candidata a descarte</b>':'')+'</div><ul>'+listaBan+'</ul></div>' : '')+
+        '</div>';
+      fertEl.querySelectorAll('.bn-table .bn-flag').forEach(function(el){ el.addEventListener('click', function(){ alert(el.getAttribute('title')); }); });
     } else {
-      fertEl.innerHTML = '<div class="panel"><p class="empty-note">No hay historial de partos registrado en la hoja de fertilidad ni crías con fecha de nacimiento suficientes para calcularlo.</p></div>';
+      fertEl.innerHTML = '<div class="panel"><p class="empty-note">'+(r.sexo==='H' ? 'No hay partos registrados: no se encontraron crías con fecha de nacimiento.' : 'El resumen de partos aplica a hembras.')+'</p></div>';
     }
 
     if(window.__renderReproHead){ try{ window.__renderReproHead({ r:r, palp:palp, ent:ent, crias:crias, fert:fert, araProm:(typeof araProm!=='undefined'?araProm:null) }); }catch(e){ console.error(e); } }
@@ -10871,8 +11146,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       var ps = (PESOS[String(r.numero).trim()]||[]).slice().sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||''); });
       if(ps.length) tiles.push(['Último peso', ps[0].peso+' kg · '+fechaBonita(ps[0].fecha)]);
       if(r.causa_salida) tiles.push(['Salida', esc(r.causa_salida)]);
+      // Acceso directo a la ficha completa, arriba, sin tener que bajar
+      botonGrande(c, '📋  Ver ficha completa', function(){ cerrar(); if(window.__abrirFicha) window.__abrirFicha(r.id); });
       var g = document.createElement('div'); g.className='g-tiles';
       g.innerHTML = tiles.map(function(t){ return '<div class="g-tile"><span>'+t[0]+'</span><b>'+t[1]+'</b></div>'; }).join('');
+      g.style.marginTop = '14px';
       c.appendChild(g);
       var fam = [];
       [['Padre', r.padre, '🐂'], ['Madre', r.madre, '🐄']].forEach(function(x){
@@ -10886,7 +11164,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       var t2 = document.createElement('div'); t2.className='g-subt'; t2.textContent='¿Qué más quiere hacer con este animal?'; c.appendChild(t2);
       var acc = [
         {icon:'📄', label:'Descargar ficha en PDF', sub:'Con pedigrí, para compartir', onClick:function(){ if(window.__pdfAnimal) window.__pdfAnimal(r.id); }},
-        {icon:'📋', label:'Ver ficha completa', sub:'Todo el detalle en el panel', onClick:function(){ cerrar(); if(window.__abrirFicha) window.__abrirFicha(r.id); }},
         {icon:'⚖', label:'Agregar a comparación', onClick:function(){ if(window.__comparador){ window.__comparador.add(r.id); this.querySelector('b').textContent='✓ Agregado a comparación'; } }},
         {icon:'📋', label:'Agregar a visita ASOCEBU', sub:'Registrar lo que dice el técnico', onClick:function(){ if(window.__visitaAsocebu) window.__visitaAsocebu.add(r.id); }}
       ];
@@ -12356,5 +12633,57 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
 <script>(function(){ function f(){ var e=document.getElementById('app-version'); if(!e) return; var t=e.textContent.trim();
   ['hsVer'].forEach(function(id){ var x=document.getElementById(id); if(x) x.textContent=t; }); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',f); else f(); })();</script>
+<script>
+/* Lista "Animales para descarte" (Comparativo de vacas) */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function fmt(iso){ if(!iso) return ''; var p=String(iso).split('-'); return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso; }
+  var ultima = [];
+  function fincas(){ var v = $('bnFinca') ? $('bnFinca').value : 'prod'; return v==='prod' ? ['OK','CACHO','TNJ'] : (v ? [v] : null); }
+  function pintar(){
+    var box = $('bnLista'); if(!box || !window.__BN) return;
+    window.__BN.reset();
+    var una = $('bnUna') && $('bnUna').checked;
+    var L = window.__BN.candidatas({ min: una ? 1 : 2, fincas: fincas() });
+    ultima = L;
+    var n2 = L.filter(function(x){ return x.a.banderas.length>=2; }).length;
+    $('bnResumen').innerHTML = '<b>'+n2+'</b> vaca'+(n2===1?'':'s')+' candidata'+(n2===1?'':'s')+' a descarte (2 o más ⚑)'+(una?' · '+(L.length-n2)+' en observación (1 ⚑)':'');
+    if(!L.length){ box.innerHTML = '<p class="empty-note">Ninguna vaca activa reúne 2 banderas negras con este filtro.</p>'; return; }
+    box.innerHTML = L.map(function(x){
+      var r = x.r, a = x.a, n = a.banderas.length;
+      var coms = a.comentarios.slice(-3).map(function(c){ return '<div><b>'+esc(c.fuente)+(c.fecha?' ('+fmt(c.fecha)+')':'')+':</b> '+esc(c.texto)+'</div>'; }).join('');
+      return '<div class="bn-card'+(n<2?' una':'')+'"><div class="bn-card-h"><a data-id="'+r.id+'">'+esc(r.numero)+'</a><span class="bn-flags" title="'+n+' banderas negras">'+'⚑'.repeat(Math.min(n,8))+'</span></div>'+
+        '<div class="bn-card-sub">'+[r.finca, r.raza, (r.edad_actual!=null?r.edad_actual.toFixed(1)+' años':''), a.partos.length+' parto'+(a.partos.length===1?'':'s'), (a.iep_prom!=null?'IEP '+a.iep_prom.toFixed(1)+' m':'')].filter(Boolean).map(esc).join(' · ')+'</div>'+
+        '<ul>'+a.banderas.map(function(b){ return '<li><span class="bn-flag">⚑</span><b>'+window.__BN.ICON[b.tipo]+'</b>'+(b.parto?' · parto '+b.parto:'')+(b.fecha&&!b.parto?' · '+fmt(b.fecha):'')+' — '+esc(b.texto)+'</li>'; }).join('')+'</ul>'+
+        (coms ? '<div class="bn-com">'+coms+'</div>' : '')+'</div>';
+    }).join('');
+    box.querySelectorAll('a[data-id]').forEach(function(el){ el.onclick = function(){ if(window.__abrirFicha) window.__abrirFicha(parseInt(el.getAttribute('data-id'),10)); }; });
+  }
+  function descargar(){
+    if(!ultima.length){ alert('La lista está vacía.'); return; }
+    function c(v){ v = v==null?'':String(v); return /[";\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+    var H = ['Numero','Finca','Raza','Edad_anos','Partos','IEP_promedio_meses','Banderas_negras','Detalle_banderas','Comentarios'];
+    var rows = ultima.map(function(x){ var r=x.r, a=x.a;
+      return [r.numero, r.finca, r.raza, r.edad_actual!=null?r.edad_actual.toFixed(1):'', a.partos.length, a.iep_prom!=null?a.iep_prom.toFixed(1):'', a.banderas.length,
+        a.banderas.map(function(b){ return window.__BN.ICON[b.tipo]+(b.parto?' (parto '+b.parto+')':'')+': '+b.texto; }).join(' | '),
+        a.comentarios.map(function(k){ return k.fuente+': '+k.texto; }).join(' | ')].map(c).join(';'); });
+    var blob = new Blob(['﻿'+H.join(';')+'\r\n'+rows.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+    var u = URL.createObjectURL(blob), el = document.createElement('a');
+    el.href = u; el.download = 'animales_para_descarte_'+new Date().toISOString().slice(0,10)+'.csv';
+    document.body.appendChild(el); el.click(); el.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 1000);
+  }
+  function init(){
+    if(!$('bnLista')) return;
+    if(window.__BN) $('bnUmbral').value = String(window.__BN.umbral());
+    $('bnFinca').onchange = pintar; $('bnUna').onchange = pintar;
+    $('bnUmbral').onchange = function(){ window.__BN.setUmbral($('bnUmbral').value); pintar(); };
+    $('bnDescargar').onclick = descargar;
+    pintar();
+    document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('.tab-btn'); if(b && b.getAttribute('data-view')==='vacas') setTimeout(pintar, 0); });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else setTimeout(init, 0);
+})();
+</script>
 </body>
 </html>

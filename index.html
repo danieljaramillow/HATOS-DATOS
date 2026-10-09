@@ -525,8 +525,11 @@
   #editsBar button.secondary:hover{ background:rgba(126,52,19,.08); }
 
   /* ---------- Update forms ---------- */
-  .upd-form-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:16px; }
-  .upd-field{ display:flex; flex-direction:column; gap:5px; }
+  .upd-form-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-bottom:16px; }
+  @media (max-width:760px){ .upd-form-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; } }
+  @media (max-width:340px){ .upd-form-grid{ grid-template-columns:minmax(0,1fr); } }
+  .upd-field{ display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .upd-field input, .upd-field select{ width:100%; box-sizing:border-box; min-width:0; }
   .upd-field label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); }
   .upd-field input, .upd-field select, .upd-field textarea{
     padding:8px 10px; border-radius:6px; border:1px solid rgba(0,0,0,.15); font-family:'IBM Plex Sans',sans-serif;
@@ -843,6 +846,35 @@
   .gallery-toggle:hover{ background:var(--green-pale); }
   #galleryCollapsible.collapsed{ display:none; }
   #inventarioCollapsible.collapsed{ display:none; }
+
+  /* ---------- Historial de actualizaciones ---------- */
+  .hist-filtros{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px; }
+  .hist-seg{ display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--card); }
+  .hist-seg button{ border:0; background:transparent; padding:8px 12px; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer; font-family:inherit; }
+  .hist-seg button + button{ border-left:1px solid var(--line); }
+  .hist-seg button.active{ background:var(--green-deep); color:#fff; }
+  .hist-filtros select, .hist-filtros input{ height:36px; border:1px solid var(--line); border-radius:8px; background:var(--card); padding:0 10px; font-size:13px; color:var(--ink); font-family:inherit; }
+  .hist-filtros input{ flex:1; min-width:140px; }
+  .hist-lista{ border:1px solid var(--line); border-radius:10px; background:var(--card); overflow:hidden; margin-bottom:22px; }
+  .hist-dia{ padding:7px 14px; background:var(--paper); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); border-top:1px solid var(--line); }
+  .hist-dia:first-child{ border-top:0; }
+  .hist-row{ display:grid; grid-template-columns:52px 1fr auto; gap:4px 12px; padding:10px 14px; border-top:1px solid var(--line); align-items:start; }
+  .hist-dia + .hist-row{ border-top:0; }
+  .hist-hora{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); padding-top:2px; }
+  .hist-main b{ font-family:'IBM Plex Mono',monospace; font-size:13.5px; }
+  .hist-main a{ color:inherit; text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:3px; cursor:pointer; }
+  .hist-tipo{ display:inline-block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--rust); margin-right:6px; }
+  .hist-det{ display:block; font-size:12.5px; color:var(--ink-soft); margin-top:2px; line-height:1.4; }
+  .hist-origen{ font-size:11px; color:var(--ink-soft); }
+  .hist-estado{ font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:10px; white-space:nowrap; }
+  .hist-estado.pend{ background:#AD8A3C22; color:#7a5f22; }
+  .hist-estado.fuera{ background:var(--green-pale); color:var(--green-deep); }
+  .hist-vacio{ padding:18px; text-align:center; color:var(--ink-soft); font-size:13px; }
+  .hist-mas{ display:block; width:100%; border:0; border-top:1px solid var(--line); background:transparent; padding:10px; font-weight:600; color:var(--green-deep); cursor:pointer; font-family:inherit; font-size:13px; }
+  .num-guia{ grid-column:1/-1; margin:-2px 0 4px; padding:9px 12px; border-radius:8px; background:var(--green-pale); border-left:3px solid var(--green-deep); font-size:13px; line-height:1.5; }
+  .num-guia b{ font-family:'IBM Plex Mono',monospace; }
+  .num-guia small{ display:block; color:var(--ink-soft); font-size:11.5px; }
+  @media (max-width:640px){ .hist-row{ grid-template-columns:44px 1fr; } .hist-row .hist-estado{ grid-column:2; justify-self:start; } }
 
   /* ---------- Pedigree tree ---------- */
   .ped-wrap{ overflow-x:auto; padding:6px 2px 10px; }
@@ -2292,6 +2324,17 @@ window.__renderReproHead = function(o){
     <div class="grid">
       <div class="panel" style="grid-column:1/-1;" id="updFormPanel"></div>
     </div>
+
+    <div class="section-head"><h2>Últimos datos ingresados o modificados</h2><div class="rail"></div></div>
+    <p class="hint" style="margin:-6px 0 12px;">Todo lo que se ha registrado o corregido en este equipo — desde estos formularios, el modo guiado o el botón ✏ Editar datos de la ficha. Se conserva aunque se vacíe la lista de pendientes, para poder revisar qué se hizo.</p>
+    <div class="hist-filtros">
+      <div class="hist-seg" id="histPeriodo" role="group" aria-label="Período">
+        <button type="button" data-p="1">Hoy</button><button type="button" data-p="7" class="active">7 días</button><button type="button" data-p="30">30 días</button><button type="button" data-p="0">Todo</button>
+      </div>
+      <select id="histTipo" aria-label="Tipo"><option value="">Todos los tipos</option></select>
+      <input type="search" id="histBuscar" placeholder="Buscar número…" aria-label="Buscar número">
+    </div>
+    <div id="histLista" class="hist-lista"></div>
 
     <div class="section-head"><h2>Actualizaciones pendientes <span id="updCount" class="hint" style="margin:0;"></span></h2><div class="rail"></div></div>
     <div style="display:flex; gap:8px; margin-bottom:12px;">
@@ -4005,6 +4048,10 @@ window.__renderReproHead = function(o){
     r[field] = newVal;
     saveEditsToStorage();
     renderEditsBar();
+    if(window.__histAdd && String(currentVal==null?'':currentVal) !== String(newVal==null?'':newVal)){
+      window.__histAdd({ tipo:'edicion', numero:r.numero, texto: FIELD_META[field].label+': '+(currentVal==null||currentVal===''?'(vacío)':currentVal)+' → '+(newVal==null||newVal===''?'(vacío)':newVal),
+        origen:'Ficha (✏ Editar datos)', ref:'e:'+r.id+':'+field, finca:r.finca });
+    }
   }
 
   function renderEditsBar(){
@@ -7149,22 +7196,132 @@ window.__renderReproHead = function(o){
     document.addEventListener('click', function(e){ if(e.target!==input) panel.classList.remove('show'); });
   }
 
-  function addUpdate(tipo, numero, detalleObj, detalleTexto){
-    UPDATES.push({ id: Date.now()*100 + Math.floor(Math.random()*100), tipo: tipo, numero: numero, detalle: detalleObj, detalle_texto: detalleTexto, fecha: new Date().toISOString().slice(0,10) });
+  function addUpdate(tipo, numero, detalleObj, detalleTexto, origen){
+    var u = { id: Date.now()*100 + Math.floor(Math.random()*100), tipo: tipo, numero: numero, detalle: detalleObj, detalle_texto: detalleTexto, fecha: new Date().toISOString().slice(0,10) };
+    UPDATES.push(u);
     saveUpdates();
+    var rec = numero ? byNumero[String(numero).trim().toUpperCase()] : null;
+    histAdd({ tipo:tipo, numero:numero, texto:detalleTexto, origen: origen||'Formulario', ref:'u:'+u.id,
+      finca: (detalleObj && detalleObj.finca) || (rec && rec.finca) || '' });
     renderUpdTable();
   }
 
+  // ---------- Historial: últimos datos ingresados o modificados ----------
+  var HIST_KEY = 'hatosDJW_historial_v1', HIST_MAX = 500;
+  function histLoad(){ try{ return JSON.parse(localStorage.getItem(HIST_KEY)) || null; }catch(e){ return null; } }
+  function histSave(){ try{ localStorage.setItem(HIST_KEY, JSON.stringify(HIST.slice(-HIST_MAX))); }catch(e){} }
+  var HIST = histLoad();
+  if(!HIST){
+    // Primera vez: se arma con lo que ya estaba pendiente en este equipo.
+    HIST = [];
+    UPDATES.forEach(function(u){ HIST.push({ ts: Math.floor(u.id/100) || Date.parse(u.fecha), tipo:u.tipo, numero:u.numero, texto:u.detalle_texto, origen:'Formulario', ref:'u:'+u.id, finca:(u.detalle&&u.detalle.finca)||'' }); });
+    try{ (JSON.parse(localStorage.getItem('hatosDJW_edits_v1'))||[]).forEach(function(e){
+      HIST.push({ ts: e.ts || Date.parse(e.fecha), tipo:'edicion', numero:e.numero, texto:e.field_label+': '+(e.valor_anterior==null||e.valor_anterior===''?'(vacío)':e.valor_anterior)+' → '+(e.valor_nuevo==null||e.valor_nuevo===''?'(vacío)':e.valor_nuevo), origen:'Ficha (✏ Editar datos)', ref:'e:'+e.id+':'+e.field });
+    }); }catch(e){}
+    HIST.sort(function(a,b){ return a.ts-b.ts; });
+    histSave();
+  }
+  function histAdd(x){ x.ts = Date.now(); HIST.push(x); histSave(); renderHist(); }
+  window.__histAdd = histAdd;
+
+  var HIST_TIPOS = { peso:'Pesaje', salida:'Salida', correccion:'Corrección', cria:'Cría nueva', palpacion:'Palpación', servicio:'Entore / servicio', aborto:'Aborto', edicion:'Edición en ficha' };
+  var histPeriodo = 7, histVer = 40;
+  function histEsPendiente(h){
+    if(!h.ref) return false;
+    if(h.ref.indexOf('u:')===0){ var id = +h.ref.slice(2); return UPDATES.some(function(u){ return u.id===id; }); }
+    if(h.ref.indexOf('e:')===0){
+      var p = h.ref.split(':');
+      try{ return (JSON.parse(localStorage.getItem('hatosDJW_edits_v1'))||[]).some(function(e){ return String(e.id)===p[1] && e.field===p[2]; }); }catch(e){ return false; }
+    }
+    return false;
+  }
+  function escH(t){ return String(t==null?'':t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function renderHist(){
+    var box = document.getElementById('histLista');
+    if(!box) return;
+    var selT = document.getElementById('histTipo');
+    if(selT && selT.options.length<=1){
+      Object.keys(HIST_TIPOS).forEach(function(k){ var o=document.createElement('option'); o.value=k; o.textContent=HIST_TIPOS[k]; selT.appendChild(o); });
+    }
+    var tipo = selT ? selT.value : '';
+    var q = ((document.getElementById('histBuscar')||{}).value||'').trim().toUpperCase();
+    var desde = 0;
+    if(histPeriodo){ var d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-(histPeriodo-1)); desde = d.getTime(); }
+    var lista = HIST.filter(function(h){
+      return h.ts>=desde && (!tipo || h.tipo===tipo) && (!q || String(h.numero||'').toUpperCase().indexOf(q)>=0);
+    }).sort(function(a,b){ return b.ts-a.ts; });
+    if(!lista.length){
+      box.innerHTML = '<div class="hist-vacio">'+(HIST.length ? 'No hay registros con estos filtros. Prueba con un período más largo.' : 'Todavía no se ha ingresado ni modificado nada en este equipo.')+'</div>';
+      return;
+    }
+    var html = '', diaPrev = '';
+    lista.slice(0, histVer).forEach(function(h){
+      var f = new Date(h.ts);
+      var dia = f.toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+      if(dia!==diaPrev){ html += '<div class="hist-dia">'+dia+'</div>'; diaPrev = dia; }
+      var hora = f.toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit', hour12:false});
+      var existe = h.numero && byNumero[String(h.numero).trim().toUpperCase()];
+      var num = h.numero ? (existe ? '<a data-num="'+escH(h.numero)+'">'+escH(h.numero)+'</a>' : escH(h.numero)) : '—';
+      var pend = histEsPendiente(h);
+      html += '<div class="hist-row"><span class="hist-hora">'+hora+'</span>'+
+        '<div class="hist-main"><span class="hist-tipo">'+(HIST_TIPOS[h.tipo]||escH(h.tipo))+'</span><b>'+num+'</b>'+(h.finca?' <span class="hist-origen">· '+escH(h.finca)+'</span>':'')+
+        '<span class="hist-det">'+escH(h.texto)+'</span><span class="hist-origen">'+escH(h.origen||'')+'</span></div>'+
+        '<span class="hist-estado '+(pend?'pend':'fuera')+'" title="'+(pend?'Todavía está en la lista de pendientes de este equipo':'Ya salió de la lista de pendientes (se envió o se quitó)')+'">'+(pend?'Pendiente':'Ya no está pendiente')+'</span></div>';
+    });
+    if(lista.length > histVer) html += '<button type="button" class="hist-mas" id="histMas">Ver más ('+(lista.length-histVer)+' restantes)</button>';
+    box.innerHTML = html;
+    var mas = document.getElementById('histMas'); if(mas) mas.onclick = function(){ histVer += 40; renderHist(); };
+    box.querySelectorAll('a[data-num]').forEach(function(a){
+      a.onclick = function(){ var r = byNumero[a.getAttribute('data-num').trim().toUpperCase()]; if(r && window.__abrirFicha) window.__abrirFicha(r.id); };
+    });
+  }
+  (function(){
+    var seg = document.getElementById('histPeriodo');
+    if(seg) seg.addEventListener('click', function(e){
+      var b = e.target.closest('button[data-p]'); if(!b) return;
+      seg.querySelectorAll('button').forEach(function(x){ x.classList.toggle('active', x===b); });
+      histPeriodo = parseInt(b.getAttribute('data-p'),10); histVer = 40; renderHist();
+    });
+    var t = document.getElementById('histTipo'); if(t) t.addEventListener('change', function(){ histVer=40; renderHist(); });
+    var bq = document.getElementById('histBuscar'); if(bq) bq.addEventListener('input', function(){ histVer=40; renderHist(); });
+  })();
+
+  // ---------- Guía de números: últimos registrados por finca ----------
+  function ultimosNumerosFinca(finca, cuantos){
+    finca = String(finca||'').trim().toUpperCase();
+    if(!finca) return [];
+    var items = [];
+    BD.forEach(function(r){
+      if(r.numero && String(r.finca||'').toUpperCase()===finca && r.fecha_nac) items.push({ numero:r.numero.trim(), fecha:r.fecha_nac, pendiente:false });
+    });
+    UPDATES.forEach(function(u){
+      if(u.tipo==='cria' && u.detalle && String(u.detalle.finca||'').trim().toUpperCase()===finca)
+        items.push({ numero:String(u.numero).trim(), fecha:u.detalle.fecha||u.fecha, pendiente:true, orden:u.id });
+    });
+    items.sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||'') || ((b.orden||0)-(a.orden||0)); });
+    return items.slice(0, cuantos||2);
+  }
+  window.__ultimosNumerosFinca = ultimosNumerosFinca;
+  function fechaCorta(iso){ if(!iso) return ''; var d = new Date(iso+'T12:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('es-CO', {day:'numeric', month:'short', year:'numeric'}); }
+  function guiaNumerosHtml(finca){
+    var u = ultimosNumerosFinca(finca, 2);
+    if(!String(finca||'').trim()) return 'Escribe o elige la finca para ver los últimos números registrados allí.';
+    if(!u.length) return 'No hay animales registrados con fecha de nacimiento en la finca <b>'+escH(finca)+'</b>.';
+    return 'Últimos números registrados en <b>'+escH(String(finca).toUpperCase())+'</b>: '+
+      u.map(function(x){ return '<b>'+escH(x.numero)+'</b> ('+(x.pendiente?'pendiente, ':'')+'nac. '+fechaCorta(x.fecha)+')'; }).join(' · ')+
+      '<small>Solo como guía para el consecutivo — no se llena nada automáticamente.</small>';
+  }
+
   var TIPO_LABELS = { peso:'Nuevo pesaje', salida:'Salida del hato', correccion:'Corrección de datos', cria:'Registrar cría nueva', palpacion:'Palpación', servicio:'Entore / servicio', aborto:'Aborto' };
-  window.__updAdd = addUpdate;
+  window.__updAdd = function(t, n, d, x){ addUpdate(t, n, d, x, 'Modo guiado'); };
   window.__updList = function(){ return UPDATES; };
   /* Quita UN solo registro (antes, dos registros de distintos dispositivos con el mismo número se borraban juntos). */
   window.__updRemove = function(x){
     var i = (x && typeof x==='object') ? UPDATES.indexOf(x) : -1;
     if(i<0) for(var k=0;k<UPDATES.length;k++){ var u=UPDATES[k]; if(x && typeof x==='object' ? (u.id===x.id && u.tipo===x.tipo && u.numero===x.numero && u.fecha===x.fecha) : u.id===x){ i=k; break; } }
-    if(i>=0){ UPDATES.splice(i,1); saveUpdates(); renderUpdTable(); }
+    if(i>=0){ UPDATES.splice(i,1); saveUpdates(); renderUpdTable(); renderHist(); }
   };
-  window.__updClear = function(){ UPDATES = []; saveUpdates(); renderUpdTable(); };
+  window.__updClear = function(){ UPDATES = []; saveUpdates(); renderUpdTable(); renderHist(); };
   window.__updDownload = function(){ var b = document.getElementById('updDownloadBtn'); if(b) b.click(); };
 
   function renderUpdTable(){
@@ -7180,11 +7337,16 @@ window.__renderReproHead = function(o){
       btn.addEventListener('click', function(){
         var pos = parseInt(btn.getAttribute('data-del'),10);
         if(pos>=0 && pos<UPDATES.length) UPDATES.splice(pos,1);
-        saveUpdates(); renderUpdTable();
+        saveUpdates(); renderUpdTable(); renderHist();
       });
     });
   }
 
+  function fincasLista(){
+    var c = {}; BD.forEach(function(r){ if(r.finca) c[r.finca] = (c[r.finca]||0)+1; });
+    var prod = ['OK','CACHO','TNJ'].filter(function(f){ return c[f]; });
+    return prod.concat(Object.keys(c).filter(function(f){ return prod.indexOf(f)<0; }).sort());
+  }
   // ---------- Formularios por tipo ----------
   function formPeso(){
     return '<h3>Registrar nuevo pesaje</h3><p class="hint">Se agrega a la lista de abajo — al descargar el resumen queda listo para pegar en la hoja CONTROL PESOS.</p>'+
@@ -7264,12 +7426,14 @@ window.__renderReproHead = function(o){
   function formCria(){
     return '<h3>Registrar cría nueva</h3><p class="hint">Para un animal que todavía no existe en la base — se agrega como fila nueva en la hoja BD.</p>'+
       '<div class="upd-form-grid">'+
+      '<div class="upd-field"><label>Finca</label><input type="text" id="criaFinca" list="criaFincaList" placeholder="Ej: OK, CACHO, TNJ" autocomplete="off"></div>'+
+      '<datalist id="criaFincaList">'+fincasLista().map(function(f){ return '<option value="'+escH(f)+'">'; }).join('')+'</datalist>'+
       '<div class="upd-field"><label>Número (nuevo)</label><input type="text" id="criaNumero" placeholder="Ej: 120/3"></div>'+
+      '<div class="num-guia" id="criaNumGuia"></div>'+
       '<div class="upd-field"><label>Nombre</label><input type="text" id="criaNombre" placeholder="Opcional"></div>'+
       '<div class="upd-field"><label>Fecha de nacimiento</label><input type="date" id="criaFecha"></div>'+
       '<div class="upd-field"><label>Sexo</label><select id="criaSexo"><option value="H">Hembra</option><option value="M">Macho</option></select></div>'+
       '<div class="upd-field"><label>Raza</label><input type="text" id="criaRaza" placeholder="Ej: BR, GZ"></div>'+
-      '<div class="upd-field"><label>Finca</label><input type="text" id="criaFinca"></div>'+
       '<div class="upd-field"><label>Lote</label><input type="text" id="criaLote" placeholder="Opcional"></div>'+
       '<div class="upd-field"><label>Padre</label><input type="text" id="criaPadre" placeholder="Número del padre"></div>'+
       '<div class="upd-field"><label>Madre (en TE: la donante)</label><input type="text" id="criaMadre" placeholder="Número de la madre"></div>'+
@@ -7279,6 +7443,9 @@ window.__renderReproHead = function(o){
       '</div><p class="hint" id="criaTipoHint" style="margin:4px 0 10px;"></p><button class="btn-pdf-prominent" id="criaSubmit">+ Agregar a la lista</button>';
   }
   function wireCria(){
+    var fincaEl = document.getElementById('criaFinca'), guiaEl = document.getElementById('criaNumGuia');
+    function pintarGuia(){ guiaEl.innerHTML = guiaNumerosHtml(fincaEl.value); }
+    fincaEl.addEventListener('input', pintarGuia); fincaEl.addEventListener('change', pintarGuia); pintarGuia();
     var tipoEl = document.getElementById('criaTipo');
     function tipoCambio(){
       var t = tipoEl.value;
@@ -7309,7 +7476,8 @@ window.__renderReproHead = function(o){
       var detalle = {nombre:nombre, fecha:fecha, sexo:sexo, raza:raza, finca:finca, lote:lote, padre:padre, madre:madre, tipo_parto:tipo, receptora:receptora, gemelo_de:gemelo};
       var etqT = tipo==='TE' ? 'TE · ' : (tipo==='GEMELAR' ? 'Gemelar · ' : '');
       addUpdate('cria', numero, detalle, etqT+(sexo==='H'?'Hembra':'Macho')+' · '+fecha+(padre?' · Padre: '+padre:'')+(madre?' · '+(tipo==='TE'?'Donante':'Madre')+': '+madre:'')+(receptora?' · Receptora: '+receptora:'')+(gemelo?' · Gemelo de '+gemelo:''));
-      ['criaNumero','criaNombre','criaFecha','criaRaza','criaFinca','criaLote','criaPadre','criaMadre','criaReceptora','criaGemelo'].forEach(function(id){ document.getElementById(id).value=''; });
+      ['criaNumero','criaNombre','criaFecha','criaRaza','criaLote','criaPadre','criaMadre','criaReceptora','criaGemelo'].forEach(function(id){ document.getElementById(id).value=''; });
+      pintarGuia(); // la finca se conserva para registrar varias crías seguidas
     });
   }
 
@@ -7413,13 +7581,15 @@ window.__renderReproHead = function(o){
     updClearBtn.addEventListener('click', function(){
       if(!UPDATES.length) return;
       if(confirm('¿Vaciar las '+UPDATES.length+' actualizaciones pendientes? No se puede deshacer.')){
-        UPDATES = []; saveUpdates(); renderUpdTable();
+        UPDATES = []; saveUpdates(); renderUpdTable(); renderHist();
       }
     });
   }
 
   renderForm('peso');
   renderUpdTable();
+  renderHist();
+  document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('.tab-btn'); if(b && /actualizar/i.test(b.getAttribute('data-view')||'')) setTimeout(renderHist, 0); });
 })();
 
 </script>
@@ -10381,6 +10551,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function nacNum(k){
     return function(el){
       var hint = ctx.tipo==='TE' ? 'Le sugerimos el siguiente número de la finca con la sigla <b>TE</b>. Déjela: así la cría no cuenta en el IEP ni el ARA de las vacas.' : 'Le sugerimos el siguiente número de la finca '+ctx.finca+'. Puede cambiarlo.';
+      var ult = window.__ultimosNumerosFinca ? window.__ultimosNumerosFinca(ctx.finca, 2) : [];
+      if(ult.length) hint += '<br>Últimos registrados en '+ctx.finca+': '+ult.map(function(x){ return '<b>'+x.numero+'</b>'+(x.pendiente?' (pendiente)':''); }).join(' y ')+'.';
       var c = pregunta(el, etqCria(k)+'¿Qué número le va a poner?', hint, paso(totalPasos()-(ctx.n-1-k)));
       campo(c, 'text', ctx.crias[k].numero || sugerirNumero(k), 'Número de la cría', function(v){
         ctx.crias[k].numero = v;

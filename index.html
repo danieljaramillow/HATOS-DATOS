@@ -12013,6 +12013,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       if(normN(g.numero)===n && (!g.finca || !r.finca || g.finca===r.finca || g.animalId===r.id)) out.push({reg:g, visita:visita}); }); }
     (S.hist||[]).forEach(function(hv){ mira(hv.regs, hv.visita); }); mira(S.regs, S.visita);
     out.sort(function(a,b){ return String(b.visita.fecha).localeCompare(String(a.visita.fecha)); }); return out; }
+  window.__visitaDirty = function(){ try{ return dirty(); }catch(e){ return false; } };
   window.__visitaAsocebu = { regsDe:regsDe, add:function(id){
     if(dirty() && (!draft || draft.animalId!==id)){ S.open=true; S.min=false; S.tab='reg'; save(); paint(); toast('Guarde o descarte el animal que está registrando'); return false; }
     abrirForm(id); S.open=true; S.min=false; S.tab='reg'; save(); paint(); renderFichaBtn(); return true; } };
@@ -12571,9 +12572,12 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
           porSubir = H.diferencias(M, remotoAhora);
           porAplicar = H.diferencias(M, L);
           if(porAplicar){
-            /* Llegaron datos de otro dispositivo: se aplican al abrir de nuevo la página. */
+            /* Llegaron datos de otro dispositivo: se aplican recargando la página.
+               Se hace solo si nadie está escribiendo; si no, queda el aviso y se
+               reintenta en un momento. */
             H.set(H.REM_KEY, { plano:remotoAhora });
             avisoCerrado = false;
+            setTimeout(autoAplicar, 400);
           } else {
             H.set(H.BASE_KEY, { plano:remotoAhora });
             H.set(H.REM_KEY, null);
@@ -12606,7 +12610,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     var f = H.J(H.aPlano(H.leerLocal()));
     if(firmaLocal !== null && f !== firmaLocal){ firmaLocal = f; porSubir = 1; pintar(); pronto(2000); }
   }, 3000);
-  setInterval(function(){ if(document.visibilityState === 'visible') sincronizar(false); }, 5 * 60 * 1000);
+  setInterval(function(){ if(document.visibilityState === 'visible') sincronizar(false); }, 2 * 60 * 1000);
   window.addEventListener('online', function(){ pronto(500); });
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') pronto(500); });
 
@@ -12646,6 +12650,50 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       av.classList.toggle('open', !!porAplicar && !avisoCerrado);
       $('hsAvisoTexto').textContent = porAplicar === 1 ? 'Llegó 1 dato de otro dispositivo.' : 'Llegaron ' + porAplicar + ' datos de otro dispositivo.';
     }
+  }
+  /* ¿Se puede recargar sin que se pierda nada que el usuario esté escribiendo? */
+  var LIBRES = { histBuscar:1, quickJumpInput:1, hsOwner:1, hsRepo:1, hsToken:1 };
+  function seguroRecargar(){
+    var a = document.activeElement;
+    if(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && !LIBRES[a.id]) return false;
+    var g = $('guia'); if(g && g.classList.contains('show')) return false;           // modo guiado abierto
+    if($('fh-save-edits')) return false;                                                // editando la ficha
+    if(window.__visitaDirty && window.__visitaDirty()) return false;                    // visita ASOCEBU sin guardar
+    if($('hsModal') && $('hsModal').classList.contains('open')) return false;
+    var campos = document.querySelectorAll('#updFormPanel input, #updFormPanel textarea, #ntTxt');
+    for(var i = 0; i < campos.length; i++){
+      var c = campos[i];
+      if(c.type === 'checkbox' || c.type === 'radio' || c.id === 'criaFinca') continue;
+      if(c.offsetParent !== null && String(c.value || '').trim()) return false;          // formulario a medio llenar
+    }
+    return true;
+  }
+  var RESTAURAR = 'hatosSync_restaurar_v1';
+  function autoAplicar(){
+    if(!porAplicar) return;
+    if(!seguroRecargar()){ clearTimeout(autoAplicar._t); autoAplicar._t = setTimeout(autoAplicar, 20000); return; }
+    try{
+      var tab = document.querySelector('.tab-btn.active');
+      sessionStorage.setItem(RESTAURAR, JSON.stringify({ view: tab ? tab.getAttribute('data-view') : null,
+        fichaId: (window.__fichaCurrent && tab && tab.getAttribute('data-view') === 'ficha') ? window.__fichaCurrent.id : null,
+        y: window.scrollY, n: porAplicar, t: Date.now() }));
+    }catch(e){}
+    location.reload();
+  }
+  function restaurar(){
+    var st; try{ st = JSON.parse(sessionStorage.getItem(RESTAURAR) || 'null'); sessionStorage.removeItem(RESTAURAR); }catch(e){ st = null; }
+    if(!st || Date.now() - (st.t || 0) > 60000) return false;
+    // Se recargó para aplicar datos del otro equipo: volver a donde estaba, sin abrir el modo guiado
+    try{ if(window.__guia) window.__guia.cerrar(); }catch(e){}
+    setTimeout(function(){
+      try{
+        if(window.__guia) window.__guia.cerrar();
+        if(st.view && st.view !== 'ficha'){ var b = document.querySelector('.tab-btn[data-view="' + st.view + '"]'); if(b) b.click(); }
+        if(st.fichaId != null && window.__abrirFicha) window.__abrirFicha(st.fichaId);
+        setTimeout(function(){ window.scrollTo(0, st.y || 0); }, 350);
+      }catch(e){}
+    }, 300);
+    return true;
   }
   function recargar(){
     /* Si hay un formulario de la visita abierto con cambios, se avisa antes. */
@@ -12689,7 +12737,8 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     $('hsAvisoVer').onclick = recargar;
     $('hsAvisoNo').onclick = function(){ avisoCerrado = true; pintar(); };
     pintar();
-    if(H.aplicadosAlAbrir) toast(H.aplicadosAlAbrir === 1 ? 'Se aplicó 1 dato que llegó de otro dispositivo.' : 'Se aplicaron ' + H.aplicadosAlAbrir + ' datos que llegaron de otro dispositivo.');
+    restaurar();
+    if(H.aplicadosAlAbrir) toast(H.aplicadosAlAbrir === 1 ? 'Se aplicó 1 dato que llegó del otro equipo.' : 'Se aplicaron ' + H.aplicadosAlAbrir + ' datos que llegaron del otro equipo.');
     setTimeout(function(){ sincronizar(false); }, 1200);
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();

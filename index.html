@@ -186,8 +186,8 @@ window.fechaAIso = function(v){
 
 /* ===================== BANDERAS NEGRAS ⚑ =====================
    Por vaca y por parto:
-   ⚑ Parto muy abierto: más de 24 meses entre un parto y el siguiente, o lleva
-     más de 24 meses desde el último parto sin preñez confirmada.
+   ⚑ Parto muy abierto: más de 20 meses entre un parto y el siguiente, o lleva
+     más de 20 meses desde el último parto sin preñez confirmada.
    ⚑ Destete bajo: la cría destetó por debajo del % (85 % por defecto) del
      promedio de sus contemporáneas (misma finca, año de nacimiento y sexo),
      comparando el peso ajustado a 8 meses.
@@ -197,7 +197,7 @@ window.fechaAIso = function(v){
      rechazada o con comentario de descarte, o comentario de BD que lo diga.
    Una vaca activa con 2 o más banderas entra a "Animales para descarte". */
 window.__BN = (function(){
-  var MESES_ABIERTA = 24, MIN_GRUPO = 5;
+  var MESES_ABIERTA = 20, MIN_GRUPO = 5;
   var ini = false, BD, byId, byNum, PESOS, PALP, grupos, abortosPorMadre;
   function N(x){ return String(x == null ? '' : x).trim().toUpperCase(); }
   function J(id){ try{ return JSON.parse(document.getElementById(id).textContent); }catch(e){ return {}; } }
@@ -300,7 +300,7 @@ window.__BN = (function(){
       if(ca.length) abD.push({ fecha:ca[0].fecha, texto:'Mencionado en '+ca.map(function(c){ return c.fuente.toLowerCase()+': «'+c.texto+'»'; }).join(' · '), fuente:ca[0].fuente });
     }
 
-    // ---- Vacía hoy más de 24 meses ----
+    // ---- Vacía hoy más de 20 meses ----
     var extra = [];
     var ult = partos.length ? partos[partos.length-1].fecha : null;
     if(ult && r.activo === 'ACTIVO'){
@@ -2349,7 +2349,7 @@ window.__renderReproHead = function(o){
 
     <div class="section-head"><h2>Animales para descarte — banderas negras ⚑</h2><div class="rail"></div></div>
     <p class="hint" style="margin:-6px 0 12px;">Vacas activas que acumulan <b>2 o más banderas negras</b>. Cada bandera es una de estas señales:
-      <b>⚑ parto muy abierto</b> (más de 24 meses entre partos, o más de 24 meses desde el último parto sin preñez confirmada),
+      <b>⚑ parto muy abierto</b> (más de 20 meses entre partos, o más de 20 meses desde el último parto sin preñez confirmada),
       <b>⚑ destete bajo</b> (cría por debajo del % elegido del promedio de sus contemporáneas — misma finca, año de nacimiento y sexo — en peso ajustado a 8 meses),
       <b>⚑ aborto</b> (registro en BD, pesaje «ABORTO MADRE…», registro en Actualizar Datos, o mención en comentarios, notas o visita ASOCEBU) y
       <b>⚑ descarte sugerido</b> (nota de la ficha marcada para descarte, visita ASOCEBU rechazada o comentario que lo pida). La lista se recalcula sola con las notas, comentarios y la visita ASOCEBU. Es una guía para decidir, no una orden.</p>

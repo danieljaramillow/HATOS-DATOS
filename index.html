@@ -16,14 +16,14 @@
    de que el tablero lea sus datos.
    ===================================================================== */
 (function(){
-  var K = { edits:'hatosDJW_edits_v1', updates:'hatosDJW_updates_v1', visita:'hatos_visita_asocebu_v1', cortes:'hatos_cortes_letras_v1', notas:'hatos_notas_v1', historial:'hatosDJW_historial_v1' };
+  var K = { edits:'hatosDJW_edits_v1', updates:'hatosDJW_updates_v1', visita:'hatos_visita_asocebu_v1', cortes:'hatos_cortes_letras_v1', notas:'hatos_notas_v1', historial:'hatosDJW_historial_v1', muertes:'hatos_muertes_v1' };
   var BASE_KEY = 'hatosSync_base_v1', REM_KEY = 'hatosSync_remoto_v1', CFG_KEY = 'hatosSync_cfg_v1';
 
   function get(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
   function set(k, v){ try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
   function J(x){ return x === undefined ? undefined : JSON.stringify(x); }
 
-  function leerLocal(){ return { edits:get(K.edits), updates:get(K.updates), visita:get(K.visita), cortes:get(K.cortes), notas:get(K.notas), historial:get(K.historial) }; }
+  function leerLocal(){ return { edits:get(K.edits), updates:get(K.updates), visita:get(K.visita), cortes:get(K.cortes), notas:get(K.notas), historial:get(K.historial), muertes:get(K.muertes) }; }
   /* Historial de lo ingresado o modificado: cada entrada se identifica por su hora y su registro. */
   function hKey(h){ return (h.ts || 0) + '|' + (h.ref || h.numero || ''); }
 
@@ -45,6 +45,7 @@
     if(st.cortes && typeof st.cortes === 'object') p['c:'] = st.cortes;
     (Array.isArray(st.notas) ? st.notas : []).forEach(function(n){ if(n && n.id) p['n:' + n.id] = n; });
     (Array.isArray(st.historial) ? st.historial : []).forEach(function(h){ if(h && h.ts) p['h:' + hKey(h)] = h; });
+    var mu = st.muertes; if(mu && typeof mu === 'object') Object.keys(mu).forEach(function(k){ if(mu[k]) p['m:' + k] = mu[k]; });
     return p;
   }
   function hoy(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
@@ -55,7 +56,7 @@
     var vistas = {}, orden = [];
     Object.keys(aPlano(local)).forEach(function(k){ if(k in p){ orden.push(k); vistas[k] = 1; } });
     Object.keys(p).forEach(function(k){ if(!vistas[k]) orden.push(k); });
-    var edits = [], updates = [], regs = {}, hist = [], cab = null, hayVisita = false, cortes = null, notas = [], historial = [];
+    var edits = [], updates = [], regs = {}, hist = [], cab = null, hayVisita = false, cortes = null, notas = [], historial = [], muertes = null;
     orden.forEach(function(k){
       var x = p[k];
       if(k.indexOf('e:') === 0) edits.push(x);
@@ -66,6 +67,7 @@
       else if(k === 'c:') cortes = x;
       else if(k.indexOf('n:') === 0) notas.push(x);
       else if(k.indexOf('h:') === 0) historial.push(x);
+      else if(k.indexOf('m:') === 0){ muertes = muertes || {}; muertes[k.slice(2)] = x; }
     });
     historial.sort(function(a, b){ return (a.ts || 0) - (b.ts || 0); });
     var visita = null;
@@ -77,14 +79,14 @@
         open: !!lv.open, min: !!lv.min, tab: lv.tab || 'reg'
       };
     }
-    return { edits:edits, updates:updates, visita:visita, cortes:cortes, notas:notas, historial:historial };
+    return { edits:edits, updates:updates, visita:visita, cortes:cortes, notas:notas, historial:historial, muertes:muertes };
   }
   /* Para el archivo cambios.json: sin lo que es solo de pantalla. */
   function paraArchivo(p){
     var st = dePlano(p, {});
     if(st.visita){ delete st.visita.open; delete st.visita.min; delete st.visita.tab; }
     return { version:1, tablero:'Hatos Datos', actualizado:new Date().toISOString(),
-             edits:st.edits, updates:st.updates, visita:st.visita, cortes:st.cortes, notas:st.notas, historial:st.historial };
+             edits:st.edits, updates:st.updates, visita:st.visita, cortes:st.cortes, notas:st.notas, historial:st.historial, muertes:st.muertes };
   }
 
   function marca(x){ return x ? (x.ts || x.updatedAt || 0) : 0; }
@@ -118,6 +120,8 @@
     else if(antes.cortes != null) set(K.cortes, null);
     if(st.notas.length || antes.notas != null) set(K.notas, st.notas);
     if(st.historial.length || antes.historial != null) set(K.historial, st.historial);
+    if(st.muertes) set(K.muertes, st.muertes);
+    else if(antes.muertes != null) set(K.muertes, null);
   }
 
   /* Al abrir: aplicar lo que llegó de otros dispositivos la vez anterior. */
@@ -193,6 +197,10 @@ window.fechaAIso = function(v){
      comparando el peso ajustado a 8 meses.
    ⚑ Aborto: cría registrada como aborto, pesaje "ABORTO MADRE …", registro
      de aborto en Actualizar Datos, o comentario/nota/visita que lo mencione.
+   ⚑ Cría muerta por la madre: murió antes del destete por golero/chulo, falta de
+     leche, abandono, mala madre o pisada. Si fue ajena a la madre (ahogada,
+     accidente, culebra, enfermedad…) se muestra pero NO es bandera; si nació
+     muerta o no hay causa clara queda "por revisar" y la clasifica el usuario.
    ⚑ Descarte sugerido: nota de la ficha marcada para descarte, visita ASOCEBU
      rechazada o con comentario de descarte, o comentario de BD que lo diga.
    Una vaca activa con 2 o más banderas entra a "Animales para descarte". */
@@ -206,6 +214,27 @@ window.__BN = (function(){
   function meses(a, b){ return (new Date(b) - new Date(a)) / 86400000 / 30.4375; }
   function hoyIso(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
   function pesoCria(c){ return c.peso_aj_8m != null ? c.peso_aj_8m : (c.peso_dest != null ? c.peso_dest : null); }
+
+  /* Cría que murió antes del destete: cuándo y por qué, y si la causa es
+     atribuible a la madre (eso sí es bandera negra) o ajena a ella. */
+  var RX_MUERTE = /MUER|MURI|NACI[OÓ]\s+MUERT|NACE\s+MUERT|AHOG|GOLERO|CHULO|PICAD[OA]\s+(POR\s+)?(GOLERO|CHULO)/;
+  var RX_MADRE  = /GOLERO|CHULO|NO\s+(LA\s+|LO\s+)?DEFENDI|NO\s+DI[OÓ]\s+LECHE|SIN\s+LECHE|POCA\s+LECHE|ABANDON|MALA\s+MADRE|NO\s+(LA\s+|LO\s+)?CRI[OÓ]|NO\s+(LA\s+|LO\s+)?QUISO|RECHAZ[OÓ]\s+(LA\s+)?CR|PIS[OÓ]|PISAD|APLAST/;
+  var RX_AJENA  = /AHOG|CHARCO|ACCIDENT|FRACTUR|RAYO|CULEBR|CULE\b|SERPIENT|MORDEDURA|ROB[OA]|TRIPANOSOM|CARB[OÓ]N|RABIA|ENFERM|RESPIRAT|NEUMON|DIARRE|TIMPANI|PATAS\s+TORCID|MALFORM|DEFORM|BRONCOASP|HEMORRAG|VIRUS|BACTER|INFECC|CAUSA\s+DESCONOC/;
+  var RX_PARTO  = /NACI[OÓ]\s+MUERT|NACE\s+MUERT|PARTO\s+COMPLIC|DISTOC|AVENTAD|MAL\s+PARTO/;
+  function muerteCria(c){
+    var causa = N(c.causa_salida), t = [c.causa_salida, c.obs_salida, c.comentario].filter(Boolean).map(N).join(' · ');
+    if(!t || !RX_MUERTE.test(t)) return null;
+    if(/VENT|VEND|DEVOLUC|CAMBIO/.test(causa)) return null;
+    if(c.peso_dest != null) return null;                        // murió después del destete
+    var dias = (c.fecha_nac && c.fecha_salida) ? (new Date(c.fecha_salida) - new Date(c.fecha_nac)) / 86400000 : null;
+    if(dias != null && dias > 300) return null;
+    var etapa = RX_PARTO.test(t) ? 'En el parto (nació muerta)' : (dias != null && dias <= 0 ? 'Al nacer' : (dias != null && dias <= 30 ? 'Recién nacida ('+Math.round(dias)+' días)' : (dias != null ? 'Joven, antes del destete ('+Math.round(dias)+' días)' : 'Antes del destete')));
+    var auto = RX_MADRE.test(t) ? 'madre' : (RX_AJENA.test(t) ? 'ajena' : 'revisar');
+    var ov = (ls('hatos_muertes_v1', {}) || {})[N(c.numero)];
+    var culpa = ov && (ov.culpa === 'madre' || ov.culpa === 'ajena') ? ov.culpa : auto;
+    var textos = []; [c.causa_salida, c.obs_salida, c.comentario].forEach(function(x){ x = String(x||'').trim(); if(x && textos.indexOf(x) < 0) textos.push(x); });
+    return { numero:c.numero, fecha:c.fecha_salida || c.fecha_nac, etapa:etapa, causa:textos.join(' · '), culpa:culpa, auto:auto, manual:!!(ov && ov.culpa) };
+  }
 
   function init(){
     if(ini) return; ini = true;
@@ -280,7 +309,11 @@ window.__BN = (function(){
         if(g){ var pct = p / g.prom * 100;
           if(pct < U) flags.push({ tipo:'destete', texto:'La cría '+c.numero+' pesó '+Math.round(p)+' kg (ajustado 8 m) = '+pct.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g.prom)+' kg, '+g.grupo+', '+g.n+' animales).' }); }
       }
-      return { n:i+1, fecha:u.fecha_nac, crias:crs, gemelar:u.gemelar, peso_destete:peso, iep_meses:iep, kg_ano:kg, anomalia:anom, flags:flags, provisional:prov };
+      var muertes = crs.map(muerteCria).filter(Boolean);
+      muertes.forEach(function(m){
+        if(m.culpa === 'madre') flags.push({ tipo:'muerte', texto:'La cría '+m.numero+' murió ('+m.etapa.toLowerCase()+') por causa atribuible a la madre: «'+m.causa+'»'+(m.manual?' — clasificado a mano':'')+'.' });
+      });
+      return { n:i+1, fecha:u.fecha_nac, crias:crs, gemelar:u.gemelar, peso_destete:peso, iep_meses:iep, kg_ano:kg, anomalia:anom, flags:flags, provisional:prov, muertes:muertes };
     });
 
     // ---- Abortos ----
@@ -327,6 +360,7 @@ window.__BN = (function(){
     var iv = partos.map(function(p){ return p.iep_meses; }).filter(function(v){ return v != null; });
     return {
       partos:partos, abortos:abortos, extra:extra, banderas:todas, comentarios:coms,
+      muertes:[].concat.apply([], partos.map(function(p){ return p.muertes.map(function(m){ m.parto = p.n; return m; }); })),
       iep_prom: iv.length ? Math.round(iv.reduce(function(a,b){ return a+b; },0)/iv.length*100)/100 : null, iep_lista:iv,
       umbral:U
     };
@@ -347,7 +381,12 @@ window.__BN = (function(){
   return { analizar:analizar, candidatas:candidatas, umbral:umbral,
     setUmbral:function(v){ try{ localStorage.setItem('hatos_bn_umbral_v1', JSON.stringify(+v)); }catch(e){} },
     reset:function(){ ini = false; }, MESES_ABIERTA:MESES_ABIERTA,
-    ICON:{ abierta:'Parto muy abierto', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sugerido' } };
+    setCulpa:function(numero, culpa){
+      var m = ls('hatos_muertes_v1', {}) || {}, k = N(numero);
+      if(culpa) m[k] = { culpa:culpa, ts:Date.now() }; else delete m[k];
+      try{ localStorage.setItem('hatos_muertes_v1', JSON.stringify(m)); }catch(e){}
+    },
+    ICON:{ abierta:'Parto muy abierto', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sugerido', muerte:'Cría muerta por la madre' } };
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -1074,6 +1113,18 @@ window.__BN = (function(){
   .bn-lista ul{ list-style:none; margin:0; padding:0; }
   .bn-lista li{ font-size:12.5px; line-height:1.45; padding:6px 0; border-bottom:1px dashed var(--line); }
   .bn-lista li:last-child{ border-bottom:0; }
+  .bn-muerte{ font-size:11px; font-weight:600; margin-top:2px; }
+  .bn-muerte.madre{ color:#111; } .bn-muerte.ajena{ color:var(--ink-soft); } .bn-muerte.revisar{ color:#7a5f22; }
+  .bn-muertes{ margin-top:12px; border-top:1px solid var(--line); padding-top:10px; }
+  .bn-m-item{ border:1px solid var(--line); border-left:4px solid #8a8f87; border-radius:8px; padding:9px 11px; margin-bottom:8px; font-size:12.5px; line-height:1.45; }
+  .bn-m-item.madre{ border-left-color:#111; } .bn-m-item.revisar{ border-left-color:#AD8A3C; }
+  .bn-m-causa{ color:var(--ink-soft); }
+  .bn-m-clas{ font-weight:600; margin-top:2px; }
+  .bn-m-btns{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:6px; }
+  .bn-m-btns span{ font-size:12px; color:var(--ink-soft); margin-right:2px; }
+  .bn-m-btns button{ min-height:32px; padding:0 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); font-weight:700; font-family:inherit; cursor:pointer; }
+  .bn-m-btns button.on{ background:var(--green-deep); color:#fff; border-color:var(--green-deep); }
+  .bn-m-btns button.ghost{ font-weight:500; color:var(--ink-soft); }
   .bn-ctrl{ display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; background:#24180f; color:#F2EDE0; padding:12px 14px; border-radius:10px; margin-bottom:12px; font-size:13px; }
   .bn-ctrl select{ height:34px; border-radius:6px; border:0; padding:0 8px; margin-left:4px; font-family:inherit; font-size:13px; }
   .bn-ctrl .bn-chk{ display:flex; align-items:center; gap:6px; }
@@ -2352,6 +2403,7 @@ window.__renderReproHead = function(o){
       <b>⚑ parto muy abierto</b> (más de 20 meses entre partos, o más de 20 meses desde el último parto sin preñez confirmada),
       <b>⚑ destete bajo</b> (cría por debajo del % elegido del promedio de sus contemporáneas — misma finca, año de nacimiento y sexo — en peso ajustado a 8 meses),
       <b>⚑ aborto</b> (registro en BD, pesaje «ABORTO MADRE…», registro en Actualizar Datos, o mención en comentarios, notas o visita ASOCEBU) y
+      <b>⚑ cría muerta por la madre</b> (antes del destete por golero o chulo, falta de leche, abandono o pisada — las muertes ajenas a la madre, como ahogada o accidente, no cuentan),
       <b>⚑ descarte sugerido</b> (nota de la ficha marcada para descarte, visita ASOCEBU rechazada o comentario que lo pida). La lista se recalcula sola con las notas, comentarios y la visita ASOCEBU. Es una guía para decidir, no una orden.</p>
     <div class="bn-ctrl">
       <label>Finca <select id="bnFinca"><option value="prod">Productivas (OK, CACHO, TNJ)</option><option value="OK">OK</option><option value="CACHO">CACHO</option><option value="TNJ">TNJ</option><option value="">Todas</option></select></label>
@@ -5927,7 +5979,8 @@ window.__renderReproHead = function(o){
         var iepStyle = iepCol ? ' style="color:'+iepCol+'; font-weight:700;"' : '';
         var pesoCell = sinPeso ? '<span class="pill inact">'+(enCurso ? 'En curso' : 'Sin dato')+'</span>' : (p.peso_destete+' kg');
         var araCell = anomalia ? '<span class="pill inact" title="Intervalo menor a '+MIN_IEP_PLAUSIBLE_MESES+' meses — biológicamente imposible, probable fecha mal escrita o cría mal asignada. No se calcula el ARA de este parto.">⚠ Revisar</span>' : (p.kg_ano!==null?p.kg_ano.toFixed(1)+' kg/año':'—');
-        var criasTxt = p.crias.map(function(c){ return escT(c.numero); }).join(' + ')+(p.gemelar?' <small>(gemelar)</small>':'')+(p.provisional?' <span class="bn-prov" title="Fecha corregida en Actualizar Datos, pendiente de pasar al Excel">provisional</span>':'');
+        var criasTxt = p.crias.map(function(c){ return escT(c.numero); }).join(' + ')+(p.gemelar?' <small>(gemelar)</small>':'')+(p.provisional?' <span class="bn-prov" title="Fecha corregida en Actualizar Datos, pendiente de pasar al Excel">provisional</span>':'')+
+          p.muertes.map(function(m){ return '<div class="bn-muerte '+m.culpa+'">✝ '+escT(m.etapa)+'</div>'; }).join('');
         return '<tr'+(p.flags.length?' class="bn-row-flag"':'')+'><td>'+p.n+'</td><td>'+fmtDate(p.fecha)+'</td><td>'+criasTxt+'</td>'+
           '<td'+iepStyle+'>'+(p.iep_meses!==null?p.iep_meses.toFixed(1):'<span class="hint" style="margin:0;">1.er</span>')+'</td>'+
           '<td>'+banderasCelda(p.flags)+'</td><td>'+pesoCell+'</td><td>'+araCell+'</td></tr>';
@@ -5936,6 +5989,16 @@ window.__renderReproHead = function(o){
         var donde = b.parto ? 'Parto '+b.parto : (b.tipo==='aborto' ? 'Aborto'+(b.fecha?' · '+fmtDate(b.fecha):'') : (b.fecha?fmtDate(b.fecha):''));
         return '<li><span class="bn-flag">⚑</span><b>'+window.__BN.ICON[b.tipo]+'</b>'+(donde?' <span class="hint" style="margin:0;">· '+donde+'</span>':'')+'<br>'+escT(b.texto)+'</li>';
       }).join('');
+      var CULPA_TXT = { madre:'Atribuible a la madre — bandera negra', ajena:'Ajena a la madre — sin bandera', revisar:'Por revisar — sin bandera hasta que la clasifiques' };
+      var muertesHtml = BNa.muertes.length ? '<div class="bn-muertes"><div class="bn-lista-tit">✝ Crías muertas antes del destete</div>'+BNa.muertes.map(function(m){
+        return '<div class="bn-m-item '+m.culpa+'"><div><b>Parto '+m.parto+' · cría '+escT(m.numero)+'</b> — '+escT(m.etapa)+(m.fecha?' · '+fmtDate(m.fecha):'')+'</div>'+
+          '<div class="bn-m-causa">Causa registrada: «'+escT(m.causa)+'»</div>'+
+          '<div class="bn-m-clas">'+(m.culpa==='madre'?'⚑ ':'')+CULPA_TXT[m.culpa]+(m.manual?' <small>(clasificado a mano)</small>':' <small>(según la causa escrita)</small>')+'</div>'+
+          '<div class="bn-m-btns"><span>¿Fue culpa de la madre?</span>'+
+            '<button type="button" data-num="'+escT(m.numero)+'" data-c="madre" class="'+(m.culpa==='madre'?'on':'')+'">Sí</button>'+
+            '<button type="button" data-num="'+escT(m.numero)+'" data-c="ajena" class="'+(m.culpa==='ajena'?'on':'')+'">No</button>'+
+            (m.manual?'<button type="button" data-num="'+escT(m.numero)+'" data-c="" class="ghost">Volver a automático</button>':'')+'</div></div>';
+      }).join('')+'<p class="hint" style="margin:6px 0 0;">Atribuible a la madre: golero o chulo (no la defendió), no dio leche, abandonó la cría, mala madre o la pisó. Ajena: ahogada, accidente, culebra, enfermedad, malformación. Tu clasificación se guarda y se comparte con el otro equipo.</p></div>' : '';
       var provs = [];
       if(r.__prov) Object.keys(r.__prov).forEach(function(k){ provs.push(r.numero+': '+k+' '+(r.__prov[k]||'(vacío)')+' → '+r[k]); });
       P.forEach(function(p){ p.crias.forEach(function(c){ if(c.__prov) Object.keys(c.__prov).forEach(function(k){ provs.push(c.numero+': '+(k==='fecha_nac'?'fecha de nacimiento':k)+' '+(k==='fecha_nac'?fmtDate(c.__prov[k]):c.__prov[k])+' → '+(k==='fecha_nac'?fmtDate(c[k]):c[k])); }); }); });
@@ -5946,8 +6009,13 @@ window.__renderReproHead = function(o){
         '<p class="hint" style="margin:0 0 8px;">IEP de cada parto = meses desde el parto anterior (<span style="color:rgb(30,54,38);font-weight:700;">verde</span> = más corto, <span style="color:rgb(169,72,26);font-weight:700;">rojo</span> = más largo). IEP promedio = suma de los IEP ÷ cantidad de IEP. ⚑ = bandera negra: parto con más de '+window.__BN.MESES_ABIERTA+' meses de intervalo, cría destetada por debajo del '+BNa.umbral+' % del promedio de sus contemporáneas, o aborto. Toca ⚑ para ver el motivo.</p>'+
         '<div style="overflow-x:auto;"><table class="mini-table bn-table"><thead><tr><th>#</th><th>Fecha parto</th><th>Cría</th><th>IEP (m)</th><th>⚑</th><th>Destete</th><th>ARA</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
         (listaBan ? '<div class="bn-lista"><div class="bn-lista-tit">⚑ '+nBan+' bandera'+(nBan===1?'':'s')+' negra'+(nBan===1?'':'s')+(nBan>=2?' — <b>candidata a descarte</b>':'')+'</div><ul>'+listaBan+'</ul></div>' : '')+
+        muertesHtml+
         '</div>';
       fertEl.querySelectorAll('.bn-table .bn-flag').forEach(function(el){ el.addEventListener('click', function(){ alert(el.getAttribute('title')); }); });
+      fertEl.querySelectorAll('.bn-m-btns button').forEach(function(bt){ bt.addEventListener('click', function(){
+        window.__BN.setCulpa(bt.getAttribute('data-num'), bt.getAttribute('data-c'));
+        var y = window.scrollY; selectAnimal(r.id, true); window.scrollTo(0, y);
+      }); });
     } else {
       fertEl.innerHTML = '<div class="panel"><p class="empty-note">'+(r.sexo==='H' ? 'No hay partos registrados: no se encontraron crías con fecha de nacimiento.' : 'El resumen de partos aplica a hembras.')+'</p></div>';
     }

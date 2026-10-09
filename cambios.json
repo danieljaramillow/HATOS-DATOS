@@ -1,0 +1,70 @@
+{
+ "version": 1,
+ "tablero": "Hatos Datos",
+ "actualizado": "2026-10-09T20:12:24.512Z",
+ "edits": [],
+ "updates": [
+  {
+   "id": 1,
+   "tipo": "salida",
+   "numero": "152/2",
+   "detalle": {
+    "fecha": "2026-09-30",
+    "causa": "VENTA",
+    "obs": "Alvaro charcos"
+   },
+   "detalle_texto": "2026-09-30 · VENTA · Alvaro charcos",
+   "fecha": "2026-09-30"
+  },
+  {
+   "id": 179157318932105,
+   "tipo": "correccion",
+   "numero": "328/2",
+   "detalle": {
+    "campo": "FECHA NAC",
+    "valor": "14/05/2026",
+    "obs": ""
+   },
+   "detalle_texto": "FECHA NAC → 14/05/2026",
+   "fecha": "2026-10-09"
+  }
+ ],
+ "visita": null,
+ "cortes": null,
+ "notas": [
+  {
+   "id": "muypfwc6gsnba",
+   "numero": "768/1C",
+   "finca": "CACHO",
+   "fecha": "2026-10-07",
+   "texto": "El animal queda para descarte por fertilidad",
+   "descarte": true,
+   "motivo": "",
+   "creado": 1791413662326,
+   "ts": 1791413662326
+  }
+ ],
+ "historial": [
+  {
+   "ts": 1790726400000,
+   "tipo": "salida",
+   "numero": "152/2",
+   "texto": "2026-09-30 · VENTA · Alvaro charcos",
+   "origen": "Formulario",
+   "ref": "u:1",
+   "finca": ""
+  },
+  {
+   "tipo": "correccion",
+   "numero": "328/2",
+   "texto": "FECHA NAC → 14/05/2026",
+   "origen": "Formulario",
+   "ref": "u:179157318932105",
+   "finca": "OK",
+   "ts": 1791573189323,
+   "equipo": "Celular"
+  }
+ ],
+ "muertes": null,
+ "qa": null
+}

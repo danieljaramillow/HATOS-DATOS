@@ -580,6 +580,8 @@ window.__BN = (function(){
   #guia .g-top{ display:flex; align-items:center; gap:10px; padding:10px 14px; background:#1E3626; color:#F2EDE0; flex:none; }
   #guia .g-home{ border:none; background:rgba(255,255,255,.12); color:#fff; font-size:18px; width:40px; height:40px; border-radius:10px; cursor:pointer; flex:none; }
   #guia .g-brand{ font-family:'Fraunces',Georgia,serif; font-weight:700; font-size:18px; flex:1; line-height:1.1; }
+  #guia .g-sync{ display:inline-flex; align-items:center; gap:6px; border:1.5px solid rgba(255,255,255,.45); background:transparent; color:#fff; border-radius:999px; padding:7px 12px; font-size:16px; cursor:pointer; margin-right:6px; }
+  #guia .g-sync .hs-dot{ margin:0; }
   #guia .g-brand small{ display:block; font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:#AD8A3C; }
   #guia .g-full{ border:1.5px solid rgba(255,255,255,.45); background:transparent; color:#fff; border-radius:999px; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
   #guia .g-trail{ display:flex; align-items:center; gap:0; overflow-x:auto; padding:10px 14px; background:#EAE3D2; border-bottom:1px solid #D9D0BA; flex:none; scrollbar-width:none; }
@@ -11463,6 +11465,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     '<div class="g-top">'+
       '<button type="button" class="g-home" title="Inicio">🏠</button>'+
       '<div class="g-brand">Hatos DJW <small>Modo guiado</small></div>'+
+      '<button type="button" class="g-sync" id="gSyncTop" title="Datos y sincronización"><span class="hs-dot" id="gSyncDot"></span>☁</button>'+
       '<button type="button" class="g-full">Panel completo ↗</button>'+
     '</div>'+
     '<div class="g-trail"></div>'+
@@ -11473,6 +11476,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   backBtn.onclick = back;
   root.querySelector('.g-home').onclick = inicio;
   root.querySelector('.g-full').onclick = cerrar;
+  root.querySelector('.g-sync').onclick = function(){ if(window.__hsAbrir) window.__hsAbrir(); };
 
   function abrir(){ document.body.classList.add('guia-abierta'); root.classList.add('show'); try{ window.scrollTo(0,0); root.scrollTop=0; if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); }catch(e){} inicio(); }
   function cerrar(){ document.body.classList.remove('guia-abierta'); root.classList.remove('show'); }
@@ -12739,6 +12743,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     var claseDot = { ok:'ok', sync:'sync', err:'err', local:'local', inicio:'sync' }[estado] || 'local';
     var dot = $('hsDot'); if(dot) dot.className = 'hs-dot ' + claseDot;
     var dg = $('hsDotGrande'); if(dg) dg.className = 'hs-dot ' + claseDot;
+    var dgg = $('gSyncDot'); if(dgg) dgg.className = 'hs-dot ' + claseDot;
     var badge = $('hsBadge'); if(badge) badge.textContent = (porSubir && cfg.token) || porAplicar ? '•' : '';
     var t = $('hsTexto');
     if(t){

@@ -1,9 +1,39 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-09T20:12:24.512Z",
+ "actualizado": "2026-10-09T20:17:24.006Z",
  "edits": [],
  "updates": [
+  {
+   "id": 1,
+   "tipo": "cria",
+   "numero": "52C",
+   "detalle": {
+    "nombre": "",
+    "fecha": "2026-09-29",
+    "sexo": "H",
+    "raza": "BR",
+    "finca": "CACHO",
+    "lote": "",
+    "padre": "963/1C",
+    "madre": "04/1C",
+    "peso_nac": "30"
+   },
+   "detalle_texto": "Hembra · 2026-09-29 · 30 kg · Madre: 04/1C · Padre: 963/1C",
+   "fecha": "2026-09-29"
+  },
+  {
+   "id": 179140429291035,
+   "tipo": "aborto",
+   "numero": "768/1C",
+   "detalle": {
+    "fecha": "2026-09-29",
+    "meses": "6",
+    "obs": "aborto"
+   },
+   "detalle_texto": "2026-09-29 · Aborto de 6 meses · aborto",
+   "fecha": "2026-10-07"
+  },
   {
    "id": 1,
    "tipo": "salida",
@@ -46,12 +76,30 @@
  ],
  "historial": [
   {
+   "ts": 1790640000000,
+   "tipo": "cria",
+   "numero": "52C",
+   "texto": "Hembra · 2026-09-29 · 30 kg · Madre: 04/1C · Padre: 963/1C",
+   "origen": "Formulario",
+   "ref": "u:1",
+   "finca": "CACHO"
+  },
+  {
    "ts": 1790726400000,
    "tipo": "salida",
    "numero": "152/2",
    "texto": "2026-09-30 · VENTA · Alvaro charcos",
    "origen": "Formulario",
    "ref": "u:1",
+   "finca": ""
+  },
+  {
+   "ts": 1791404292910,
+   "tipo": "aborto",
+   "numero": "768/1C",
+   "texto": "2026-09-29 · Aborto de 6 meses · aborto",
+   "origen": "Formulario",
+   "ref": "u:179140429291035",
    "finca": ""
   },
   {

@@ -844,13 +844,46 @@
   #galleryCollapsible.collapsed{ display:none; }
   #inventarioCollapsible.collapsed{ display:none; }
 
-  /* ---------- Pedigree tree (3 generations) ---------- */
+  /* ---------- Pedigree tree ---------- */
   .ped-wrap{ overflow-x:auto; padding:6px 2px 10px; }
+  #fh-pedigree.ped-wrap{ overflow:visible; padding:4px 0 6px; }
   .ped-row{ display:flex; align-items:center; }
-  .ped-col{ display:flex; flex-direction:column; justify-content:center; gap:7px; margin-left:16px; position:relative; }
-  .ped-col::before{
-    content:""; position:absolute; left:-8px; top:12px; bottom:12px; width:1px; background:var(--line);
+  .ped-col{ display:flex; flex-direction:column; justify-content:center; margin-left:22px; position:relative; }
+  /* conector: tramo horizontal que sale de cada recuadro hacia sus padres */
+  .ped-col::before{ content:""; position:absolute; left:-22px; top:50%; width:22px; border-top:1.5px solid var(--line-strong, #b9ad94); }
+  .ped-col > .ped-row{ position:relative; padding:4px 0 4px 11px; }
+  .ped-col > .ped-row::before{ content:""; position:absolute; left:0; top:50%; width:11px; border-top:1.5px solid var(--line-strong, #b9ad94); }
+  .ped-col > .ped-row::after{ content:""; position:absolute; left:0; border-left:1.5px solid var(--line-strong, #b9ad94); }
+  .ped-col > .ped-row:first-child::after{ top:50%; bottom:0; }
+  .ped-col > .ped-row:last-child::after{ top:0; bottom:50%; }
+  .ped-col > .ped-row:only-child::after{ display:none; }
+  .ped-box.dam{ border-left-color:#AD8A3C; }
+  .ped-box.tip{ border-right:1.5px dashed var(--line-strong, #b9ad94); }
+  .ped-toolbar{ display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; justify-content:space-between; margin:4px 0 8px; }
+  .ped-tool-group{ display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .ped-tool-lbl{ font-family:'IBM Plex Sans',sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-right:4px; }
+  .ped-gen-btn, .ped-zoom-btn{
+    min-width:36px; height:36px; padding:0 10px; border-radius:8px; border:1px solid var(--line); background:var(--card);
+    font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:600; color:var(--ink); cursor:pointer;
   }
+  .ped-gen-btn.active{ background:var(--green-deep); color:#fff; border-color:var(--green-deep); }
+  .ped-gen-btn:hover:not(.active), .ped-zoom-btn:hover{ background:var(--green-pale); }
+  .ped-zoom-val{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); min-width:44px; text-align:center; }
+  .ped-viewport{
+    overflow:auto; max-height:72vh; border:1px solid var(--line); border-radius:10px; background:var(--paper, #faf7f0);
+    padding:10px; cursor:grab; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+  }
+  .ped-viewport.dragging{ cursor:grabbing; user-select:none; }
+  .ped-sizer{ position:relative; }
+  .ped-stage{ transform-origin:0 0; position:absolute; left:0; top:0; width:max-content; }
+  .ped-zoom-hint{ margin:6px 0 0; font-size:11.5px; }
+  #fh-pedigree.ped-fullscreen{
+    position:fixed; inset:0; z-index:9999; background:var(--paper); padding:12px 12px max(12px, env(safe-area-inset-bottom));
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  #fh-pedigree.ped-fullscreen .ped-viewport{ flex:1; max-height:none; }
+  #fh-pedigree.ped-fullscreen > :not(.ped-toolbar):not(.ped-viewport){ display:none; }
+  body.ped-fs-lock{ overflow:hidden; }
   .ped-box{
     background:var(--card); border:1px solid var(--line); border-left:3px solid var(--rust);
     border-radius:6px; padding:7px 11px; font-size:12.5px; white-space:nowrap; min-width:130px;
@@ -872,8 +905,10 @@
     .ped-box{ font-size:9.5px; padding:4px 7px; min-width:78px; border-radius:5px; }
     .ped-box.self{ font-size:10.5px; padding:5px 9px; min-width:88px; }
     .ped-box .g{ font-size:6.5px; }
-    .ped-col{ margin-left:9px; gap:4px; }
-    .ped-col::before{ left:-5px; }
+    .ped-col{ margin-left:14px; }
+    .ped-col::before{ left:-14px; width:14px; }
+    .ped-col > .ped-row{ padding:3px 0 3px 7px; }
+    .ped-col > .ped-row::before{ width:7px; }
     .ped-dup-badge{ font-size:7px; top:-5px; right:-5px; padding:1px 3px; }
     .ped-dup-dot{ width:5px; height:5px; margin-right:3px; }
   }
@@ -1637,8 +1672,8 @@ window.__renderReproHead = function(o){
       <div class="panel" style="margin-top:14px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
           <div>
-            <h3>Pedigrí — 4 generaciones</h3>
-            <p class="hint">Padres, abuelos, bisabuelos y tatarabuelos encontrados en la base de datos. Los recuadros resaltados son clicables y abren la ficha de ese ancestro. Los puntos de color señalan animales repetidos en más de una rama (consanguinidad).</p>
+            <h3 id="fh-ped-title">Pedigrí — 4 generaciones</h3>
+            <p class="hint" id="fh-ped-sub">Padres, abuelos, bisabuelos y tatarabuelos encontrados en la base de datos. Los recuadros resaltados son clicables y abren la ficha de ese ancestro. Los puntos de color señalan animales repetidos en más de una rama (consanguinidad).</p>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <button class="btn-pdf-prominent btn-quiet" id="fh-print-btn" style="white-space:nowrap;">🖨 Imprimir</button>
@@ -3867,6 +3902,12 @@ window.__renderReproHead = function(o){
       byNumero[k].push(r.id);
     }
   });
+  // Un mismo animal puede estar registrado como "7011/2" (OK) y "7011/2C" (CACHO).
+  // Si un hijo lo anota sin la C pero en la base solo existe la versión C,
+  // se enlaza a esa para no cortar el pedigrí.
+  Object.keys(byNumero).forEach(function(k){
+    if(/\/.+C$/.test(k)){ var base = k.slice(0,-1); if(!byNumero[base]) byNumero[base] = byNumero[k]; }
+  });
 
   // ---------- Tabs ----------
   document.querySelectorAll('.tab-btn').forEach(function(btn){
@@ -4510,9 +4551,12 @@ window.__renderReproHead = function(o){
   }
   function pedRoleLabel(depth, path){
     if(PED_ROLE_LABELS[depth] && PED_ROLE_LABELS[depth][path]) return PED_ROLE_LABELS[depth][path];
-    var side = /P$/.test(path) ? 'paterno/a' : 'materno/a';
-    var gen = depth===3?'Bisabuelo/a':'Tatarabuelo/a';
-    return gen+' ('+path+')';
+    var macho = /P$/.test(path);
+    var lado = path.charAt(0)==='P' ? 'pat.' : 'mat.';
+    var gen = depth===3 ? (macho?'Bisabuelo':'Bisabuela')
+            : depth===4 ? (macho?'Tatarabuelo':'Tatarabuela')
+            : (macho?'♂':'♀')+' Gen. '+depth;
+    return gen+' · '+lado;
   }
   // BFS: builds generations[] where generations[d-1] = array of {label, path, id, key}
   function pedBuildGenerations(r, maxDepth){
@@ -4547,7 +4591,8 @@ window.__renderReproHead = function(o){
     var key = pedIdentityKey(label);
     var info = key ? colorMap[key] : null;
     var color = info ? info.color : null;
-    var cls = 'ped-box' + (id!==null?' known':'') + (!label?' unknown':'');
+    var cls = 'ped-box' + (id!==null?' known':'') + (!label?' unknown':'') + (/P$/.test(path)?' sire':' dam') +
+              ((label && id===null && depth<maxDepth) ? ' tip' : '');
     var style = color ? ' style="border-left-color:'+color+'; border-left-width:4px; background:'+color+'14;"' : '';
     var dot = color ? '<span class="ped-dup-dot" style="background:'+color+';"></span>' : '';
     var badgeTitle = info ? ('Aparece '+info.count+' veces en las primeras '+PED_ANALISIS_DEPTH+' generaciones'+
@@ -4557,15 +4602,27 @@ window.__renderReproHead = function(o){
     var badge = (info && info.count>=2) ? '<span class="ped-dup-badge" style="background:'+color+';" title="'+badgeTitle+'">×'+info.count+
       ((info.visibles!==undefined && info.visibles<info.count) ? '<sup style="font-size:9px;">*</sup>' : '')+'</span>' : '';
     var roleLabel = pedRoleLabel(depth, path);
-    var box = '<div class="'+cls+'"'+style+' '+(id!==null?'data-id="'+id+'"':'')+'>'+dot+badge+'<span class="g">'+roleLabel+'</span>'+(label||'Sin registro')+'</div>';
+    var tipTitle = (label && id===null && depth<maxDepth) ? ' title="'+label+' no está en la base de datos: su ascendencia no se puede seguir"' : '';
+    var box = '<div class="'+cls+'"'+style+tipTitle+' '+(id!==null?'data-id="'+id+'"':'')+'>'+dot+badge+'<span class="g">'+roleLabel+'</span>'+(label||'Sin registro')+'</div>';
     if(depth>=maxDepth || !rec){
       return '<div class="ped-row">'+box+'</div>';
     }
     var kids = '<div class="ped-col">'+pedTreeNode(rec.padre, depth+1, maxDepth, colorMap, path+'P')+pedTreeNode(rec.madre, depth+1, maxDepth, colorMap, path+'M')+'</div>';
     return '<div class="ped-row">'+box+kids+'</div>';
   }
-  function buildPedigreeTree(r){
-    var maxDepth = 4;
+  // Generaciones visibles: el usuario las elige (3 a 7) y se recuerdan en este equipo.
+  var PED_GEN_OPCIONES = [3,4,5,6,7];
+  function pedGetGenPref(){
+    var v = 4;
+    try{ var x = parseInt(localStorage.getItem('hatos.ped.gens'),10); if(PED_GEN_OPCIONES.indexOf(x)>=0) v = x; }catch(e){}
+    return v;
+  }
+  function pedSetGenPref(v){ try{ localStorage.setItem('hatos.ped.gens', String(v)); }catch(e){} }
+  var PED_GEN_TITULOS = {3:'padres, abuelos y bisabuelos', 4:'padres, abuelos, bisabuelos y tatarabuelos',
+    5:'hasta la 5.ª generación de ancestros', 6:'hasta la 6.ª generación de ancestros', 7:'hasta la 7.ª generación de ancestros'};
+
+  function buildPedigreeTree(r, maxDepthOpt){
+    var maxDepth = maxDepthOpt || pedGetGenPref();
     var gens = pedBuildGenerations(r, maxDepth);                    // lo que se dibuja
     var gensDeep = pedBuildGenerations(r, PED_ANALISIS_DEPTH);      // lo que se analiza
     var counts = pedCountIdentities(gensDeep);
@@ -4584,20 +4641,163 @@ window.__renderReproHead = function(o){
 
     var selfBox = '<div class="ped-box self"><span class="g">Animal</span>'+(r.numero||r.nombre||'—')+'</div>';
     var kids = '<div class="ped-col">'+pedTreeNode(r.padre,1,maxDepth,colorMap,'P')+pedTreeNode(r.madre,1,maxDepth,colorMap,'M')+'</div>';
-    var html = '<div class="ped-row">'+selfBox+kids+'</div>';
-    var wrap = document.createElement('div');
-    wrap.innerHTML = html;
-    wrap.querySelectorAll('.ped-box.known').forEach(function(el){
-      el.addEventListener('click', function(){ selectAnimal(parseInt(el.getAttribute('data-id'),10)); });
-    });
+    var tree = '<div class="ped-row ped-root">'+selfBox+kids+'</div>';
+    var genBtns = PED_GEN_OPCIONES.map(function(g){
+      return '<button type="button" class="ped-gen-btn'+(g===maxDepth?' active':'')+'" data-gens="'+g+'" aria-pressed="'+(g===maxDepth)+'">'+g+'</button>';
+    }).join('');
+    var toolbar = '<div class="ped-toolbar">'+
+      '<div class="ped-tool-group" role="group" aria-label="Generaciones"><span class="ped-tool-lbl">Generaciones</span>'+genBtns+'</div>'+
+      '<div class="ped-tool-group" role="group" aria-label="Zoom">'+
+        '<button type="button" class="ped-zoom-btn" data-zoom="out" aria-label="Alejar">−</button>'+
+        '<span class="ped-zoom-val">100%</span>'+
+        '<button type="button" class="ped-zoom-btn" data-zoom="in" aria-label="Acercar">+</button>'+
+        '<button type="button" class="ped-zoom-btn ped-zoom-fit" data-zoom="fit">Ajustar</button>'+
+        '<button type="button" class="ped-zoom-btn ped-zoom-full" data-zoom="full" aria-label="Pantalla completa">⛶</button>'+
+      '</div></div>';
+    var html = toolbar +
+      '<div class="ped-viewport"><div class="ped-sizer"><div class="ped-stage">'+tree+'</div></div></div>'+
+      '<p class="hint ped-zoom-hint">Pellizca con dos dedos o usa − / + para acercar; desliza para recorrer el árbol. Los recuadros con borde punteado son ancestros que no están en la base, por eso el árbol no sigue detrás de ellos.</p>';
+    var wrap = { innerHTML: html };
     var ocultos = Object.keys(colorMap).filter(function(k){ return colorMap[k].count > colorMap[k].visibles; }).length;
     var hasDup = ci > 0;
     var legend = hasDup ? '<p class="hint" style="margin:8px 0 0;">● Los puntos de color marcan ancestros que aparecen más de una vez en este pedigrí (consanguinidad) — cada color identifica un animal distinto repetido en más de una rama.</p>' : '';
     var nota = ocultos ? '<p class="hint" style="margin:6px 0 0;">El conteo llega hasta '+PED_ANALISIS_DEPTH+
-      ' generaciones, más allá del árbol dibujado: '+ocultos+' de los ancestros marcados repiten también por fuera de las 4 generaciones visibles. '+
+      ' generaciones, más allá del árbol dibujado: '+ocultos+' de los ancestros marcados repiten también por fuera de las '+maxDepth+' generaciones visibles. '+
       'Pasa el cursor sobre el ×N para ver el desglose.</p>' : '';
-    window.__pedGensCache = { gens:gens, colorMap:colorMap };
+    window.__pedGensCache = { gens: maxDepth===4 ? gens : pedBuildGenerations(r, 4), colorMap:colorMap };
+    window.__pedCurrentRec = r;
+    window.__pedMaxDepth = maxDepth;
     return wrap.innerHTML + legend + nota + buildInbreedingPanel(gensDeep);
+  }
+
+
+  // ---------- Visor del pedigrí: zoom, pellizco, pantalla completa ----------
+  var pedZoom = null; // null = ajustar al ancho
+  function renderFichaPedigree(r, maxDepth){
+    var host = document.getElementById('fh-pedigree');
+    if(!host) return;
+    host.innerHTML = buildPedigreeTree(r, maxDepth);
+    var md = window.__pedMaxDepth || 4;
+    var h3 = document.getElementById('fh-ped-title');
+    if(h3) h3.textContent = 'Pedigrí — '+md+' generaciones';
+    var sub = document.getElementById('fh-ped-sub');
+    if(sub) sub.textContent = 'Muestra '+(PED_GEN_TITULOS[md]||'los ancestros')+' encontrados en la base de datos. Toca un recuadro resaltado para abrir la ficha de ese ancestro. Los puntos de color señalan animales repetidos en más de una rama (consanguinidad).';
+    pedInitViewer(host);
+  }
+  function pedInitViewer(host){
+    var vp = host.querySelector('.ped-viewport');
+    var sizer = host.querySelector('.ped-sizer');
+    var stage = host.querySelector('.ped-stage');
+    var valEl = host.querySelector('.ped-zoom-val');
+    if(!vp || !stage) return;
+    var natW = 0, natH = 0;
+    function measure(){
+      stage.style.transform = 'none';
+      natW = stage.scrollWidth; natH = stage.scrollHeight;
+    }
+    function fitZoom(){
+      var avail = vp.clientWidth - 4;
+      return Math.max(0.3, Math.min(1.4, avail / (natW || 1)));
+    }
+    function apply(z, anchorX, anchorY){
+      var prev = currentZ();
+      var cx = (anchorX===undefined ? vp.clientWidth/2 : anchorX), cy = (anchorY===undefined ? vp.clientHeight/2 : anchorY);
+      var px = (vp.scrollLeft + cx) / prev, py = (vp.scrollTop + cy) / prev;
+      z = Math.max(0.3, Math.min(2.5, z));
+      stage.style.transform = 'scale('+z+')';
+      sizer.style.width = Math.ceil(natW*z)+'px';
+      sizer.style.height = Math.ceil(natH*z)+'px';
+      stage.__z = z;
+      vp.scrollLeft = px*z - cx; vp.scrollTop = py*z - cy;
+      if(valEl) valEl.textContent = Math.round(z*100)+'%';
+    }
+    function currentZ(){ return stage.__z || 1; }
+    measure();
+    stage.__z = 1;
+    // Al abrir: el árbol completo si cabe legible; si no, mínimo 70 % y se recorre deslizando.
+    apply(pedZoom===null ? Math.max(fitZoom(), Math.min(0.7, 1)) : pedZoom, 0, 0);
+    vp.scrollLeft = 0;
+    // centrar verticalmente sobre el animal
+    var self = stage.querySelector('.ped-box.self');
+    if(self && vp.scrollHeight > vp.clientHeight){
+      vp.scrollTop = Math.max(0, self.offsetTop*currentZ() + self.offsetHeight*currentZ()/2 - vp.clientHeight/2);
+    }
+
+    host.onclick = function(ev){
+      var g = ev.target.closest('.ped-gen-btn');
+      if(g){ var n = parseInt(g.getAttribute('data-gens'),10); pedSetGenPref(n); pedZoom = null;
+        renderFichaPedigree(window.__pedCurrentRec, n); return; }
+      var zb = ev.target.closest('.ped-zoom-btn');
+      if(zb){
+        var a = zb.getAttribute('data-zoom');
+        if(a==='in'){ pedZoom = currentZ()*1.25; apply(pedZoom); }
+        else if(a==='out'){ pedZoom = currentZ()/1.25; apply(pedZoom); }
+        else if(a==='fit'){ pedZoom = fitZoom(); apply(pedZoom, 0, 0); vp.scrollLeft = 0; vp.scrollTop = 0; }
+        else if(a==='full'){
+          var on = !host.classList.contains('ped-fullscreen');
+          host.classList.toggle('ped-fullscreen', on);
+          document.body.classList.toggle('ped-fs-lock', on);
+          zb.textContent = on ? '✕' : '⛶';
+          zb.setAttribute('aria-label', on ? 'Salir de pantalla completa' : 'Pantalla completa');
+          if(pedZoom===null) apply(Math.max(fitZoom(), 0.7), 0, 0);
+        }
+        return;
+      }
+      if(vp.__moved) return;
+      var box = ev.target.closest('.ped-box.known');
+      if(box && box.hasAttribute('data-id')){
+        if(host.classList.contains('ped-fullscreen')){ host.classList.remove('ped-fullscreen'); document.body.classList.remove('ped-fs-lock'); }
+        selectAnimal(parseInt(box.getAttribute('data-id'),10));
+      }
+    };
+
+    // Pellizco con dos dedos (móvil)
+    var pinch = null;
+    function dist(t){ var dx=t[0].clientX-t[1].clientX, dy=t[0].clientY-t[1].clientY; return Math.sqrt(dx*dx+dy*dy); }
+    vp.addEventListener('touchstart', function(e){
+      vp.__moved = false;
+      if(e.touches.length===2){
+        var rect = vp.getBoundingClientRect();
+        pinch = { d: dist(e.touches), z: currentZ(),
+          x: (e.touches[0].clientX+e.touches[1].clientX)/2 - rect.left,
+          y: (e.touches[0].clientY+e.touches[1].clientY)/2 - rect.top };
+      }
+    }, {passive:true});
+    vp.addEventListener('touchmove', function(e){
+      vp.__moved = true;
+      if(pinch && e.touches.length===2){
+        e.preventDefault();
+        pedZoom = pinch.z * dist(e.touches) / pinch.d;
+        apply(pedZoom, pinch.x, pinch.y);
+      }
+    }, {passive:false});
+    vp.addEventListener('touchend', function(e){ if(e.touches.length<2) pinch = null; setTimeout(function(){ vp.__moved=false; }, 50); });
+    // Ctrl + rueda (computador)
+    vp.addEventListener('wheel', function(e){
+      if(!e.ctrlKey) return;
+      e.preventDefault();
+      var rect = vp.getBoundingClientRect();
+      pedZoom = currentZ() * (e.deltaY<0 ? 1.1 : 1/1.1);
+      apply(pedZoom, e.clientX-rect.left, e.clientY-rect.top);
+    }, {passive:false});
+    // Arrastrar con el ratón
+    vp.addEventListener('mousedown', function(e){
+      if(e.button!==0) return;
+      window.__pedDrag = { vp:vp, x:e.clientX, y:e.clientY, l:vp.scrollLeft, t:vp.scrollTop }; vp.__moved = false;
+    });
+    if(!window.__pedDragBound){
+      window.__pedDragBound = true;
+      window.addEventListener('mousemove', function(e){
+        var d = window.__pedDrag; if(!d) return;
+        var dx = e.clientX-d.x, dy = e.clientY-d.y;
+        if(Math.abs(dx)+Math.abs(dy) > 4){ d.vp.__moved = true; d.vp.classList.add('dragging'); }
+        d.vp.scrollLeft = d.l - dx; d.vp.scrollTop = d.t - dy;
+      });
+      window.addEventListener('mouseup', function(){
+        var d = window.__pedDrag; if(!d) return; window.__pedDrag = null;
+        d.vp.classList.remove('dragging'); setTimeout(function(){ d.vp.__moved=false; }, 0);
+      });
+    }
   }
 
   // ---------- Pedigrí proyectado de una cría hipotética (simulador de cruces) ----------
@@ -5140,7 +5340,7 @@ window.__renderReproHead = function(o){
     renderIdentGrid(r);
 
     // ---- Pedigrí (4 generaciones) ----
-    document.getElementById('fh-pedigree').innerHTML = buildPedigreeTree(r);
+    renderFichaPedigree(r);
     var printBtn = document.getElementById('fh-print-btn');
     printBtn.onclick = function(){ printPedigree(r); };
     var downloadHtmlBtn = document.getElementById('fh-download-html-btn');
@@ -5493,6 +5693,9 @@ window.__renderReproHead = function(o){
   var byId = {};
   var byNumero = {};
   BD.forEach(function(r){ byId[r.id] = r; if(r.numero){ byNumero[r.numero.trim()] = byNumero[r.numero.trim()] || r; } });
+  Object.keys(byNumero).forEach(function(k){
+    if(/\/.+C$/i.test(k)){ var base = k.slice(0,-1); if(!byNumero[base]) byNumero[base] = byNumero[k]; }
+  });
   var SEMEN = {};
   try{ SEMEN = JSON.parse(document.getElementById('semen-source').textContent); }catch(e){ SEMEN = {}; }
 

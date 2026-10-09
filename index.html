@@ -1045,6 +1045,8 @@ html.app .tabs{top:env(safe-area-inset-top,0px)}
 .app-ver{display:none;font:600 12px 'IBM Plex Mono',monospace;color:var(--rust,#A9481A);margin:2px 0 10px;letter-spacing:.02em}
 html.app .app-ver{display:block}
 @media (display-mode: standalone), (display-mode: fullscreen){ .app-ver{display:block} }
+.kpi-row .tag.ver .value{font-size:22px;line-height:1.15}
+.kpi-row .tag.ver .value small{display:block;font-size:13px;margin-top:4px;opacity:.8}
 .g-ver{font:600 12px 'IBM Plex Mono',monospace;color:var(--rust,#A9481A);margin:14px 0 0;}
 .hs-ver{font:600 12px 'IBM Plex Mono',monospace;color:var(--rust,#A9481A);margin:-4px 0 10px;}
 </style>
@@ -1271,7 +1273,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 9 oct 2026 · 1:45 p.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 9 oct 2026 · 1:50 p.m.</b>
     </div>
   </header>
 
@@ -1294,7 +1296,6 @@ window.__renderReproHead = function(o){
     <button class="tab-btn" data-view="grupos">Grupos Contemporáneos</button>
     <button class="tab-btn" data-view="actualizar">Actualizar Datos</button>
   </div>
-  <div class="app-ver" id="appVerMini"></div>
 
   <div class="view active" id="viewGeneral">
 
@@ -2515,9 +2516,12 @@ window.__renderReproHead = function(o){
       {label:'Edad prom. (años)', value: edadProm.toFixed(1), accent:true},
       {label:'IEP prom. — vacas fértiles (meses)', value: iepProm!==null ? iepProm.toFixed(1) : '—', accent:true},
     ];
+    (function(){ var e = document.getElementById('app-version'); if(!e) return;
+      var t = e.textContent.replace(/^\s*Versión:\s*/,'').split('·');
+      items.push({label:'Versión del tablero', value: t[0].trim() + (t[1] ? '<small>' + t.slice(1).join('·').trim() + '</small>' : ''), accent:false, cls:'ver'}); })();
     var row = document.getElementById('kpiRow');
     row.innerHTML = items.map(function(it){
-      return '<div class="tag'+(it.accent?' accent':'')+'"><div class="label">'+it.label+'</div><div class="value">'+it.value+'</div></div>';
+      return '<div class="tag'+(it.accent?' accent':'')+(it.cls?' '+it.cls:'')+'"><div class="label">'+it.label+'</div><div class="value">'+it.value+'</div></div>';
     }).join('');
     document.getElementById('resultCount').textContent = d.length.toLocaleString('es-CO') + ' animales en la selección';
   }
@@ -11949,7 +11953,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
 </script>
 
 <script>(function(){ function f(){ var e=document.getElementById('app-version'); if(!e) return; var t=e.textContent.trim();
-  ['appVerMini','hsVer'].forEach(function(id){ var x=document.getElementById(id); if(x) x.textContent=t; }); }
+  ['hsVer'].forEach(function(id){ var x=document.getElementById(id); if(x) x.textContent=t; }); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',f); else f(); })();</script>
 </body>
 </html>

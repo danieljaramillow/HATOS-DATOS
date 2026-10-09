@@ -16,14 +16,14 @@
    de que el tablero lea sus datos.
    ===================================================================== */
 (function(){
-  var K = { edits:'hatosDJW_edits_v1', updates:'hatosDJW_updates_v1', visita:'hatos_visita_asocebu_v1', cortes:'hatos_cortes_letras_v1', notas:'hatos_notas_v1', historial:'hatosDJW_historial_v1', muertes:'hatos_muertes_v1', qa:'hatos_qa_resp_v1' };
+  var K = { edits:'hatosDJW_edits_v1', updates:'hatosDJW_updates_v1', visita:'hatos_visita_asocebu_v1', cortes:'hatos_cortes_letras_v1', notas:'hatos_notas_v1', historial:'hatosDJW_historial_v1', muertes:'hatos_muertes_v1', qa:'hatos_qa_resp_v1', visitas:'hatos_visitas_v1' };
   var BASE_KEY = 'hatosSync_base_v1', REM_KEY = 'hatosSync_remoto_v1', CFG_KEY = 'hatosSync_cfg_v1';
 
   function get(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
   function set(k, v){ try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
   function J(x){ return x === undefined ? undefined : JSON.stringify(x); }
 
-  function leerLocal(){ return { edits:get(K.edits), updates:get(K.updates), visita:get(K.visita), cortes:get(K.cortes), notas:get(K.notas), historial:get(K.historial), muertes:get(K.muertes), qa:get(K.qa) }; }
+  function leerLocal(){ return { edits:get(K.edits), updates:get(K.updates), visita:get(K.visita), cortes:get(K.cortes), notas:get(K.notas), historial:get(K.historial), muertes:get(K.muertes), qa:get(K.qa), visitas:get(K.visitas) }; }
   /* Historial de lo ingresado o modificado: cada entrada se identifica por su hora y su registro. */
   function hKey(h){ return (h.ts || 0) + '|' + (h.ref || h.numero || ''); }
 
@@ -47,6 +47,10 @@
     (Array.isArray(st.historial) ? st.historial : []).forEach(function(h){ if(h && h.ts) p['h:' + hKey(h)] = h; });
     var mu = st.muertes; if(mu && typeof mu === 'object') Object.keys(mu).forEach(function(k){ if(mu[k]) p['m:' + k] = mu[k]; });
     var qa = st.qa; if(qa && typeof qa === 'object') Object.keys(qa).forEach(function(k){ if(qa[k]) p['q:' + k] = qa[k]; });
+    var vs = st.visitas; if(vs && typeof vs === 'object'){
+      Object.keys(vs.visitas || {}).forEach(function(k){ p['W:v:' + k] = vs.visitas[k]; });
+      Object.keys(vs.regs || {}).forEach(function(k){ p['W:r:' + k] = vs.regs[k]; });
+    }
     return p;
   }
   function hoy(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
@@ -57,7 +61,7 @@
     var vistas = {}, orden = [];
     Object.keys(aPlano(local)).forEach(function(k){ if(k in p){ orden.push(k); vistas[k] = 1; } });
     Object.keys(p).forEach(function(k){ if(!vistas[k]) orden.push(k); });
-    var edits = [], updates = [], regs = {}, hist = [], cab = null, hayVisita = false, cortes = null, notas = [], historial = [], muertes = null, qa = null;
+    var edits = [], updates = [], regs = {}, hist = [], cab = null, hayVisita = false, cortes = null, notas = [], historial = [], muertes = null, qa = null, visitas = null;
     orden.forEach(function(k){
       var x = p[k];
       if(k.indexOf('e:') === 0) edits.push(x);
@@ -70,6 +74,8 @@
       else if(k.indexOf('h:') === 0) historial.push(x);
       else if(k.indexOf('m:') === 0){ muertes = muertes || {}; muertes[k.slice(2)] = x; }
       else if(k.indexOf('q:') === 0){ qa = qa || {}; qa[k.slice(2)] = x; }
+      else if(k.indexOf('W:v:') === 0){ visitas = visitas || {visitas:{}, regs:{}}; visitas.visitas[k.slice(4)] = x; }
+      else if(k.indexOf('W:r:') === 0){ visitas = visitas || {visitas:{}, regs:{}}; visitas.regs[k.slice(4)] = x; }
     });
     historial.sort(function(a, b){ return (a.ts || 0) - (b.ts || 0); });
     var visita = null;
@@ -81,14 +87,14 @@
         open: !!lv.open, min: !!lv.min, tab: lv.tab || 'reg'
       };
     }
-    return { edits:edits, updates:updates, visita:visita, cortes:cortes, notas:notas, historial:historial, muertes:muertes, qa:qa };
+    return { edits:edits, updates:updates, visita:visita, cortes:cortes, notas:notas, historial:historial, muertes:muertes, qa:qa, visitas:visitas };
   }
   /* Para el archivo cambios.json: sin lo que es solo de pantalla. */
   function paraArchivo(p){
     var st = dePlano(p, {});
     if(st.visita){ delete st.visita.open; delete st.visita.min; delete st.visita.tab; }
     return { version:1, tablero:'Hatos Datos', actualizado:new Date().toISOString(),
-             edits:st.edits, updates:st.updates, visita:st.visita, cortes:st.cortes, notas:st.notas, historial:st.historial, muertes:st.muertes, qa:st.qa };
+             edits:st.edits, updates:st.updates, visita:st.visita, cortes:st.cortes, notas:st.notas, historial:st.historial, muertes:st.muertes, qa:st.qa, visitas:st.visitas };
   }
 
   function marca(x){ return x ? (x.ts || x.updatedAt || 0) : 0; }
@@ -126,6 +132,8 @@
     else if(antes.muertes != null) set(K.muertes, null);
     if(st.qa) set(K.qa, st.qa);
     else if(antes.qa != null) set(K.qa, null);
+    if(st.visitas) set(K.visitas, st.visitas);
+    else if(antes.visitas != null) set(K.visitas, null);
   }
 
   /* Al abrir: aplicar lo que llegó de otros dispositivos la vez anterior. */
@@ -285,6 +293,7 @@ window.__BN = (function(){
     ls('hatos_notas_v1', []).forEach(function(n){
       if(n && N(n.numero) === k) out.push({ fuente:'Nota de la ficha', fecha:n.fecha||null, texto:(n.texto||'')+(n.descarte?' [MARCADA PARA DESCARTE'+(n.motivo?': '+n.motivo:'')+']':''), descarte:!!n.descarte });
     });
+    if(window.__visitas){ try{ window.__visitas.comentariosDe(r).forEach(function(c){ out.push(c); }); }catch(e){} }
     var V = window.__visitaAsocebu;
     if(V && V.regsDe){ try{ V.regsDe(r).forEach(function(x){ var g = x.reg || {}, v = x.visita || {};
       var t = [g.resultado ? 'Resultado: '+g.resultado : '', (g.motivo||[]).length ? 'Motivo: '+g.motivo.join(', ') : '', g.obs||'', g.tarea ? 'Tarea: '+g.tarea : ''].filter(Boolean).join(' · ');
@@ -2737,6 +2746,39 @@ window.__renderReproHead = function(o){
       .forEach(function(u){ var d = u.detalle || {}; aplicar(u.numero, d.campo, d.valor); });
     window.__correccionesProvisionales = aplicadas;
   })();
+  /* Palpaciones y pesajes pendientes (de formularios, modo guiado o visitas):
+     se agregan como PROVISIONALES a los datos de palpaciones y pesos antes de
+     que los módulos los lean, para que la ficha ya los muestre. */
+  (function(){
+    window.__provListeners = [];
+    function N(x){ return String(x == null ? '' : x).trim(); }
+    function meter(obj, num, entry){
+      var k = N(num); if(!k) return; obj[k] = obj[k] || [];
+      if(entry.__key){ for(var i = 0; i < obj[k].length; i++) if(obj[k][i].__key === entry.__key){ obj[k][i] = entry; return; } }
+      obj[k].push(entry); obj[k].sort(function(a,b){ return (a.fecha||'').localeCompare(b.fecha||''); });
+    }
+    function deUpdate(u){
+      var d = u.detalle || {};
+      if(u.tipo === 'palpacion') return ['palp', { fecha:d.fecha||u.fecha, estado:d.resultado==='PREÑADA' ? 'P+' : (d.resultado==='VACIA' ? 'VACIA' : (d.resultado||'')), toro:d.toro||null, hallazgo:d.hallazgo||null, provisional:true, __key:'u'+u.id }];
+      if(u.tipo === 'peso' && d.peso != null && d.peso !== '') return ['peso', { fecha:d.fecha||u.fecha, peso:+String(d.peso).replace(',','.'), nota:(d.nota||'')+' (pendiente)', provisional:true, __key:'u'+u.id }];
+      return null;
+    }
+    var U; try{ U = JSON.parse(localStorage.getItem('hatosDJW_updates_v1') || '[]'); }catch(e){ U = []; }
+    var lista = (Array.isArray(U) ? U : []).map(function(u){ var x = u && deUpdate(u); return x ? [x[0], u.numero, x[1]] : null; }).filter(Boolean);
+    function parchar(id, kind, items){
+      if(!items.length) return;
+      var el = document.getElementById(id); if(!el) return;
+      try{ var o = JSON.parse(el.textContent); items.forEach(function(x){ meter(o, x[1], x[2]); }); el.textContent = JSON.stringify(o); }catch(e){ console.warn(e); }
+    }
+    parchar('palp-source', 'palp', lista.filter(function(x){ return x[0]==='palp'; }));
+    parchar('pesos-source', 'peso', lista.filter(function(x){ return x[0]==='peso'; }));
+    /* Agregar uno en caliente (desde una visita) */
+    window.__provisional = function(kind, num, entry){
+      parchar(kind === 'palp' ? 'palp-source' : 'pesos-source', kind, [[kind, num, entry]]);
+      window.__provListeners.forEach(function(fn){ try{ fn(kind, num, entry, meter); }catch(e){} });
+      if(window.__BN) window.__BN.reset();
+    };
+  })();
   document.getElementById('gen-date').textContent = new Date().toLocaleDateString('es-CO', {year:'numeric', month:'long', day:'numeric'});
 
   // ---------- IEP (Intervalo Entre Partos) para el KPI de Panel General ----------
@@ -4306,6 +4348,7 @@ window.__renderReproHead = function(o){
   var BD = window.__BD__ || [];
   var PESOS = JSON.parse(document.getElementById('pesos-source').textContent);
   var PALP = JSON.parse(document.getElementById('palp-source').textContent);
+  if(window.__provListeners) window.__provListeners.push(function(kind, num, entry, meter){ meter(kind === 'palp' ? PALP : PESOS, num, entry); });
   var ENTORES = JSON.parse(document.getElementById('entores-source').textContent);
   var FERT = fertConIep(JSON.parse(document.getElementById('fert-source').textContent));
 
@@ -7652,6 +7695,7 @@ window.__renderReproHead = function(o){
     histAdd({ tipo:tipo, numero:numero, texto:detalleTexto, origen: origen||'Formulario', ref:'u:'+u.id,
       finca: (detalleObj && detalleObj.finca) || (rec && rec.finca) || '' });
     renderUpdTable();
+    return u;
   }
 
   // ---------- Historial: últimos datos ingresados o modificados ----------
@@ -7676,7 +7720,7 @@ window.__renderReproHead = function(o){
   }
   window.__histAdd = histAdd;
 
-  var HIST_TIPOS = { peso:'Pesaje', salida:'Salida', correccion:'Corrección', cria:'Cría nueva', palpacion:'Palpación', servicio:'Entore / servicio', aborto:'Aborto', edicion:'Edición en ficha' };
+  var HIST_TIPOS = { visita:'Visita', peso:'Pesaje', salida:'Salida', correccion:'Corrección', cria:'Cría nueva', palpacion:'Palpación', servicio:'Entore / servicio', aborto:'Aborto', edicion:'Edición en ficha' };
   var histPeriodo = 7, histVer = 40;
   function histEsPendiente(h){
     if(!h.ref) return false;
@@ -7765,7 +7809,7 @@ window.__renderReproHead = function(o){
   }
 
   var TIPO_LABELS = { peso:'Nuevo pesaje', salida:'Salida del hato', correccion:'Corrección de datos', cria:'Registrar cría nueva', palpacion:'Palpación', servicio:'Entore / servicio', aborto:'Aborto' };
-  window.__updAdd = function(t, n, d, x, origen){ addUpdate(t, n, d, x, origen || 'Modo guiado'); };
+  window.__updAdd = function(t, n, d, x, origen){ return addUpdate(t, n, d, x, origen || 'Modo guiado'); };
   window.__updList = function(){ return UPDATES; };
   /* Quita UN solo registro (antes, dos registros de distintos dispositivos con el mismo número se borraban juntos). */
   window.__updRemove = function(x){
@@ -10602,6 +10646,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   if(!BD.length) return;
   function J(id){ try{ return JSON.parse(document.getElementById(id).textContent); }catch(e){ return {}; } }
   var PALP = J('palp-source'), ENT = J('entores-source'), SEMEN = J('semen-source'), PESOS = J('pesos-source');
+  if(window.__provListeners) window.__provListeners.push(function(kind, num, entry, meter){ meter(kind === 'palp' ? PALP : PESOS, num, entry); });
   var FINCAS = [
     {k:'OK', l:'OK', sub:'Toluviejo, Sucre'},
     {k:'CACHO', l:'CACHO', sub:'Orocué, Casanare'},
@@ -10915,7 +10960,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       {icon:'❤', label:'Serví una vaca', sub:'Entore: monta natural o inseminación', onClick:function(){ ctx={}; go(ent1, 'Entore', 'rama'); }},
       {icon:'⚖', label:'Pesé un animal', sub:'Control de peso o destete', onClick:function(){ ctx={}; go(pes1, 'Pesaje', 'rama'); }},
       {icon:'🚚', label:'Salió un animal', sub:'Venta, muerte o descarte', onClick:function(){ ctx={}; go(sal1, 'Salida', 'rama'); }},
-      {icon:'✏', label:'Corregir un dato', sub:'Un dato equivocado de un animal', onClick:function(){ ctx={}; go(cor1, 'Corrección', 'rama'); }}
+      {icon:'✏', label:'Corregir un dato', sub:'Un dato equivocado de un animal', onClick:function(){ ctx={}; go(cor1, 'Corrección', 'rama'); }},
+      {icon:'📋', label:'Registrar una visita', sub:'Varios animales: ASOCEBU, palpación, pesaje, cliente o inventario', onClick:function(){ if(window.__visitas) window.__visitas.abrir(); }}
     ]);
   }
 
@@ -11277,7 +11323,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       {icon:'⭕', label:'Vacas vacías y sin palpar', sub:'Para organizar servicios y palpaciones', onClick:function(){ ctx.lista='vacias'; go(conFinca, 'Vacías', 'rama'); }},
       {icon:'🏡', label:'Resumen de una finca', sub:'Cuántos animales hay de cada tipo', onClick:function(){ ctx.lista='resumen'; go(conFinca, 'Resumen finca', 'rama'); }},
       {icon:'⚖', label:'Comparar animales', sub:'Pesos y conformación lado a lado', onClick:function(){ cerrar(); if(window.__comparador) window.__comparador.open(); }},
-      {icon:'📋', label:'Visita ASOCEBU', sub:'Animales revisados, resultados y comentarios del técnico', onClick:function(){ if(window.__visitaConsulta) window.__visitaConsulta.abrir(); }}
+      {icon:'📋', label:'Visitas', sub:'ASOCEBU, palpación, pesaje, cliente o inventario — listados y resúmenes', onClick:function(){ if(window.__visitas) window.__visitas.abrir(); }}
     ]);
   }
   function conAnimal(el){
@@ -11319,7 +11365,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       var acc = [
         {icon:'📄', label:'Descargar ficha en PDF', sub:'Con pedigrí, para compartir', onClick:function(){ if(window.__pdfAnimal) window.__pdfAnimal(r.id); }},
         {icon:'⚖', label:'Agregar a comparación', onClick:function(){ if(window.__comparador){ window.__comparador.add(r.id); this.querySelector('b').textContent='✓ Agregado a comparación'; } }},
-        {icon:'📋', label:'Agregar a visita ASOCEBU', sub:'Registrar lo que dice el técnico', onClick:function(){ if(window.__visitaAsocebu) window.__visitaAsocebu.add(r.id); }}
+        {icon:'📋', label:'Agregar a visita', sub:'ASOCEBU, palpación, pesaje, cliente o inventario', onClick:function(){ if(window.__visitas) window.__visitas.abrir(r.id); }}
       ];
       if(r.activo==='ACTIVO'){
         acc.push({icon:'⚖', label:'Registrar un pesaje', onClick:function(){ ctx={animal:r}; go(pes2, 'Pesaje'); }});
@@ -12736,7 +12782,8 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       ['Animales en la visita ASOCEBU', regs],
       ['Cortes de calificación', st.cortes ? 'propios' : 'por defecto'],
       ['Notas y descartes de la ficha', Array.isArray(st.notas) ? st.notas.length : 0],
-      ['Historial de datos ingresados o modificados', Array.isArray(st.historial) ? st.historial.length : 0]
+      ['Historial de datos ingresados o modificados', Array.isArray(st.historial) ? st.historial.length : 0],
+      ['Visitas registradas', st.visitas && st.visitas.visitas ? Object.keys(st.visitas.visitas).filter(function(k){ return !st.visitas.visitas[k].deleted; }).length : 0]
     ];
   }
   function pintar(){
@@ -12772,6 +12819,8 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     var g = $('guia'); if(g && g.classList.contains('show')) return false;           // modo guiado abierto
     if($('fh-save-edits')) return false;                                                // editando la ficha
     if(window.__visitaDirty && window.__visitaDirty()) return false;                    // visita ASOCEBU sin guardar
+    var vsm = $('vsModal'); if(vsm && vsm.classList.contains('open')) return false;    // registrando en una visita
+    var vcm = $('vcModal'); if(vcm && vcm.classList.contains('open')) return false;
     if($('hsModal') && $('hsModal').classList.contains('open')) return false;
     var campos = document.querySelectorAll('#updFormPanel input, #updFormPanel textarea, #ntTxt');
     for(var i = 0; i < campos.length; i++){
@@ -12984,5 +13033,616 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     d.querySelector('button').onclick = abrir; res.parentNode.insertBefore(d, res); }
 })();
 </script>
+<style>
+  #avFab, #fh-vis-btn{ display:none !important; }   /* reemplazados por "Agregar a visita" */
+  .vs-modal{ position:fixed; inset:0; z-index:10040; background:var(--paper); display:none; flex-direction:column; }
+  .vs-modal.open{ display:flex; }
+  body.vs-lock{ overflow:hidden; }
+  .vs-head{ display:flex; align-items:center; gap:10px; padding:12px 14px; background:var(--green-deep); color:#F2EDE0; }
+  .vs-head h3{ margin:0; font-size:17px; flex:1; color:#F2EDE0; line-height:1.2; }
+  .vs-head h3 small{ display:block; font-size:12px; font-weight:400; opacity:.8; }
+  .vs-head button{ background:transparent; border:1px solid rgba(242,237,224,.5); color:#F2EDE0; border-radius:8px; min-width:40px; height:36px; font-size:16px; cursor:pointer; padding:0 10px; }
+  .vs-body{ flex:1; overflow:auto; padding:14px 14px calc(20px + env(safe-area-inset-bottom,0px)); -webkit-overflow-scrolling:touch; }
+  .vs-body > div{ max-width:860px; margin:0 auto; }
+  .vs-h{ font-family:'Fraunces',Georgia,serif; font-size:20px; margin:4px 0 10px; color:var(--green-deep); }
+  .vs-sub{ font-size:13px; color:var(--ink-soft); margin:-4px 0 12px; }
+  .vs-tipos{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin-bottom:14px; }
+  .vs-tipo{ border:2px solid var(--line); background:var(--card); border-radius:12px; padding:12px; text-align:left; cursor:pointer; font-family:inherit; }
+  .vs-tipo b{ display:block; font-size:15px; margin-top:4px; color:var(--ink); }
+  .vs-tipo small{ color:var(--ink-soft); font-size:12px; line-height:1.3; display:block; margin-top:2px; }
+  .vs-tipo .i{ font-size:22px; }
+  .vs-tipo.on{ border-color:var(--green-deep); background:var(--green-pale); }
+  .vs-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 12px; margin-bottom:12px; }
+  .vs-grid .full{ grid-column:1/-1; }
+  @media (max-width:420px){ .vs-grid{ grid-template-columns:minmax(0,1fr); } }
+  .vs-f label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:4px; }
+  .vs-f input, .vs-f select, .vs-f textarea{ width:100%; box-sizing:border-box; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,.18); background:#fff; font-family:'IBM Plex Sans',sans-serif; font-size:15px; }
+  .vs-f textarea{ min-height:70px; resize:vertical; }
+  .vs-seg{ display:flex; flex-wrap:wrap; gap:6px; }
+  .vs-seg button{ flex:1 1 auto; min-height:44px; padding:6px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--card); font-weight:700; font-family:inherit; font-size:14px; cursor:pointer; }
+  .vs-seg button.on{ background:var(--green-deep); color:#fff; border-color:var(--green-deep); }
+  .vs-seg.rojo button.on{ background:var(--rust-deep); border-color:var(--rust-deep); }
+  .vs-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .vs-chip{ border:1px solid var(--line); background:var(--card); border-radius:999px; padding:6px 12px; font-size:13px; cursor:pointer; font-family:inherit; text-align:left; }
+  .vs-chip b{ font-family:'IBM Plex Mono',monospace; }
+  .vs-chip small{ color:var(--ink-soft); }
+  .vs-chip.on{ background:var(--green-pale); border-color:var(--green-deep); }
+  .vs-btns{ display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 6px; }
+  .vs-btn{ min-height:44px; padding:0 16px; border-radius:10px; border:0; background:var(--rust); color:#fff; font-weight:700; font-family:inherit; font-size:14.5px; cursor:pointer; }
+  .vs-btn.verde{ background:var(--green-deep); }
+  .vs-btn.ghost{ background:var(--card); color:var(--ink); border:1px solid var(--line); }
+  .vs-animal{ display:flex; gap:10px; align-items:center; background:var(--card); border:1px solid var(--line); border-left:4px solid var(--green-deep); border-radius:10px; padding:10px 12px; margin-bottom:12px; }
+  .vs-animal b{ font-family:'IBM Plex Mono',monospace; font-size:17px; }
+  .vs-animal small{ display:block; color:var(--ink-soft); font-size:12.5px; }
+  .vs-rasgos{ display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:8px 14px; margin-bottom:10px; }
+  .vs-rasgo{ display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:1px dashed var(--line); padding:4px 0; }
+  .vs-rasgo span{ font-size:13.5px; }
+  .vs-rasgo select{ width:86px; padding:8px; border-radius:8px; border:1px solid rgba(0,0,0,.18); font-size:15px; }
+  .vs-score{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; background:var(--green-pale); border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:14px; }
+  .vs-score b{ font-family:'IBM Plex Mono',monospace; font-size:18px; }
+  .vs-letra{ display:inline-block; min-width:30px; text-align:center; border-radius:6px; padding:2px 8px; color:#fff; font-weight:800; }
+  .vs-lista-v{ display:flex; flex-direction:column; gap:8px; }
+  .vs-v{ display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; cursor:pointer; text-align:left; font-family:inherit; width:100%; }
+  .vs-v .i{ font-size:22px; }
+  .vs-v b{ display:block; font-size:15px; }
+  .vs-v small{ color:var(--ink-soft); font-size:12.5px; }
+  .vs-v.activa{ border:2px solid var(--green-deep); }
+  .vs-v .tag{ margin-left:auto; font-size:11px; font-weight:700; background:var(--green-deep); color:#fff; border-radius:999px; padding:2px 8px; white-space:nowrap; }
+  .vs-tabs{ display:flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; margin:6px 0 12px; }
+  .vs-tabs button{ flex:1; border:0; background:var(--card); padding:10px 6px; font-weight:700; font-family:inherit; font-size:13.5px; cursor:pointer; }
+  .vs-tabs button + button{ border-left:1px solid var(--line); }
+  .vs-tabs button.on{ background:var(--green-deep); color:#fff; }
+  .vs-buscar{ position:relative; margin-bottom:12px; }
+  .vs-buscar input{ width:100%; box-sizing:border-box; padding:12px; border-radius:10px; border:1.5px solid var(--green-deep); font-size:16px; }
+  .vs-sug{ border:1px solid var(--line); border-radius:10px; background:#fff; margin-top:4px; overflow:hidden; }
+  .vs-sug button{ display:block; width:100%; text-align:left; border:0; border-bottom:1px solid var(--line); background:#fff; padding:10px 12px; font-family:inherit; font-size:14px; cursor:pointer; }
+  .vs-sug button:last-child{ border-bottom:0; }
+  .vs-reg{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; }
+  .vs-reg-h{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .vs-reg-h a{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:15px; color:var(--green-deep); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+  .vs-reg-h .acc{ margin-left:auto; display:flex; gap:6px; }
+  .vs-reg-h .acc button{ border:1px solid var(--line); background:#fff; border-radius:8px; padding:4px 10px; font-size:12.5px; cursor:pointer; font-family:inherit; }
+  .vs-reg p{ margin:4px 0 0; font-size:13px; line-height:1.45; }
+  .vs-pill{ font-size:11px; font-weight:700; border-radius:999px; padding:2px 8px; background:var(--paper); border:1px solid var(--line); }
+  .vs-pill.ok{ background:#DCE4D3; border-color:#33513B; color:#1E3626; }
+  .vs-pill.mal{ background:#7C2B2118; border-color:#7C2B21; color:#7C2B21; }
+  .vs-pill.med{ background:#AD8A3C22; border-color:#AD8A3C; color:#6b521c; }
+  .vs-kpis{ display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; margin-bottom:12px; }
+  .vs-kpi{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px; }
+  .vs-kpi b{ display:block; font-family:'IBM Plex Mono',monospace; font-size:20px; color:var(--green-deep); }
+  .vs-kpi span{ font-size:12px; color:var(--ink-soft); }
+  .vs-tw{ overflow-x:auto; margin-bottom:12px; }
+  .vs-tw table{ width:100%; border-collapse:collapse; font-size:13px; background:var(--card); }
+  .vs-tw th{ text-align:left; background:var(--green-deep); color:#fff; padding:7px 8px; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
+  .vs-tw td{ padding:7px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .vs-eb{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--brass); font-weight:700; margin:14px 0 6px; }
+  .vs-vacio{ padding:16px; text-align:center; color:var(--ink-soft); background:var(--card); border:1px dashed var(--line); border-radius:10px; }
+  .vs-bar{ display:inline-block; height:10px; border-radius:5px; background:var(--green-deep); vertical-align:middle; }
+  .vs-toast{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px); background:#1E3626; color:#fff; padding:10px 16px; border-radius:10px; font-size:14px; opacity:0; transition:.25s; z-index:10045; pointer-events:none; max-width:90vw; text-align:center; }
+  .vs-toast.on{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .vs-activa-bar{ position:fixed; right:14px; bottom:calc(84px + env(safe-area-inset-bottom,0px)); z-index:1050; background:var(--green-deep); color:#fff; border:0; border-radius:999px; padding:10px 14px; font-weight:700; font-family:inherit; font-size:13px; box-shadow:0 6px 18px rgba(0,0,0,.25); cursor:pointer; display:none; }
+  .vs-activa-bar.on{ display:block; }
+  body.guia-abierta .vs-activa-bar{ display:none; }
+  #fh-vst-btn{ white-space:nowrap; }
+  #fh-visitas-wrap .vs-reg{ background:var(--card); }
+</style>
+<div class="vs-modal" id="vsModal" role="dialog" aria-label="Visitas">
+  <div class="vs-head"><button type="button" id="vsAtras" aria-label="Atrás">←</button><h3 id="vsTitulo">Visitas</h3><button type="button" id="vsCerrar" aria-label="Cerrar">✕</button></div>
+  <div class="vs-body"><div id="vsCuerpo"></div></div>
+</div>
+<button type="button" class="vs-activa-bar" id="vsActivaBar"></button>
+<div class="vs-toast" id="vsToast"></div>
+<script>
+/* =====================================================================
+   VISITAS — "Agregar a visita"
+   Tipos: ASOCEBU, Palpación, Pesaje, Cliente, Inventario.
+   - Cada visita y cada animal registrado se guardan en este equipo
+     (hatos_visitas_v1) y viajan con la sincronización de GitHub.
+   - Palpación y pesaje van también a la lista de pendientes del Excel y se
+     ven de una vez en la ficha (provisionales). En inventario, el cambio de
+     lote va como corrección y el peso como pesaje.
+   ===================================================================== */
+(function(){
+  var KEY = 'hatos_visitas_v1', KEY_ACT = 'hatos_visita_activa_v1';
+  var BD = window.__BD__ || [];
+  var byId = {}, byNum = {};
+  BD.forEach(function(r){ byId[r.id] = r; if(r.numero){ var k = N(r.numero); if(!byNum[k]) byNum[k] = r; } });
+  function N(x){ return String(x == null ? '' : x).trim().toUpperCase(); }
+  function J(id){ try{ return JSON.parse(document.getElementById(id).textContent); }catch(e){ return {}; } }
+  function esc(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function hoy(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  function fmt(f){ if(!f) return '—'; var p = String(f).split('-'); return p.length === 3 ? p[2]+'/'+p[1]+'/'+p[0] : f; }
+  function addDays(iso, n){ var d = new Date(iso+'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0,10); }
+  function uid(p){ return p + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  function num(v){ v = String(v == null ? '' : v).replace(',', '.').trim(); var n = parseFloat(v); return isNaN(n) ? null : n; }
+  function $(id){ return document.getElementById(id); }
+  var ES_CEL = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  var ENT = J('entores-source'), PALP0 = J('palp-source'), PESOS0 = J('pesos-source');
+
+  var TIPOS = {
+    asocebu:{ i:'🏅', n:'ASOCEBU', d:'Calificación R · R+ · B · B+ · MB y base 100, peso y comentarios' },
+    palpacion:{ i:'🩺', n:'Palpación', d:'Preñada o vacía, tiempo, toro posible, diagnóstico' },
+    pesaje:{ i:'⚖', n:'Pesaje', d:'Peso de cada animal' },
+    cliente:{ i:'🤝', n:'Cliente', d:'Animales que vio, interés y precio, comparación y PDF' },
+    inventario:{ i:'📋', n:'Inventario', d:'Presente o no, lote, peso, condición, descarte' }
+  };
+  var RASGOS = [['temp','Temperamento'],['ombligo','Ombligo'],['caract','Caracterización racial'],['conf','Conformación'],['musc','Musculatura'],['aplo','Aplomos'],['tamano_fs','Tamaño'],['dorso','Dorso'],['longitud_corp','Longitud corporal']];
+  var RESULTADOS = ['Inscrita','Calificada','Aprobada registro definitivo','Observada / condicionada','Pendiente','Rechazada'];
+  var DIAG = [['NORMAL','Normal'],['UCT','Útero con tono (UCT)'],['CLOD','Cuerpo lúteo ovario derecho (CLOD)'],['CLOI','Cuerpo lúteo ovario izquierdo (CLOI)'],['FOD','Folículo ovario derecho (FOD)'],['FOI','Folículo ovario izquierdo (FOI)'],['ESTATICA','Ovarios estáticos'],['QUISTE','Quiste ovárico'],['METRITIS','Metritis / infección'],['INFANTIL','Útero infantil'],['OTRO','Otro']];
+  var INTERES = [['alto','Alto'],['medio','Medio'],['bajo','Bajo'],['ninguno','Ninguno']];
+
+  /* ---------- almacenamiento ---------- */
+  function cargar(){ var s; try{ s = JSON.parse(localStorage.getItem(KEY)); }catch(e){} s = s || {}; s.visitas = s.visitas || {}; s.regs = s.regs || {}; return s; }
+  var S = cargar();
+  function guardarS(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('No hay espacio para guardar en este equipo.'); } }
+  function activaId(){ var a; try{ a = localStorage.getItem(KEY_ACT); }catch(e){} return (a && S.visitas[a] && !S.visitas[a].cerrada && !S.visitas[a].deleted) ? a : null; }
+  function setActiva(id){ try{ if(id) localStorage.setItem(KEY_ACT, id); else localStorage.removeItem(KEY_ACT); }catch(e){} pintarBarra(); }
+  function visitasOrden(){ return Object.keys(S.visitas).map(function(k){ return S.visitas[k]; }).filter(function(v){ return !v.deleted; })
+    .sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||'') || (b.ts||0) - (a.ts||0); }); }
+  function regsDe(vid){ return Object.keys(S.regs).map(function(k){ return S.regs[k]; }).filter(function(r){ return r.visitaId === vid && !r.deleted; })
+    .sort(function(a,b){ return (a.ts0||a.ts||0) - (b.ts0||b.ts||0); }); }
+  function regDeAnimal(vid, numero){ var k = N(numero); return regsDe(vid).filter(function(r){ return N(r.numero) === k; })[0] || null; }
+  var tt; function toast(t){ var el = $('vsToast'); el.textContent = t; el.classList.add('on'); clearTimeout(tt); tt = setTimeout(function(){ el.classList.remove('on'); }, 3200); }
+
+  /* ---------- datos de apoyo ---------- */
+  function edadTxt(r){
+    if(r && r.fecha_nac){ var dias = (new Date(hoy()) - new Date(r.fecha_nac)) / 864e5; if(dias >= 0) return dias < 730 ? (dias/30).toFixed(1)+' meses' : (dias/365.25).toFixed(1)+' años'; }
+    var e = r && r.edad_actual; if(e == null || isNaN(e)) return ''; return e < 2 ? (e*12).toFixed(1)+' meses' : e.toFixed(1)+' años'; }
+  function descAnimal(r){ return [r.finca, r.raza, r.sexo==='H'?'Hembra':(r.sexo==='M'?'Macho':''), edadTxt(r), r.lote && String(r.lote).trim()!=='0' ? 'Lote '+r.lote : ''].filter(Boolean).join(' · '); }
+  function ultimoParto(r){ var f = null; (r.crias_ids||[]).forEach(function(id){ var c = byId[id]; if(c && c.fecha_nac && (!f || c.fecha_nac > f)) f = c.fecha_nac; }); return f; }
+  function torosPosibles(r, fechaVisita){
+    var k = String(r.numero||'').trim(), lim = ultimoParto(r) || '0000', out = [], vistos = {};
+    (ENT[k] || []).slice().sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||''); }).forEach(function(e){
+      if(!e.fecha || e.fecha < lim) return;
+      var t = e.toro || e.ia || e.te; if(!t) return; t = String(t).trim();
+      var dias = Math.round((new Date(fechaVisita) - new Date(e.fecha)) / 864e5);
+      var tipo = e.ia ? 'inseminación' : (e.te ? 'transferencia' : 'monta');
+      if(!vistos[N(t)]){ vistos[N(t)] = 1; out.push({ toro:t, fecha:e.fecha, dias:(dias>0 && dias<=300) ? dias : null, nota:tipo+' del '+fmt(e.fecha) }); }
+    });
+    var pp = (PALP0[k] || []).slice().sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||''); })[0];
+    if(pp && pp.toro && !vistos[N(pp.toro)]) out.push({ toro:String(pp.toro).trim(), fecha:pp.fecha, dias:null, nota:'según palpación del '+fmt(pp.fecha) });
+    return out;
+  }
+  function ultimoPeso(r, antesDe){
+    var a = (PESOS0[String(r.numero||'').trim()] || []).filter(function(p){ return p.peso != null && (!antesDe || p.fecha < antesDe); })
+      .sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||''); });
+    return a[0] || null;
+  }
+  function califDe(d){ var s = 0, n = 0; RASGOS.forEach(function(x){ var v = num(d.scores && d.scores[x[0]]); if(v != null){ s += v; n++; } }); return n ? s/n : null; }
+  function letraTag(p){ var A = window.__asoc; if(!A || p == null) return ''; var l = A.letra(p); return '<span class="vs-letra" style="background:'+A.COLOR[l]+(l==='R'||l==='R+'?';color:#241D14':'')+'">'+l+'</span>'; }
+
+  /* ---------- textos de un registro ---------- */
+  function textoReg(v, r){
+    var d = r.datos || {}, t = [];
+    if(v.tipo === 'asocebu'){ var c = califDe(d); if(c != null) t.push('Calif. '+c.toFixed(2)+' / 5 = '+(c*20).toFixed(1)+' base 100'+(window.__asoc?' ('+window.__asoc.letra(c*20)+')':'')); if(d.resultado) t.push(d.resultado); if(d.registro) t.push('Registro '+d.registro); if(d.peso) t.push(d.peso+' kg'); }
+    else if(v.tipo === 'palpacion'){ if(d.estado === 'PREÑADA'){ t.push('Preñada'+(d.dias?' '+d.dias+' días':'')+(d.toro?' · toro '+d.toro:'')+(d.parto?' · parto probable '+fmt(d.parto):'')); } else if(d.estado === 'VACIA'){ t.push('Vacía'+(d.diag?' · '+d.diag:'')); } }
+    else if(v.tipo === 'pesaje'){ if(d.peso) t.push(d.peso+' kg'); if(d.nota) t.push(d.nota); }
+    else if(v.tipo === 'cliente'){ if(d.interes) t.push('Interés '+d.interes); if(d.precioPedido) t.push('Pide $'+fmtPrecio(d.precioPedido)); if(d.precioOfrecido) t.push('Ofrece $'+fmtPrecio(d.precioOfrecido)); }
+    else if(v.tipo === 'inventario'){ t.push(d.presente === 'no' ? 'NO ESTÁ' : 'Presente'); if(d.lote) t.push('Lote '+d.lote); if(d.peso) t.push(d.peso+' kg'); if(d.cc) t.push('CC '+d.cc); if(d.descarte) t.push('⚑ marcado para descarte'+(d.motivo?' ('+d.motivo+')':'')); }
+    return t.join(' · ');
+  }
+  function fmtPrecio(v){ var n = num(String(v).replace(/[.\s$]/g,'')); return n == null ? String(v) : n.toLocaleString('es-CO'); }
+
+  /* ---------- efectos: ficha y pendientes del Excel ---------- */
+  function quitarPendientes(reg){
+    (reg.updIds || []).forEach(function(id){ var l = window.__updList ? window.__updList() : []; var u = l.filter(function(x){ return x.id === id; })[0]; if(u && window.__updRemove) window.__updRemove(u); });
+    reg.updIds = [];
+  }
+  function add(reg, tipo, detalle, texto){
+    if(!window.__updAdd) return;
+    var u = window.__updAdd(tipo, reg.numero, detalle, texto, 'Visita: '+TIPOS[S.visitas[reg.visitaId].tipo].n);
+    if(u && u.id) (reg.updIds = reg.updIds || []).push(u.id);
+  }
+  function efectos(v, reg){
+    quitarPendientes(reg);
+    var d = reg.datos || {}, f = v.fecha || hoy();
+    if(v.tipo === 'palpacion' && d.estado){
+      var det = { fecha:f, resultado:d.estado, dias:d.dias||'', parto_probable:d.parto||'', hallazgo:d.estado==='PREÑADA' ? String(d.dias||'') : (d.diag||''), toro:d.estado==='PREÑADA' ? (d.toro||'') : '' };
+      add(reg, 'palpacion', det, f+' · '+(d.estado==='PREÑADA' ? 'Preñada'+(d.dias?' '+d.dias+' días':'')+(d.parto?' · parto probable '+d.parto:'')+(d.toro?' · Toro: '+d.toro:'') : 'Vacía · '+(d.diag||''))+(d.obs?' · '+d.obs:''));
+      if(window.__provisional) window.__provisional('palp', reg.numero, { fecha:f, estado:d.estado==='PREÑADA' ? 'P+' : 'VACIA', toro:det.toro||null, hallazgo:det.hallazgo||null, provisional:true, __key:reg.id });
+    }
+    var peso = num(d.peso);
+    if(peso != null && (v.tipo === 'pesaje' || v.tipo === 'inventario' || v.tipo === 'asocebu')){
+      var nota = (v.tipo === 'pesaje' ? (d.nota || 'Pesaje') : (v.tipo === 'asocebu' ? 'Visita ASOCEBU' : 'Inventario')) + ' (visita '+fmt(f)+')';
+      add(reg, 'peso', { fecha:f, peso:peso, nota:nota }, f+' · '+peso+' kg · '+nota);
+      if(window.__provisional) window.__provisional('peso', reg.numero, { fecha:f, peso:peso, nota:nota, provisional:true, __key:reg.id });
+    }
+    if(v.tipo === 'inventario' && d.lote){
+      var r = byNum[N(reg.numero)];
+      if(r && String(r.lote == null ? '' : r.lote).trim() !== String(d.lote).trim()){
+        add(reg, 'correccion', { campo:'LOTE', valor:d.lote, obs:'Inventario '+fmt(f) }, 'LOTE → '+d.lote+' (inventario '+fmt(f)+')');
+        if(window.__aplicarCorreccion) window.__aplicarCorreccion(reg.numero, 'LOTE', d.lote);
+      }
+    }
+    if(window.__histAdd) window.__histAdd({ tipo:'visita', numero:reg.numero, texto:TIPOS[v.tipo].n+' ('+fmt(f)+'): '+textoReg(v, reg)+(d.obs?' · '+d.obs:''), origen:'Visita '+TIPOS[v.tipo].n, ref:'w:'+reg.id, finca:(byNum[N(reg.numero)]||{}).finca||v.finca });
+  }
+
+  /* ---------- pantalla ---------- */
+  var pila = [], vista = null;
+  function abrirModal(){ $('vsModal').classList.add('open'); document.body.classList.add('vs-lock'); }
+  function cerrarModal(){ $('vsModal').classList.remove('open'); document.body.classList.remove('vs-lock'); pila = []; vista = null; pintarBarra(); if(window.__retryFichaCharts){ var y = window.scrollY; window.__retryFichaCharts(); setTimeout(function(){ window.scrollTo(0, y); }, 50); } if(window.__refrescarFichaVisitas) window.__refrescarFichaVisitas(); }
+  function ir(fn, titulo, sinPila){ if(vista && !sinPila) pila.push(vista); vista = { fn:fn, titulo:titulo }; pintar(); }
+  function pintar(){ if(!vista) return; $('vsTitulo').innerHTML = vista.titulo; var c = $('vsCuerpo'); c.innerHTML = ''; vista.fn(c); $('vsAtras').style.visibility = pila.length ? 'visible' : 'hidden'; $('vsModal').querySelector('.vs-body').scrollTop = 0; }
+  function irRaiz(fn, titulo){ pila = [{ fn:scrInicio, titulo:'Visitas' }]; vista = null; ir(fn, titulo, true); }
+  function atras(){ if(!pila.length){ cerrarModal(); return; } vista = pila.pop(); pintar(); }
+  function el(html){ var d = document.createElement('div'); d.innerHTML = html; return d; }
+
+  /* ---- inicio: lista de visitas ---- */
+  function scrInicio(c){
+    var act = activaId(), vs = visitasOrden();
+    var h = '<p class="vs-sub">Registra lo que pasa en el corral: una calificación ASOCEBU, una palpación, un pesaje, la visita de un cliente o un inventario. Cada animal se agrega desde su ficha con <b>📋 Agregar a visita</b>, o desde aquí.</p>'+
+      '<div class="vs-btns"><button class="vs-btn verde" id="vsNueva">＋ Registrar nueva visita</button></div>';
+    h += vs.length ? '<div class="vs-eb">Visitas registradas</div><div class="vs-lista-v">'+vs.map(function(v){ var n = regsDe(v.id).length;
+      return '<button class="vs-v'+(v.id===act?' activa':'')+'" data-v="'+v.id+'"><span class="i">'+TIPOS[v.tipo].i+'</span><span><b>'+TIPOS[v.tipo].n+' · '+fmt(v.fecha)+'</b><small>'+esc([v.finca, encabezado(v), n+' animal'+(n===1?'':'es')].filter(Boolean).join(' · '))+'</small></span>'+(v.id===act?'<span class="tag">EN CURSO</span>':(v.cerrada?'<span class="tag" style="background:#8a8f87">CERRADA</span>':''))+'</button>'; }).join('')+'</div>'
+      : '<div class="vs-vacio">Todavía no hay visitas registradas.</div>';
+    if(window.__visitaConsulta) h += '<div class="vs-btns"><button class="vs-btn ghost" id="vsViejas">Ver visitas ASOCEBU del formato anterior</button></div>';
+    c.appendChild(el(h));
+    $('vsNueva').onclick = function(){ ir(scrNueva(null), 'Nueva visita'); };
+    c.querySelectorAll('[data-v]').forEach(function(b){ b.onclick = function(){ var v = S.visitas[b.getAttribute('data-v')]; ir(scrVisita(v.id), TIPOS[v.tipo].i+' '+TIPOS[v.tipo].n+'<small>'+fmt(v.fecha)+(v.finca?' · '+esc(v.finca):'')+'</small>'); }; });
+    var vj = $('vsViejas'); if(vj) vj.onclick = function(){ cerrarModal(); window.__visitaConsulta.abrir(); };
+  }
+  function encabezado(v){
+    var x = v.extra || {};
+    if(v.tipo === 'asocebu') return x.tecnico ? 'Técnico '+x.tecnico : '';
+    if(v.tipo === 'cliente') return [x.cliente, x.empresa].filter(Boolean).join(' — ');
+    if(v.tipo === 'inventario') return x.lote ? 'Lote/potrero '+x.lote : '';
+    if(v.tipo === 'palpacion') return x.veterinario ? 'Veterinario '+x.veterinario : '';
+    return '';
+  }
+
+  /* ---- nueva visita (o editar datos de la visita) ---- */
+  function fincas(){ var c = {}; BD.forEach(function(r){ if(r.finca) c[r.finca] = 1; }); var p = ['OK','CACHO','TNJ'].filter(function(f){ return c[f]; }); return p.concat(Object.keys(c).filter(function(f){ return p.indexOf(f) < 0; }).sort()); }
+  function scrNueva(editId, animalId){
+    return function(c){
+      var v = editId ? S.visitas[editId] : null, tipo = v ? v.tipo : null, x = v ? (v.extra || {}) : {};
+      var animal = animalId != null ? byId[animalId] : null;
+      var h = (animal ? '<div class="vs-animal"><span style="font-size:22px">🐄</span><div><b>'+esc(animal.numero)+'</b><small>Se agregará a la visita apenas la crees</small></div></div>' : '')+
+        '<div class="vs-eb">Tipo de visita</div><div class="vs-tipos">'+Object.keys(TIPOS).map(function(k){ return '<button class="vs-tipo'+(tipo===k?' on':'')+'" data-t="'+k+'"'+(v?' disabled':'')+'><span class="i">'+TIPOS[k].i+'</span><b>'+TIPOS[k].n+'</b><small>'+TIPOS[k].d+'</small></button>'; }).join('')+'</div>'+
+        '<div class="vs-grid vs-f"><div><label>Fecha</label><input type="date" id="vsFecha" value="'+esc(v ? v.fecha : hoy())+'"></div>'+
+        '<div><label>Finca</label><select id="vsFinca">'+fincas().map(function(f){ return '<option'+((v ? v.finca : (animal ? animal.finca : 'OK'))===f?' selected':'')+'>'+esc(f)+'</option>'; }).join('')+'<option value="">Otra / varias</option></select></div>'+
+        '<div class="full" id="vsExtra"></div>'+
+        '<div class="full"><label>Observaciones de la visita</label><textarea id="vsObs" placeholder="Opcional">'+esc(v ? v.obs : '')+'</textarea></div></div>'+
+        '<div class="vs-btns"><button class="vs-btn verde" id="vsCrear">'+(v ? 'Guardar cambios' : 'Crear visita')+'</button></div>';
+      c.appendChild(el(h));
+      function extra(){
+        var t = tipo, e = $('vsExtra'), H = '';
+        if(t === 'asocebu') H = '<div class="vs-grid"><div class="full"><label>Técnico ASOCEBU</label><input id="vxTecnico" value="'+esc(x.tecnico||'')+'"></div></div>';
+        else if(t === 'palpacion') H = '<div class="vs-grid"><div class="full"><label>Veterinario</label><input id="vxVeterinario" value="'+esc(x.veterinario||'')+'" placeholder="Opcional"></div></div>';
+        else if(t === 'cliente') H = '<div class="vs-grid"><div><label>Nombre del cliente</label><input id="vxCliente" value="'+esc(x.cliente||'')+'"></div><div><label>Finca o empresa</label><input id="vxEmpresa" value="'+esc(x.empresa||'')+'"></div><div><label>Teléfono / WhatsApp</label><input id="vxTel" inputmode="tel" value="'+esc(x.tel||'')+'"></div><div><label>Ciudad / región</label><input id="vxCiudad" value="'+esc(x.ciudad||'')+'"></div></div>';
+        else if(t === 'inventario') H = '<div class="vs-grid"><div class="full"><label>Lote o potrero que se inventaría (opcional)</label><input id="vxLote" value="'+esc(x.lote||'')+'" placeholder="Vacío = toda la finca"></div></div>';
+        e.innerHTML = H;
+      }
+      c.querySelectorAll('.vs-tipo').forEach(function(b){ b.onclick = function(){ tipo = b.getAttribute('data-t'); c.querySelectorAll('.vs-tipo').forEach(function(z){ z.classList.toggle('on', z===b); }); extra(); }; });
+      extra();
+      $('vsCrear').onclick = function(){
+        if(!tipo){ toast('Elige el tipo de visita.'); return; }
+        var ex = {}; [['vxTecnico','tecnico'],['vxVeterinario','veterinario'],['vxCliente','cliente'],['vxEmpresa','empresa'],['vxTel','tel'],['vxCiudad','ciudad'],['vxLote','lote']].forEach(function(p){ var i = $(p[0]); if(i) ex[p[1]] = i.value.trim(); });
+        if(tipo === 'cliente' && !ex.cliente){ toast('Escribe el nombre del cliente.'); return; }
+        var nv = v || { id:uid('v'), tipo:tipo, ts0:Date.now() };
+        nv.fecha = $('vsFecha').value || hoy(); nv.finca = $('vsFinca').value; nv.extra = ex; nv.obs = $('vsObs').value.trim(); nv.ts = Date.now(); nv.equipo = ES_CEL ? 'Celular' : 'Computador';
+        S.visitas[nv.id] = nv; guardarS();
+        if(!v){ setActiva(nv.id); toast('Visita creada — queda en curso en este equipo.'); }
+        if(animal) irRaiz(scrForm(nv.id, animal.id), TIPOS[nv.tipo].i+' '+esc(animal.numero)+'<small>'+TIPOS[nv.tipo].n+' · '+fmt(nv.fecha)+'</small>');
+        else irRaiz(scrVisita(nv.id), TIPOS[nv.tipo].i+' '+TIPOS[nv.tipo].n+'<small>'+fmt(nv.fecha)+(nv.finca?' · '+esc(nv.finca):'')+'</small>');
+      };
+    };
+  }
+
+  /* ---- formulario de un animal ---- */
+  function seg(id, opts, val, cls){ return '<div class="vs-seg'+(cls?' '+cls:'')+'" id="'+id+'">'+opts.map(function(o){ return '<button type="button" data-v="'+esc(o[0])+'" class="'+(String(val)===String(o[0])?'on':'')+'">'+esc(o[1])+'</button>'; }).join('')+'</div>'; }
+  function segVal(id){ var b = $(id) && $(id).querySelector('button.on'); return b ? b.getAttribute('data-v') : ''; }
+  function wireSeg(id, cb){ var s = $(id); if(!s) return; s.addEventListener('click', function(e){ var b = e.target.closest('button[data-v]'); if(!b) return; s.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x===b); }); if(cb) cb(b.getAttribute('data-v')); }); }
+
+  function scrForm(vid, animalId){
+    return function(c){
+      var v = S.visitas[vid], r = byId[animalId]; if(!v || !r){ c.appendChild(el('<div class="vs-vacio">No se encontró el animal o la visita.</div>')); return; }
+      var reg = regDeAnimal(vid, r.numero), d = reg ? JSON.parse(JSON.stringify(reg.datos || {})) : {};
+      var H = '<div class="vs-animal"><span style="font-size:22px">'+(r.sexo==='H'?'♀':'♂')+'</span><div><b>'+esc(r.numero)+(r.nombre?' · '+esc(r.nombre):'')+'</b><small>'+esc(descAnimal(r))+'</small></div></div>'+
+        (reg ? '<p class="vs-sub">Este animal ya está en la visita: estás corrigiendo su registro.</p>' : '');
+      if(v.tipo === 'asocebu'){
+        d.scores = d.scores || {};
+        var op = '<option value="">—</option>'+[1,1.5,2,2.5,3,3.5,4,4.5,5].map(function(n){ return '<option>'+n+'</option>'; }).join('');
+        H += '<div class="vs-eb">Calificación lineal (1 a 5)</div><div class="vs-rasgos">'+RASGOS.map(function(x){ return '<div class="vs-rasgo"><span>'+x[1]+'</span><select data-r="'+x[0]+'">'+op+'</select></div>'; }).join('')+'</div>'+
+          '<div class="vs-score" id="vfScore"></div>'+
+          '<div class="vs-grid vs-f"><div><label>Resultado</label><select id="vfRes"><option value="">—</option>'+RESULTADOS.map(function(x){ return '<option'+(d.resultado===x?' selected':'')+'>'+x+'</option>'; }).join('')+'</select></div>'+
+          '<div><label>Registro asignado</label><input id="vfReg" value="'+esc(d.registro||'')+'"></div>'+
+          '<div><label>Peso (kg)</label><input id="vfPeso" inputmode="decimal" value="'+esc(d.peso||'')+'"></div><div></div>'+
+          '<div class="full"><label>Anotaciones y comentarios del técnico</label><textarea id="vfObs">'+esc(d.obs||'')+'</textarea></div></div>';
+      } else if(v.tipo === 'palpacion'){
+        var unidad = d.unidad || 'dias', tiempo = d.unidad === 'meses' ? (d.meses||'') : (d.dias||'');
+        H += '<div class="vs-eb">Resultado</div>'+seg('vfEstado', [['PREÑADA','Preñada (P+)'],['VACIA','Vacía']], d.estado||'')+
+          '<div id="vfPren" style="display:none"><div class="vs-grid vs-f" style="margin-top:10px"><div><label>Tiempo de preñez</label><input id="vfTiempo" inputmode="decimal" value="'+esc(tiempo)+'"></div><div><label>En</label>'+seg('vfUnidad', [['dias','Días'],['meses','Meses']], unidad)+'</div>'+
+          '<div class="full"><label>Toro</label><input id="vfToro" value="'+esc(d.toro||'')+'" placeholder="Número o nombre del toro"><div class="vs-chips" id="vfToros"></div></div>'+
+          '<div class="full" id="vfParto" style="font-size:13px;color:var(--ink-soft)"></div></div></div>'+
+          '<div id="vfVacia" style="display:none"><div class="vs-grid vs-f" style="margin-top:10px"><div class="full"><label>Diagnóstico</label><select id="vfDiag"><option value="">—</option>'+DIAG.map(function(x){ return '<option value="'+x[0]+'"'+(d.diag===x[0]?' selected':'')+'>'+x[1]+'</option>'; }).join('')+'</select></div></div></div>'+
+          '<div class="vs-grid vs-f" style="margin-top:10px"><div class="full"><label>Observación y comentarios</label><textarea id="vfObs">'+esc(d.obs||'')+'</textarea></div></div>';
+      } else if(v.tipo === 'pesaje'){
+        var up = ultimoPeso(r, v.fecha);
+        H += '<div class="vs-grid vs-f"><div><label>Peso (kg)</label><input id="vfPeso" inputmode="decimal" value="'+esc(d.peso||'')+'"></div><div><label>Motivo / nota</label><input id="vfNota" value="'+esc(d.nota||'')+'" placeholder="Ej: control, destete, venta"></div>'+
+          (up ? '<div class="full" style="font-size:13px;color:var(--ink-soft)">Último peso: <b>'+up.peso+' kg</b> el '+fmt(up.fecha)+'<span id="vfGan"></span></div>' : '')+
+          '<div class="full"><label>Comentarios</label><textarea id="vfObs">'+esc(d.obs||'')+'</textarea></div></div>';
+      } else if(v.tipo === 'cliente'){
+        H += '<div class="vs-eb">Interés del cliente</div>'+seg('vfInteres', INTERES, d.interes||'')+
+          '<div class="vs-grid vs-f" style="margin-top:10px"><div><label>Precio pedido ($)</label><input id="vfPP" inputmode="numeric" value="'+esc(d.precioPedido||'')+'"></div><div><label>Precio ofrecido ($)</label><input id="vfPO" inputmode="numeric" value="'+esc(d.precioOfrecido||'')+'"></div>'+
+          '<div class="full"><label>Comentarios</label><textarea id="vfObs" placeholder="Qué le gustó, condiciones, etc.">'+esc(d.obs||'')+'</textarea></div></div>';
+      } else if(v.tipo === 'inventario'){
+        H += '<div class="vs-eb">¿Está el animal?</div>'+seg('vfPres', [['si','Presente'],['no','No está']], d.presente||'si')+
+          '<div class="vs-grid vs-f" style="margin-top:10px"><div><label>Lote / potrero actual</label><input id="vfLote" value="'+esc(d.lote != null ? d.lote : (r.lote && String(r.lote).trim()!=='0' ? r.lote : (v.extra && v.extra.lote) || ''))+'"></div>'+
+          '<div><label>Peso (kg)</label><input id="vfPeso" inputmode="decimal" value="'+esc(d.peso||'')+'"></div>'+
+          '<div><label>Condición corporal (1 a 5)</label><select id="vfCC"><option value="">—</option>'+[1,1.5,2,2.5,3,3.5,4,4.5,5].map(function(n){ return '<option'+(String(d.cc)===String(n)?' selected':'')+'>'+n+'</option>'; }).join('')+'</select></div><div></div>'+
+          '<div class="full"><label>Anotaciones y comentarios</label><textarea id="vfObs">'+esc(d.obs||'')+'</textarea></div>'+
+          '<div class="full"><label style="display:flex;align-items:center;gap:8px;text-transform:none;font-family:inherit;font-size:15px;color:var(--rust-deep);font-weight:700"><input type="checkbox" id="vfDesc" style="width:22px;height:22px"'+(d.descarte?' checked':'')+'> ⚑ Marcar para posible descarte</label>'+
+          '<input id="vfMotivo" value="'+esc(d.motivo||'')+'" placeholder="Motivo del descarte" style="margin-top:6px'+(d.descarte?'':';display:none')+'"></div></div>';
+      }
+      H += '<div class="vs-btns"><button class="vs-btn verde" id="vfGuardar">Guardar</button><button class="vs-btn" id="vfGuardarOtro">Guardar y agregar otro</button>'+(reg?'<button class="vs-btn ghost" id="vfQuitar">Quitar de la visita</button>':'')+'</div>';
+      c.appendChild(el(H));
+
+      // --- vida de cada formulario ---
+      if(v.tipo === 'asocebu'){
+        c.querySelectorAll('select[data-r]').forEach(function(s){ var x = d.scores[s.getAttribute('data-r')]; if(x != null) s.value = String(x); s.onchange = score; });
+        function score(){ var sc = {}; c.querySelectorAll('select[data-r]').forEach(function(s){ if(s.value) sc[s.getAttribute('data-r')] = +s.value; }); var cal = califDe({scores:sc});
+          $('vfScore').innerHTML = cal == null ? 'Elige las calificaciones para ver el puntaje.' : 'Promedio <b>'+cal.toFixed(2)+'</b> / 5 → <b>'+(cal*20).toFixed(1)+'</b> base 100 '+letraTag(cal*20); }
+        score();
+      }
+      if(v.tipo === 'palpacion'){
+        var tor = torosPosibles(r, v.fecha);
+        $('vfToros').innerHTML = tor.length ? tor.map(function(t){ return '<button type="button" class="vs-chip" data-t="'+esc(t.toro)+'" data-d="'+(t.dias||'')+'"><b>'+esc(t.toro)+'</b> <small>'+esc(t.nota)+(t.dias?' · hace '+t.dias+' días':'')+'</small></button>'; }).join('') : '<small style="color:var(--ink-soft)">No hay servicios registrados después del último parto.</small>';
+        $('vfToros').addEventListener('click', function(e){ var b = e.target.closest('.vs-chip'); if(!b) return; $('vfToro').value = b.getAttribute('data-t'); $('vfToros').querySelectorAll('.vs-chip').forEach(function(x){ x.classList.toggle('on', x===b); });
+          var dd = b.getAttribute('data-d'); if(dd && !$('vfTiempo').value){ $('vfTiempo').value = segVal('vfUnidad')==='meses' ? (dd/30.4).toFixed(1) : dd; } parto(); });
+        function vis(){ var e = segVal('vfEstado'); $('vfPren').style.display = e==='PREÑADA' ? '' : 'none'; $('vfVacia').style.display = e==='VACIA' ? '' : 'none'; }
+        function parto(){ var t = num($('vfTiempo').value), dias = t == null ? null : (segVal('vfUnidad')==='meses' ? Math.round(t*30.4) : Math.round(t));
+          $('vfParto').innerHTML = dias ? 'Equivale a <b>'+dias+' días</b> · parto probable <b>'+fmt(addDays(v.fecha, 283 - dias))+'</b>' : ''; }
+        wireSeg('vfEstado', vis); wireSeg('vfUnidad', parto); $('vfTiempo').oninput = parto; vis(); parto();
+      }
+      if(v.tipo === 'pesaje' && $('vfGan')){ var up2 = ultimoPeso(r, v.fecha); $('vfPeso').oninput = function(){ var p = num($('vfPeso').value); if(p == null){ $('vfGan').textContent=''; return; } var dias = Math.round((new Date(v.fecha) - new Date(up2.fecha))/864e5), dif = p - up2.peso;
+        $('vfGan').innerHTML = ' → diferencia <b>'+(dif>=0?'+':'')+dif.toFixed(0)+' kg</b>'+(dias>0?' en '+dias+' días ('+(dif*1000/dias).toFixed(0)+' g/día)':''); }; $('vfPeso').oninput(); }
+      if(v.tipo === 'cliente') wireSeg('vfInteres');
+      if(v.tipo === 'inventario'){ wireSeg('vfPres'); $('vfDesc').onchange = function(){ $('vfMotivo').style.display = this.checked ? '' : 'none'; }; }
+
+      function leer(){
+        var o = {};
+        if(v.tipo === 'asocebu'){ o.scores = {}; c.querySelectorAll('select[data-r]').forEach(function(s){ if(s.value) o.scores[s.getAttribute('data-r')] = +s.value; }); o.resultado = $('vfRes').value; o.registro = $('vfReg').value.trim(); o.peso = $('vfPeso').value.trim(); o.obs = $('vfObs').value.trim(); }
+        if(v.tipo === 'palpacion'){ o.estado = segVal('vfEstado'); if(!o.estado){ toast('Elige si está preñada o vacía.'); return null; }
+          o.obs = $('vfObs').value.trim();
+          if(o.estado === 'PREÑADA'){ o.unidad = segVal('vfUnidad') || 'dias'; var t = num($('vfTiempo').value); if(o.unidad==='meses'){ o.meses = t; o.dias = t != null ? Math.round(t*30.4) : ''; } else o.dias = t != null ? Math.round(t) : ''; o.toro = $('vfToro').value.trim(); o.parto = o.dias ? addDays(v.fecha, 283 - o.dias) : ''; }
+          else { o.diag = $('vfDiag').value; } }
+        if(v.tipo === 'pesaje'){ o.peso = $('vfPeso').value.trim(); if(num(o.peso) == null){ toast('Escribe el peso.'); return null; } o.nota = $('vfNota').value.trim(); o.obs = $('vfObs').value.trim(); }
+        if(v.tipo === 'cliente'){ o.interes = segVal('vfInteres'); o.precioPedido = $('vfPP').value.trim(); o.precioOfrecido = $('vfPO').value.trim(); o.obs = $('vfObs').value.trim(); }
+        if(v.tipo === 'inventario'){ o.presente = segVal('vfPres') || 'si'; o.lote = $('vfLote').value.trim(); o.peso = $('vfPeso').value.trim(); o.cc = $('vfCC').value; o.obs = $('vfObs').value.trim(); o.descarte = $('vfDesc').checked; o.motivo = o.descarte ? $('vfMotivo').value.trim() : ''; }
+        return o;
+      }
+      function guardar(otro){
+        var o = leer(); if(!o) return;
+        var nr = reg || { id:uid('r'), visitaId:vid, animalId:r.id, numero:r.numero, ts0:Date.now() };
+        nr.datos = o; nr.ts = Date.now(); nr.deleted = false;
+        S.regs[nr.id] = nr; efectos(v, nr); S.regs[nr.id] = nr; guardarS();
+        toast(r.numero+' guardado en la visita.');
+        if(otro){ irRaiz(scrVisita(vid, 'buscar'), TIPOS[v.tipo].i+' '+TIPOS[v.tipo].n+'<small>'+fmt(v.fecha)+(v.finca?' · '+esc(v.finca):'')+'</small>'); }
+        else { irRaiz(scrVisita(vid), TIPOS[v.tipo].i+' '+TIPOS[v.tipo].n+'<small>'+fmt(v.fecha)+(v.finca?' · '+esc(v.finca):'')+'</small>'); }
+        if(window.__refrescarFichaVisitas) window.__refrescarFichaVisitas();
+      }
+      $('vfGuardar').onclick = function(){ guardar(false); };
+      $('vfGuardarOtro').onclick = function(){ guardar(true); };
+      var q = $('vfQuitar'); if(q) q.onclick = function(){ if(!confirm('¿Quitar '+r.numero+' de esta visita? También se quitan sus pendientes para el Excel.')) return; quitarPendientes(reg); reg.deleted = true; reg.ts = Date.now(); guardarS(); toast('Quitado de la visita.'); atras(); };
+    };
+  }
+
+  /* ---- una visita: animales, resumen, acciones ---- */
+  function scrVisita(vid, foco){
+    return function(c){
+      var v = S.visitas[vid]; if(!v) return;
+      var regs = regsDe(vid), act = activaId() === vid;
+      var tab = vista.tab || (foco === 'buscar' ? 'animales' : 'animales');
+      var H = '<p class="vs-sub">'+esc([fmt(v.fecha), v.finca, encabezado(v)].filter(Boolean).join(' · '))+(v.obs?'<br>'+esc(v.obs):'')+'</p>'+
+        '<div class="vs-buscar"><input type="search" id="vsBuscar" placeholder="＋ Agregar animal: escribe el número…" autocomplete="off"><div id="vsSug"></div></div>'+
+        '<div class="vs-tabs"><button data-t="animales" class="'+(tab==='animales'?'on':'')+'">Animales ('+regs.length+')</button><button data-t="resumen" class="'+(tab==='resumen'?'on':'')+'">Resumen</button></div><div id="vsTab"></div>'+
+        '<div class="vs-btns">'+(act ? '<button class="vs-btn ghost" id="vsTerminar">Terminar visita</button>' : '<button class="vs-btn verde" id="vsActivar">Continuar esta visita</button>')+
+        '<button class="vs-btn ghost" id="vsEditar">Editar datos de la visita</button><button class="vs-btn ghost" id="vsCsv">⬇ Excel de la visita</button>'+
+        (regs.length ? '<button class="vs-btn ghost" id="vsComparar">⚖ Comparar animales</button>' : '')+
+        (v.tipo==='cliente' && regs.length ? '<button class="vs-btn" id="vsPdf">📤 PDF para el cliente</button>' : '')+
+        '<button class="vs-btn ghost" id="vsBorrar" style="color:var(--rust-deep)">Borrar visita</button></div>';
+      c.appendChild(el(H));
+      // buscar y agregar
+      var inp = $('vsBuscar'), sug = $('vsSug');
+      inp.oninput = function(){ var q = N(inp.value); if(!q){ sug.innerHTML=''; return; }
+        var m = BD.filter(function(r){ return r.numero && N(r.numero).indexOf(q) >= 0; }).sort(function(a,b){ return (a.activo==='ACTIVO'?0:1)-(b.activo==='ACTIVO'?0:1) || (N(a.numero).indexOf(q)) - (N(b.numero).indexOf(q)); }).slice(0,8);
+        sug.innerHTML = m.length ? '<div class="vs-sug">'+m.map(function(r){ var ya = regDeAnimal(vid, r.numero); return '<button data-id="'+r.id+'"><b>'+esc(r.numero)+'</b>'+(r.nombre?' · '+esc(r.nombre):'')+' <small style="color:var(--ink-soft)">'+esc(descAnimal(r))+(r.activo!=='ACTIVO'?' · '+esc(r.activo):'')+(ya?' · ya registrado':'')+'</small></button>'; }).join('')+'</div>' : '<div class="vs-vacio">Sin coincidencias.</div>';
+        sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = function(){ var rr = byId[+b.getAttribute('data-id')]; ir(scrForm(vid, rr.id), TIPOS[v.tipo].i+' '+esc(rr.numero)+'<small>'+TIPOS[v.tipo].n+' · '+fmt(v.fecha)+'</small>'); }; }); };
+      if(foco === 'buscar') setTimeout(function(){ inp.focus(); }, 50);
+      c.querySelectorAll('.vs-tabs button').forEach(function(b){ b.onclick = function(){ vista.tab = b.getAttribute('data-t'); pintar(); }; });
+      var T = $('vsTab');
+      if(tab === 'animales') T.innerHTML = listaRegs(v, regs); else T.innerHTML = resumen(v, regs);
+      T.querySelectorAll('[data-edit]').forEach(function(b){ b.onclick = function(){ var rg = S.regs[b.getAttribute('data-edit')]; var rr = byNum[N(rg.numero)]; if(rr) ir(scrForm(vid, rr.id), TIPOS[v.tipo].i+' '+esc(rr.numero)+'<small>'+TIPOS[v.tipo].n+' · '+fmt(v.fecha)+'</small>'); }; });
+      T.querySelectorAll('a[data-num]').forEach(function(a){ a.onclick = function(){ var rr = byNum[N(a.getAttribute('data-num'))]; if(!rr) return; cerrarModal(); if(window.__guia) window.__guia.cerrar(); if(window.__abrirFicha) window.__abrirFicha(rr.id); }; });
+      T.querySelectorAll('[data-agregar]').forEach(function(b){ b.onclick = function(){ ir(scrForm(vid, +b.getAttribute('data-agregar')), TIPOS[v.tipo].i+' '+esc(byId[+b.getAttribute('data-agregar')].numero)+'<small>'+TIPOS[v.tipo].n+'</small>'); }; });
+      var bt;
+      if((bt = $('vsTerminar'))) bt.onclick = function(){ setActiva(null); v.cerrada = true; v.ts = Date.now(); guardarS(); toast('Visita terminada. Queda guardada para consultarla.'); pintar(); };
+      if((bt = $('vsActivar'))) bt.onclick = function(){ v.cerrada = false; v.ts = Date.now(); guardarS(); setActiva(vid); toast('Visita en curso: lo que agregues desde las fichas entra aquí.'); pintar(); };
+      $('vsEditar').onclick = function(){ ir(scrNueva(vid), 'Datos de la visita'); };
+      $('vsCsv').onclick = function(){ csv(v, regs); };
+      if((bt = $('vsComparar'))) bt.onclick = function(){ if(!window.__comparador) return; regs.slice(0,12).forEach(function(rg){ var rr = byNum[N(rg.numero)]; if(rr) window.__comparador.add(rr.id); }); cerrarModal(); if(window.__guia) window.__guia.cerrar(); window.__comparador.open(); };
+      if((bt = $('vsPdf'))) bt.onclick = function(){ pdfCliente(v, regs); };
+      $('vsBorrar').onclick = function(){ if(!confirm('¿Borrar esta visita y sus '+regs.length+' registros? También se quitan sus pendientes para el Excel.')) return; regs.forEach(function(rg){ quitarPendientes(rg); rg.deleted = true; rg.ts = Date.now(); }); v.deleted = true; v.ts = Date.now(); if(activaId()===vid) setActiva(null); guardarS(); toast('Visita borrada.'); atras(); };
+    };
+  }
+  function listaRegs(v, regs){
+    if(!regs.length) return '<div class="vs-vacio">Todavía no hay animales. Búscalos arriba o usa <b>📋 Agregar a visita</b> en la ficha.</div>';
+    return regs.map(function(rg){ var d = rg.datos || {}, pill = '';
+      if(v.tipo==='palpacion') pill = d.estado==='PREÑADA' ? '<span class="vs-pill ok">Preñada</span>' : (d.estado==='VACIA' ? '<span class="vs-pill mal">Vacía</span>' : '');
+      if(v.tipo==='asocebu' && d.resultado) pill = '<span class="vs-pill '+(/Rechaz/.test(d.resultado)?'mal':(/Observ|Pendiente/.test(d.resultado)?'med':'ok'))+'">'+esc(d.resultado)+'</span>';
+      if(v.tipo==='cliente' && d.interes) pill = '<span class="vs-pill '+(d.interes==='alto'?'ok':(d.interes==='medio'?'med':''))+'">Interés '+esc(d.interes)+'</span>';
+      if(v.tipo==='inventario') pill = d.presente==='no' ? '<span class="vs-pill mal">No está</span>' : '<span class="vs-pill ok">Presente</span>';
+      if(v.tipo==='asocebu'){ var cal = califDe(d); if(cal != null) pill += ' '+letraTag(cal*20); }
+      return '<div class="vs-reg"><div class="vs-reg-h"><a data-num="'+esc(rg.numero)+'">'+esc(rg.numero)+'</a>'+pill+(d.descarte?' <span class="vs-pill mal">⚑ descarte</span>':'')+'<span class="acc"><button data-edit="'+rg.id+'">Corregir</button></span></div>'+
+        '<p>'+esc(textoReg(v, rg))+'</p>'+(d.obs?'<p><b>Comentario:</b> '+esc(d.obs)+'</p>':'')+'</div>'; }).join('');
+  }
+  function kpis(arr){ return '<div class="vs-kpis">'+arr.map(function(k){ return '<div class="vs-kpi"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>'; }).join('')+'</div>'; }
+  function tabla(head, rows){ if(!rows.length) return '<div class="vs-vacio">Nada por ahora.</div>'; return '<div class="vs-tw"><table><thead><tr>'+head.map(function(h){ return '<th>'+esc(h)+'</th>'; }).join('')+'</tr></thead><tbody>'+rows.map(function(r){ return '<tr>'+r.map(function(x){ return '<td>'+(x==null||x===''?'—':x)+'</td>'; }).join('')+'</tr>'; }).join('')+'</tbody></table></div>'; }
+  function prom(a){ a = a.filter(function(x){ return x != null && !isNaN(x); }); return a.length ? a.reduce(function(s,x){ return s+x; },0)/a.length : null; }
+  function link(n){ return '<a data-num="'+esc(n)+'" style="font-family:IBM Plex Mono,monospace;font-weight:700;color:var(--green-deep);text-decoration:underline;cursor:pointer">'+esc(n)+'</a>'; }
+  function resumen(v, regs){
+    var H = '', D = regs.map(function(r){ return r.datos || {}; });
+    if(!regs.length) return '<div class="vs-vacio">El resumen aparece cuando agregues animales.</div>';
+    if(v.tipo === 'asocebu'){
+      var cs = regs.map(function(r){ var c = califDe(r.datos||{}); return c == null ? null : c*20; }), A = window.__asoc;
+      var porL = {}; cs.forEach(function(p){ if(p != null && A){ var l = A.letra(p); porL[l] = (porL[l]||0)+1; } });
+      var porR = {}; D.forEach(function(d){ var k = d.resultado || 'Sin resultado'; porR[k] = (porR[k]||0)+1; });
+      H += kpis([[regs.length,'animales'],[prom(cs)!=null?prom(cs).toFixed(1):'—','puntaje prom. base 100'],[prom(D.map(function(d){ return num(d.peso); }))!=null?Math.round(prom(D.map(function(d){ return num(d.peso); }))):'—','peso prom. (kg)'],[D.filter(function(d){ return d.registro; }).length,'registros asignados']]);
+      if(A) H += '<div class="vs-eb">Por calificación</div>'+tabla(['Letra','Animales',''], A.LETRAS.map(function(l){ var n = porL[l]||0; return [letraTag(l==='MB'?100:(l==='B+'?A.cortes()['B+']:(l==='B'?A.cortes().B:(l==='R+'?A.cortes()['R+']:0)))) , n, '<span class="vs-bar" style="width:'+(n*100/regs.length)+'%;min-width:'+(n?4:0)+'px"></span>']; }));
+      H += '<div class="vs-eb">Por resultado</div>'+tabla(['Resultado','Animales'], Object.keys(porR).map(function(k){ return [esc(k), porR[k]]; }));
+      H += '<div class="vs-eb">Listado</div>'+tabla(['Número','Base 100','Letra','Resultado','Peso','Comentario'], regs.map(function(r,i){ var d = r.datos||{}; return [link(r.numero), cs[i]!=null?cs[i].toFixed(1):'', cs[i]!=null?letraTag(cs[i]):'', esc(d.resultado||''), esc(d.peso||''), esc(d.obs||'')]; }));
+    }
+    if(v.tipo === 'palpacion'){
+      var pr = D.filter(function(d){ return d.estado==='PREÑADA'; }), va = D.filter(function(d){ return d.estado==='VACIA'; });
+      H += kpis([[regs.length,'palpadas'],[pr.length,'preñadas'],[va.length,'vacías'],[regs.length?Math.round(pr.length*100/regs.length)+'%':'—','% de preñez']]);
+      var porT = {}; pr.forEach(function(d){ var t = d.toro || 'Sin toro'; porT[t] = (porT[t]||0)+1; });
+      H += '<div class="vs-eb">Preñadas por toro</div>'+tabla(['Toro','Vacas'], Object.keys(porT).sort(function(a,b){ return porT[b]-porT[a]; }).map(function(t){ return [esc(t), porT[t]]; }));
+      var porD = {}; va.forEach(function(d){ var t = d.diag || 'Sin diagnóstico'; porD[t] = (porD[t]||0)+1; });
+      H += '<div class="vs-eb">Vacías por diagnóstico</div>'+tabla(['Diagnóstico','Vacas'], Object.keys(porD).map(function(t){ return [esc(t), porD[t]]; }));
+      var porM = {}; pr.forEach(function(d){ if(d.parto){ var m = d.parto.slice(0,7); porM[m] = (porM[m]||0)+1; } });
+      H += '<div class="vs-eb">Partos probables por mes</div>'+tabla(['Mes','Partos'], Object.keys(porM).sort().map(function(m){ var p = m.split('-'); return [['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][+p[1]-1]+' '+p[0], porM[m]]; }));
+      H += '<div class="vs-eb">Listado</div>'+tabla(['Vaca','Resultado','Días','Toro','Parto probable','Diagnóstico / obs.'], regs.map(function(r){ var d = r.datos||{}; return [link(r.numero), d.estado==='PREÑADA'?'Preñada':(d.estado==='VACIA'?'Vacía':''), esc(d.dias||''), esc(d.toro||''), d.parto?fmt(d.parto):'', esc([d.diag, d.obs].filter(Boolean).join(' · '))]; }));
+    }
+    if(v.tipo === 'pesaje' || v.tipo === 'inventario'){
+      var ps = D.map(function(d){ return num(d.peso); }).filter(function(x){ return x != null; });
+      if(v.tipo === 'pesaje') H += kpis([[regs.length,'pesados'],[ps.length?Math.round(prom(ps)):'—','peso prom. (kg)'],[ps.length?Math.min.apply(null,ps):'—','mínimo'],[ps.length?Math.max.apply(null,ps):'—','máximo']]);
+      if(v.tipo === 'pesaje') H += '<div class="vs-eb">Listado</div>'+tabla(['Animal','Peso','Anterior','Diferencia','Nota'], regs.map(function(r){ var d = r.datos||{}, rr = byNum[N(r.numero)], up = rr ? ultimoPeso(rr, v.fecha) : null, p = num(d.peso); var dias = up ? Math.round((new Date(v.fecha)-new Date(up.fecha))/864e5) : 0;
+        return [link(r.numero), p!=null?p+' kg':'', up?up.peso+' kg ('+fmt(up.fecha)+')':'', (up && p!=null)?((p-up.peso>=0?'+':'')+(p-up.peso).toFixed(0)+' kg'+(dias>0?' · '+((p-up.peso)*1000/dias).toFixed(0)+' g/día':'')):'', esc([d.nota, d.obs].filter(Boolean).join(' · '))]; }));
+    }
+    if(v.tipo === 'inventario'){
+      var lote = v.extra && v.extra.lote ? N(v.extra.lote) : '';
+      var esperados = BD.filter(function(r){ return r.activo==='ACTIVO' && (!v.finca || r.finca===v.finca) && (!lote || N(r.lote)===lote); });
+      var vistos = {}; regs.forEach(function(r){ vistos[N(r.numero)] = 1; });
+      var sinRev = esperados.filter(function(r){ return !vistos[N(r.numero)]; });
+      var no = regs.filter(function(r){ return (r.datos||{}).presente==='no'; }), desc = regs.filter(function(r){ return (r.datos||{}).descarte; });
+      H += kpis([[regs.length - no.length,'presentes'],[no.length,'no están'],[sinRev.length,'sin revisar'],[desc.length,'⚑ para descarte'],[ps.length?Math.round(prom(ps)):'—','peso prom.'],[prom(D.map(function(d){ return num(d.cc); }))!=null?prom(D.map(function(d){ return num(d.cc); })).toFixed(1):'—','condición prom.']]);
+      H += '<div class="vs-eb">⚑ Marcados para posible descarte</div>'+tabla(['Animal','Motivo','Comentario'], desc.map(function(r){ var d = r.datos||{}; return [link(r.numero), esc(d.motivo||''), esc(d.obs||'')]; }));
+      H += '<div class="vs-eb">No están</div>'+tabla(['Animal','Último lote','Comentario'], no.map(function(r){ var d = r.datos||{}, rr = byNum[N(r.numero)]; return [link(r.numero), esc(rr?rr.lote:''), esc(d.obs||'')]; }));
+      H += '<div class="vs-eb">Sin revisar todavía ('+sinRev.length+') — activos'+(v.finca?' de '+esc(v.finca):'')+(lote?' en el lote '+esc(v.extra.lote):'')+'</div>'+
+        (sinRev.length ? '<div class="vs-chips">'+sinRev.slice(0,150).map(function(r){ return '<button class="vs-chip" data-agregar="'+r.id+'"><b>'+esc(r.numero)+'</b> <small>'+esc([r.sexo, edadTxt(r)].filter(Boolean).join(' · '))+'</small></button>'; }).join('')+(sinRev.length>150?'<small> … y '+(sinRev.length-150)+' más</small>':'')+'</div>' : '<div class="vs-vacio">Todos los animales esperados ya fueron revisados.</div>');
+      H += '<div class="vs-eb">Listado</div>'+tabla(['Animal','Estado','Lote','Peso','CC','Comentario'], regs.map(function(r){ var d = r.datos||{}; return [link(r.numero), d.presente==='no'?'No está':'Presente', esc(d.lote||''), esc(d.peso||''), esc(d.cc||''), esc([d.descarte?'⚑ descarte'+(d.motivo?': '+d.motivo:''):'', d.obs].filter(Boolean).join(' · '))]; }));
+    }
+    if(v.tipo === 'cliente'){
+      var x = v.extra || {}, porI = {}; D.forEach(function(d){ var k = d.interes || 'sin marcar'; porI[k] = (porI[k]||0)+1; });
+      H += '<div class="vs-reg"><b>'+esc(x.cliente||'Cliente')+'</b>'+(x.empresa?' — '+esc(x.empresa):'')+'<p>'+esc([x.tel?'Tel. '+x.tel:'', x.ciudad].filter(Boolean).join(' · '))+'</p></div>';
+      H += kpis([[regs.length,'animales vistos'],[porI.alto||0,'interés alto'],[porI.medio||0,'interés medio'],[(porI.bajo||0)+(porI.ninguno||0),'bajo / ninguno']]);
+      H += '<div class="vs-eb">Animales vistos</div>'+tabla(['Animal','Raza','Edad','Interés','Pide','Ofrece','Comentario'], regs.map(function(r){ var d = r.datos||{}, rr = byNum[N(r.numero)] || {}; return [link(r.numero), esc(rr.raza||''), esc(edadTxt(rr)), esc(d.interes||''), d.precioPedido?'$'+fmtPrecio(d.precioPedido):'', d.precioOfrecido?'$'+fmtPrecio(d.precioOfrecido):'', esc(d.obs||'')]; }));
+      H += '<p class="vs-sub">Usa <b>⚖ Comparar animales</b> para verlos lado a lado (pesos, conformación) y <b>📤 PDF para el cliente</b> para enviarle la lista.</p>';
+    }
+    return H;
+  }
+
+  /* ---- Excel (CSV) de la visita ---- */
+  function csv(v, regs){
+    function c(x){ x = x == null ? '' : String(x); return /[";\n]/.test(x) ? '"'+x.replace(/"/g,'""')+'"' : x; }
+    var head = ['Visita','Fecha','Finca','Numero','Detalle','Comentario'];
+    if(v.tipo === 'asocebu') head = head.concat(RASGOS.map(function(x){ return x[1]; }).concat(['Promedio_1a5','Base_100','Letra','Resultado','Registro','Peso']));
+    if(v.tipo === 'palpacion') head = head.concat(['Resultado','Dias','Toro','Parto_probable','Diagnostico']);
+    if(v.tipo === 'pesaje') head = head.concat(['Peso','Nota']);
+    if(v.tipo === 'cliente') head = head.concat(['Interes','Precio_pedido','Precio_ofrecido']);
+    if(v.tipo === 'inventario') head = head.concat(['Presente','Lote','Peso','Condicion_corporal','Descarte','Motivo_descarte']);
+    var rows = regs.map(function(r){ var d = r.datos||{}, b = [TIPOS[v.tipo].n, v.fecha, v.finca, r.numero, textoReg(v, r), d.obs||''];
+      if(v.tipo === 'asocebu'){ var cal = califDe(d); b = b.concat(RASGOS.map(function(x){ return d.scores && d.scores[x[0]] != null ? d.scores[x[0]] : ''; })).concat([cal!=null?cal.toFixed(2):'', cal!=null?(cal*20).toFixed(1):'', cal!=null&&window.__asoc?window.__asoc.letra(cal*20):'', d.resultado||'', d.registro||'', d.peso||'']); }
+      if(v.tipo === 'palpacion') b = b.concat([d.estado||'', d.dias||'', d.toro||'', d.parto||'', d.diag||'']);
+      if(v.tipo === 'pesaje') b = b.concat([d.peso||'', d.nota||'']);
+      if(v.tipo === 'cliente') b = b.concat([d.interes||'', d.precioPedido||'', d.precioOfrecido||'']);
+      if(v.tipo === 'inventario') b = b.concat([d.presente==='no'?'NO':'SI', d.lote||'', d.peso||'', d.cc||'', d.descarte?'SI':'', d.motivo||'']);
+      return b.map(c).join(';'); });
+    var blob = new Blob(['﻿'+head.join(';')+'\r\n'+rows.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+    var u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = 'visita_'+v.tipo+'_'+v.fecha+'.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 1500);
+  }
+
+  /* ---- PDF para el cliente ---- */
+  function pdfCliente(v, regs){
+    var Jp = window.jspdf && window.jspdf.jsPDF; if(!Jp){ toast('No se pudo cargar el generador de PDF.'); return; }
+    var x = v.extra || {}, doc = new Jp({ orientation:'portrait', unit:'mm', format:'letter' }), W = 215.9, M = 14, y = 16;
+    doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(30,54,38); doc.text('GANCEBU — Animales vistos', M, y); y += 7;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(60,60,60);
+    doc.text('Visita del '+fmt(v.fecha)+(v.finca?' · Finca '+v.finca:'')+' · Jaramillo Williamson SAS', M, y); y += 6;
+    doc.text('Cliente: '+(x.cliente||'')+(x.empresa?' — '+x.empresa:'')+(x.ciudad?' · '+x.ciudad:''), M, y); y += 8;
+    var cols = [['Animal',30],['Raza',14],['Sexo',12],['Edad',20],['Padre',34],['Madre',34],['Peso',17],['Conf.',16]];
+    function cab(){ doc.setFillColor(30,54,38); doc.rect(M, y-4.5, W-2*M, 7, 'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8.5); var xx = M+1.5; cols.forEach(function(c){ doc.text(c[0], xx, y); xx += c[1]; }); y += 6; doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30); }
+    cab();
+    regs.forEach(function(r){
+      var rr = byNum[N(r.numero)] || {}, d = r.datos || {}, up = rr.numero ? ultimoPeso(rr) : null;
+      var conf = rr.calif_conf_justa != null ? (rr.calif_conf_justa*20).toFixed(0)+(window.__asoc?' '+window.__asoc.letra(rr.calif_conf_justa*20):'') : '';
+      var vals = [String(r.numero), rr.raza||'', rr.sexo==='H'?'Hembra':(rr.sexo==='M'?'Macho':''), edadTxt(rr), String(rr.padre||'').slice(0,22), String(rr.madre||'').slice(0,22), up?up.peso+' kg':(rr.peso_aj_8m?Math.round(rr.peso_aj_8m)+' kg*':''), conf];
+      if(y > 255){ doc.addPage(); y = 18; cab(); }
+      doc.setFontSize(8.5); var xx = M+1.5; vals.forEach(function(t, i){ doc.text(doc.splitTextToSize(String(t), cols[i][1]-2)[0] || '', xx, y); xx += cols[i][1]; });
+      y += 4.5;
+      var nota = [d.precioPedido?'Precio: $'+fmtPrecio(d.precioPedido):'', d.obs||''].filter(Boolean).join(' · ');
+      if(nota){ doc.setFontSize(7.5); doc.setTextColor(100,100,100); doc.splitTextToSize(nota, W-2*M-4).slice(0,2).forEach(function(l){ doc.text(l, M+3, y); y += 3.6; }); doc.setTextColor(30,30,30); }
+      doc.setDrawColor(220,214,195); doc.line(M, y-1.5, W-M, y-1.5); y += 3;
+    });
+    doc.setFontSize(7.5); doc.setTextColor(120,120,120); doc.text('Peso: último pesaje registrado (* peso ajustado a 8 meses). Conf.: conformación en base 100 y letra (MB · B+ · B · R+ · R).', M, 270);
+    var nombre = 'GANCEBU_animales_'+String(x.cliente||'cliente').replace(/[^a-zA-Z0-9]+/g,'_')+'_'+v.fecha+'.pdf';
+    try{ var file = new File([doc.output('blob')], nombre, {type:'application/pdf'});
+      if(navigator.canShare && navigator.canShare({files:[file]})) navigator.share({files:[file], title:'Animales GANCEBU', text:'Animales vistos en la visita'}).catch(function(e){ if(e && e.name!=='AbortError') doc.save(nombre); });
+      else doc.save(nombre);
+    }catch(e){ doc.save(nombre); }
+  }
+
+  /* ---------- puntos de entrada ---------- */
+  function abrir(animalId){
+    S = cargar(); abrirModal(); pila = []; vista = null;
+    var act = activaId();
+    if(animalId != null && act) ir(scrForm(act, animalId), TIPOS[S.visitas[act].tipo].i+' '+esc(byId[animalId].numero)+'<small>'+TIPOS[S.visitas[act].tipo].n+' · '+fmt(S.visitas[act].fecha)+'</small>');
+    else if(animalId != null) ir(scrNueva(null, animalId), 'Registrar visita');
+    else if(act) ir(scrVisita(act), TIPOS[S.visitas[act].tipo].i+' '+TIPOS[S.visitas[act].tipo].n+'<small>'+fmt(S.visitas[act].fecha)+'</small>');
+    else ir(scrInicio, 'Visitas');
+    if(vista && pila.length === 0 && (animalId != null || act)){ pila = [{ fn:scrInicio, titulo:'Visitas' }]; $('vsAtras').style.visibility = 'visible'; }
+  }
+  function pintarBarra(){
+    var b = $('vsActivaBar'), a = activaId(); if(!b) return;
+    if(!a){ b.classList.remove('on'); return; }
+    var v = S.visitas[a]; b.textContent = TIPOS[v.tipo].i+' Visita en curso: '+TIPOS[v.tipo].n+' ('+regsDe(a).length+')'; b.classList.add('on');
+  }
+  $('vsActivaBar').onclick = function(){ abrir(); };
+  $('vsCerrar').onclick = cerrarModal; $('vsAtras').onclick = atras;
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && $('vsModal').classList.contains('open')) cerrarModal(); });
+
+  // Botón en la ficha, al lado de "Comparar"
+  function botonFicha(){
+    var c = $('fh-cmp-btn'); if(!c || $('fh-vst-btn')) return;
+    var b = document.createElement('button'); b.id = 'fh-vst-btn'; b.type = 'button'; b.className = 'btn-pdf-prominent btn-green'; b.textContent = '📋 Agregar a visita';
+    b.onclick = function(){ var r = window.__fichaCurrent; if(r) abrir(r.id); };
+    c.parentNode.insertBefore(b, c.nextSibling);
+  }
+  botonFicha();
+  // Sección "Visitas" en la ficha
+  function seccionFicha(r){
+    var w = $('fh-visitas-wrap');
+    if(!w){ var ref = $('fh-asocebu-wrap'); if(!ref) return; w = document.createElement('div'); w.id = 'fh-visitas-wrap'; ref.parentNode.insertBefore(w, ref.nextSibling); }
+    if(!r){ w.innerHTML = ''; return; }
+    var k = N(r.numero), items = Object.keys(S.regs).map(function(x){ return S.regs[x]; }).filter(function(g){ return !g.deleted && N(g.numero) === k && S.visitas[g.visitaId] && !S.visitas[g.visitaId].deleted; })
+      .sort(function(a,b){ return (S.visitas[b.visitaId].fecha||'').localeCompare(S.visitas[a.visitaId].fecha||''); });
+    if(!items.length){ w.innerHTML = ''; return; }
+    w.innerHTML = '<div class="section-head"><h2>Visitas</h2><div class="rail"></div></div>'+items.map(function(g){ var v = S.visitas[g.visitaId], d = g.datos || {};
+      return '<div class="vs-reg"><div class="vs-reg-h"><b>'+TIPOS[v.tipo].i+' '+TIPOS[v.tipo].n+' · '+fmt(v.fecha)+'</b>'+(encabezado(v)?' <small style="color:var(--ink-soft)">'+esc(encabezado(v))+'</small>':'')+'<span class="acc"><button data-vv="'+v.id+'">Ver visita</button></span></div>'+
+        '<p>'+esc(textoReg(v, g))+'</p>'+(d.obs?'<p><b>Comentario:</b> '+esc(d.obs)+'</p>':'')+'</div>'; }).join('');
+    w.querySelectorAll('[data-vv]').forEach(function(b){ b.onclick = function(){ var v = S.visitas[b.getAttribute('data-vv')]; S = cargar(); abrirModal(); pila = [{ fn:scrInicio, titulo:'Visitas' }]; vista = null; ir(scrVisita(v.id), TIPOS[v.tipo].i+' '+TIPOS[v.tipo].n+'<small>'+fmt(v.fecha)+'</small>', true); }; });
+  }
+  window.addEventListener('ficha:change', function(e){ setTimeout(function(){ botonFicha(); S = cargar(); seccionFicha(e.detail); }, 0); });
+  window.__refrescarFichaVisitas = function(){ S = cargar(); if(window.__fichaCurrent) seccionFicha(window.__fichaCurrent); };
+
+  // Panel General: reemplaza el botón de consulta ASOCEBU por "Visitas"
+  (function(){ var res = $('asocResumen'); if(!res) return; var ent = res.previousElementSibling;
+    if(ent && ent.classList.contains('vc-entrada')){ var b = ent.querySelector('button'); b.textContent = '📋 Visitas'; b.onclick = function(){ abrir(); };
+      var sp = ent.querySelector('span'); if(sp) sp.textContent = 'Registrar y consultar visitas: ASOCEBU, palpación, pesaje, cliente o inventario — en el celular y el computador.'; } })();
+
+  // Para las banderas negras y otras vistas: comentarios y descarte desde visitas
+  window.__visitas = {
+    abrir:abrir,
+    comentariosDe:function(r){ var k = N(r.numero), out = []; S = cargar();
+      Object.keys(S.regs).forEach(function(x){ var g = S.regs[x], v = S.visitas[g.visitaId]; if(g.deleted || !v || v.deleted || N(g.numero) !== k) return; var d = g.datos || {};
+        var t = [textoReg(v, g), d.obs].filter(Boolean).join(' · ');
+        if(t) out.push({ fuente:'Visita '+TIPOS[v.tipo].n, fecha:v.fecha, texto:t, descarte:!!d.descarte, rechazo:/Rechaz/i.test(d.resultado||'') }); });
+      return out; },
+    estado:function(){ return { activa:activaId(), visitas:visitasOrden().length }; }
+  };
+  pintarBarra();
+})();
+</script>
+
 </body>
 </html>

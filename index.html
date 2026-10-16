@@ -278,9 +278,16 @@ window.__BN = (function(){
   }
   function fmt(iso){ if(!iso) return '—'; var p = String(iso).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : iso; }
 
+  var hijosPorMadre = null;
   function criasDe(r){
-    var seen = {}, out = [];
-    (r.crias_ids || []).map(function(id){ return byId[id]; }).filter(Boolean).forEach(function(c){
+    var seen = {}, out = [], k = N(r.numero), gem = /C$/.test(k) ? k.slice(0,-1) : k+'C';
+    if(!hijosPorMadre){ hijosPorMadre = {}; BD.forEach(function(c){ var m = N(c.madre); if(m) (hijosPorMadre[m] = hijosPorMadre[m] || []).push(c); }); }
+    var ids = (r.crias_ids || []).slice();
+    // el mismo animal registrado en OK y en CACHO (sufijo C): sus crías son las mismas
+    BD.forEach(function(x){ if(x !== r && x.numero && N(x.numero) === gem && x.sexo === r.sexo && (!x.fecha_nac || !r.fecha_nac || x.fecha_nac === r.fecha_nac)) ids = ids.concat(x.crias_ids || []); });
+    var lista = ids.map(function(id){ return byId[id]; }).filter(Boolean);
+    [k, gem].forEach(function(m){ (hijosPorMadre[m] || []).forEach(function(c){ if(lista.indexOf(c) < 0) lista.push(c); }); });
+    lista.forEach(function(c){
       var k = c.numero ? N(c.numero) : (c.fecha_nac+'|'+N(c.padre));
       if(!seen[k]){ seen[k] = 1; out.push(c); }
     });
@@ -356,7 +363,7 @@ window.__BN = (function(){
     }
     // ---- Comentarios que piden descarte ----
     // "MADRE DESCARTE" / "HIJA DE DESCARTE" hablan de otro animal, no de esta vaca
-    var cd = coms.filter(function(c){ return c.descarte || c.rechazo || (/DESCART/i.test(c.texto) && !/(MADRE|HIJ[OA]|CR[IÍ]A|PADRE)\s+(DE\s+)?(VACA\s+)?DESCART/i.test(c.texto)); });
+    var cd = coms.filter(function(c){ return c.descarte || c.rechazo || (/DESCART/i.test(c.texto) && !/(MADRE|HIJ[OA]|CR[IÍ]A|PADRE)\s+(DE\s+)?(VACA\s+)?DESCART/i.test(c.texto) && !/SI\s*NO\s*(QUEDA\s*)?P\s*\+|SINO\s*P\s*\+|SI\s*NP\b/i.test(c.texto)); });
     if(cd.length) extra.push({ tipo:'comentario', fecha:cd[cd.length-1].fecha, texto:'Descarte sugerido en '+cd.map(function(c){ return c.fuente.toLowerCase()+(c.fecha?' ('+fmt(c.fecha)+')':'')+': «'+c.texto+'»'; }).join(' · ') });
     // ---- Comentarios de baja fertilidad o mala crianza (solo si los datos no la marcaron ya) ----
     var tiene = function(t){ return partos.some(function(p){ return p.flags.some(function(f){ return f.tipo===t; }); }) || extra.some(function(f){ return f.tipo===t; }); };
@@ -393,7 +400,7 @@ window.__BN = (function(){
   }
   return { analizar:analizar, candidatas:candidatas, umbral:umbral,
     setUmbral:function(v){ try{ localStorage.setItem('hatos_bn_umbral_v1', JSON.stringify(+v)); }catch(e){} },
-    reset:function(){ ini = false; }, MESES_ABIERTA:MESES_ABIERTA,
+    reset:function(){ ini = false; hijosPorMadre = null; }, MESES_ABIERTA:MESES_ABIERTA,
     setCulpa:function(numero, culpa){
       var m = ls('hatos_muertes_v1', {}) || {}, k = N(numero);
       if(culpa) m[k] = { culpa:culpa, ts:Date.now() }; else delete m[k];
@@ -1661,7 +1668,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 9 oct 2026 · 4:11 p.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 16 oct 2026 · 3:25 p.m.</b>
     </div>
   </header>
 
@@ -1677,12 +1684,55 @@ window.__renderReproHead = function(o){
 
   <div class="tabs">
     <button class="tab-btn active" data-view="general">Panel General</button>
+    <button class="tab-btn tab-rep" data-view="reportes">📋 Reportes</button>
     <button class="tab-btn" data-view="ficha">Ficha Individual</button>
     <button class="tab-btn" data-view="toros">Comparativo de Toros</button>
     <button class="tab-btn" data-view="simulador">Simulador de Cruces</button>
     <button class="tab-btn" data-view="vacas">Comparativo de Vacas</button>
     <button class="tab-btn" data-view="grupos">Grupos Contemporáneos</button>
     <button class="tab-btn" data-view="actualizar">Actualizar Datos</button>
+  </div>
+
+  <div class="view" id="viewReportes">
+    <h2 class="rep-h">Reportes</h2>
+    <p class="rep-intro">Todo para revisar vacas y decidir descartes, en un solo lugar. Elija un reporte; cada uno se descarga en Excel y el de revisión también en PDF.</p>
+    <div class="rep-menu" id="rpMenu">
+      <button type="button" data-p="revision"><b>🐄 Vacas para revisión <span class="rep-n" id="rpNRev">·</span></b><span>Ojo fertilidad, si no P+ descarte, ojo leche, posible descarte y vacías, con partos, palpación y decisión sugerida</span></button>
+      <button type="button" data-p="descarte"><b>⚑ Animales para descarte <span class="rep-n" id="rpNDesc">·</span></b><span>Vacas activas con 2 o más banderas negras</span></button>
+      <button type="button" data-p="visitas"><b>🏅 Visitas ASOCEBU <span class="rep-n" id="rpNVis">·</span></b><span>Visitas guardadas en este equipo, con su Excel</span></button>
+      <button type="button" data-p="palpacion"><b>🩺 Planilla de palpación <span class="rep-n" id="rpNPalp">·</span></b><span>Para imprimir y anotar: último parto, destete, palpación anterior y banderas</span></button>
+    </div>
+    <div class="rep-panel" id="rpP-revision">
+      <div class="rep-ctrl">
+        <label>Finca <select id="rpFinca"><option value="OK">OK</option><option value="CACHO">CACHO</option><option value="TNJ">TNJ</option><option value="prod">Productivas (OK, CACHO, TNJ)</option><option value="">Todas</option></select></label>
+        <input type="search" id="rpBuscar" placeholder="Buscar vaca…" autocomplete="off">
+        <span class="rep-sp"></span>
+        <button type="button" class="rep-btn verde" id="rpExcel">⬇ Excel</button>
+        <button type="button" class="rep-btn" id="rpPdf">⬇ PDF</button>
+      </div>
+      <div class="rep-chips" id="rpChips"></div>
+      <div class="rep-kpis" id="rpKpis"></div>
+      <p class="hint" id="rpRevRes" style="margin:0 0 6px;"></p>
+      <div id="rpRevLista"></div>
+      <p class="hint" style="margin-top:14px;">Toma el comentario de la BD, las notas de la ficha y los comentarios de las visitas. El parto probable se calcula con unos 290 días de gestación. La decisión es una sugerencia para revisar, no una orden.</p>
+    </div>
+    <div class="rep-panel" id="rpP-descarte"></div>
+    <div class="rep-panel" id="rpP-visitas"><div id="rpVisLista"></div></div>
+    <div class="rep-panel" id="rpP-palpacion">
+      <div class="rep-ctrl">
+        <label>Finca <select id="plFinca"><option value="OK">OK</option><option value="CACHO">CACHO</option><option value="TNJ">TNJ</option><option value="prod">Productivas (OK, CACHO, TNJ)</option></select></label>
+        <label>Orden <select id="plOrden"><option value="numero">Número</option><option value="lote">Lote</option><option value="prioridad">Más banderas primero</option></select></label>
+        <label><input type="checkbox" id="plPren"> Incluir las ya palpadas preñadas</label>
+        <label><input type="checkbox" id="plNov"> Incluir novillas de vientre</label>
+        <span class="rep-sp"></span>
+        <button type="button" class="rep-btn" id="plPdf">🖨 PDF para imprimir</button>
+        <button type="button" class="rep-btn ghost" id="plExcel">⬇ Excel</button>
+        <button type="button" class="rep-btn verde" id="plReg">🩺 Registrar palpación en la app</button>
+      </div>
+      <p class="hint" id="plRes" style="margin:0 0 8px;"></p>
+      <div id="plLista"></div>
+      <p class="hint" style="margin-top:12px;">Vacas y novillas de vientre activas. El PDF trae columnas en blanco para anotar el resultado (P+ o V), los días, el toro y el diagnóstico. Para registrar en la app: «Registrar palpación en la app» → nueva visita de tipo Palpación; al agregar cada vaca, el formulario muestra su último parto, el destete, la palpación anterior y las banderas negras.</p>
+    </div>
   </div>
 
   <div class="view active" id="viewGeneral">
@@ -10937,6 +10987,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       {icon:'📝', label:'Registrar algo que pasó', sub:'Nacimiento, aborto, palpación, entore, pesaje, salida…', tono:'rust', onClick:function(){ go(scrRegistrar, 'Registrar', 'rama'); }},
       {icon:'🔎', label:'Consultar información', sub:'Un animal, vacas por parir, vacías, resumen de la finca', tono:'verde', onClick:function(){ go(scrConsultar, 'Consultar', 'rama'); }},
       {icon:'📊', label:'Ver informes y análisis', sub:'Comparativos de toros y vacas, grupos, simulador', tono:'oro', onClick:function(){ go(scrInformes, 'Informes', 'rama'); }},
+      {icon:'📋', label:'Reportes de vacas', sub:'Vacas para revisión, animales para descarte y visitas ASOCEBU', tono:'verde', onClick:function(){ cerrar(); if(window.__reportes) window.__reportes.abrir(); }},
       {icon:'📤', label:'Enviar lo registrado', sub: n ? n+' registro(s) pendientes por pasar al Excel' : 'No hay registros pendientes', badge: n||'', onClick:function(){ go(scrEnviar, 'Enviar', 'rama'); }}
     ], 'g-opts-home');
     var pie = document.createElement('div'); pie.className='g-pie';
@@ -12170,7 +12221,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     },
     lista:function(k){ return listaSoloLectura(k==='actual'||k==null ? S.regs : ((S.hist||[])[+k]||{}).regs); },
     resumen:function(){ var h=vistaRes().h; return h.replace(' id="avTxt"',''); },
-    abrir:function(){ if(window.__vcAbrir) window.__vcAbrir(); }
+    abrir:function(k){ if(window.__vcAbrir) window.__vcAbrir(k); },
+    regs:function(k){ var o = (k==='actual'||k==null) ? S.regs : ((S.hist||[])[+k]||{}).regs; return Object.keys(o||{}).map(function(x){ return o[x]; }).filter(function(r){ return r && !r.deleted; }).map(function(r){ var c = calif(r); return Object.assign({}, r, { calif:c }); }); },
+    cab:function(k){ return (k==='actual'||k==null) ? S.visita : (((S.hist||[])[+k]||{}).visita||{}); }
   };
   window.__visitaAsocebu = { regsDe:regsDe, add:function(id){
     if(dirty() && (!draft || draft.animalId!==id)){ S.open=true; S.min=false; S.tab='reg'; save(); paint(); toast('Guarde o descarte el animal que está registrando'); return false; }
@@ -13014,10 +13067,11 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     // en consulta no se usan los botones de la visita
     $('vcCuerpo').querySelectorAll('button').forEach(function(b){ b.remove(); });
   }
-  function abrir(){
+  function abrir(k){
     var V = window.__visitaConsulta; if(!V) return;
     var vs = V.visitas();
     $('vcVisita').innerHTML = vs.map(function(x){ var v=x.v||{}; return '<option value="'+x.k+'">'+(x.k==='actual'?'Visita en curso':'Visita anterior')+' · '+fmt(v.fecha)+(v.finca?' · '+v.finca:'')+' · '+x.n+' animales</option>'; }).join('');
+    if(typeof k === 'string' && vs.some(function(x){ return x.k===k; })) $('vcVisita').value = k;
     tab = 'lista'; M.classList.add('open'); document.body.classList.add('vc-lock'); pintar();
   }
   function cerrar(){ M.classList.remove('open'); document.body.classList.remove('vc-lock'); }
@@ -13349,6 +13403,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
           '<div><label>Peso (kg)</label><input id="vfPeso" inputmode="decimal" value="'+esc(d.peso||'')+'"></div><div></div>'+
           '<div class="full"><label>Anotaciones y comentarios del técnico</label><textarea id="vfObs">'+esc(d.obs||'')+'</textarea></div></div>';
       } else if(v.tipo === 'palpacion'){
+        H += (window.__palpCtx ? window.__palpCtx(r) : '');
         var unidad = d.unidad || 'dias', tiempo = d.unidad === 'meses' ? (d.meses||'') : (d.dias||'');
         H += '<div class="vs-eb">Resultado</div>'+seg('vfEstado', [['PREÑADA','Preñada (P+)'],['VACIA','Vacía']], d.estado||'')+
           '<div id="vfPren" style="display:none"><div class="vs-grid vs-f" style="margin-top:10px"><div><label>Tiempo de preñez</label><input id="vfTiempo" inputmode="decimal" value="'+esc(tiempo)+'"></div><div><label>En</label>'+seg('vfUnidad', [['dias','Días'],['meses','Meses']], unidad)+'</div>'+
@@ -13633,6 +13688,9 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
   // Para las banderas negras y otras vistas: comentarios y descarte desde visitas
   window.__visitas = {
     abrir:abrir,
+    lista:function(){ S = cargar(); return visitasOrden().map(function(v){ return { id:v.id, tipo:v.tipo, fecha:v.fecha, finca:v.finca, cerrada:!!v.cerrada, encabezado:encabezado(v), n:regsDe(v.id).length }; }); },
+    abrirVisita:function(vid){ S = cargar(); if(!S.visitas[vid]) return; abrirModal(); pila = [{ fn:scrInicio, titulo:'Visitas' }]; vista = null; var v = S.visitas[vid]; ir(scrVisita(vid), TIPOS[v.tipo].i+' '+TIPOS[v.tipo].n+'<small>'+fmt(v.fecha)+'</small>', true); $('vsAtras').style.visibility = 'visible'; },
+    csv:function(vid){ S = cargar(); var v = S.visitas[vid]; if(v) csv(v, regsDe(vid)); },
     comentariosDe:function(r){ var k = N(r.numero), out = []; S = cargar();
       Object.keys(S.regs).forEach(function(x){ var g = S.regs[x], v = S.visitas[g.visitaId]; if(g.deleted || !v || v.deleted || N(g.numero) !== k) return; var d = g.datos || {};
         var t = [textoReg(v, g), d.obs].filter(Boolean).join(' · ');
@@ -13641,6 +13699,636 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     estado:function(){ return { activa:activaId(), visitas:visitasOrden().length }; }
   };
   pintarBarra();
+})();
+</script>
+
+<style>
+  /* ---------- Pestaña Reportes ---------- */
+  .tab-btn.tab-rep{ font-weight:700; }
+  .rep-h{ font-family:'Fraunces',serif; font-size:28px; margin:4px 0 6px; color:var(--green-deep); }
+  .rep-intro{ margin:0 0 14px; color:var(--ink-soft); font-size:14px; max-width:860px; }
+  .rep-menu{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; margin:0 0 22px; }
+  .rep-menu button{ text-align:left; vertical-align:top; align-self:stretch; background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:14px 16px; cursor:pointer; font-family:'IBM Plex Sans',sans-serif; color:var(--ink); transition:border-color .15s, box-shadow .15s; }
+  .rep-menu button:hover{ border-color:var(--green-mid); }
+  .rep-menu button.on{ border-color:var(--green-deep); box-shadow:inset 0 0 0 1.5px var(--green-deep); background:#fff; }
+  .rep-menu b{ display:block; font-size:16px; margin-bottom:3px; }
+  .rep-menu span{ display:block; font-size:12.5px; color:var(--ink-soft); line-height:1.35; }
+  .rep-menu .rep-n{ float:right; font-family:'IBM Plex Mono',monospace; font-size:13px; background:var(--green-pale); color:var(--green-deep); border-radius:999px; padding:2px 9px; }
+  .rep-panel{ display:none; }
+  .rep-panel.on{ display:block; }
+  .rep-ctrl{ display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; margin:0 0 12px; }
+  .rep-ctrl label{ font-size:13px; color:var(--ink-soft); display:flex; gap:6px; align-items:center; }
+  .rep-ctrl select, .rep-ctrl input[type=search]{ font-family:inherit; font-size:14px; padding:7px 9px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); }
+  .rep-ctrl input[type=search]{ min-width:180px; }
+  .rep-ctrl .rep-sp{ flex:1; }
+  .rep-btn{ font-family:inherit; font-size:13px; font-weight:700; padding:8px 14px; border-radius:8px; border:none; cursor:pointer; background:var(--rust); color:#fff; }
+  .rep-btn.verde{ background:var(--green-deep); }
+  .rep-btn.ghost{ background:transparent; color:var(--green-deep); border:1.5px solid var(--green-deep); }
+  .rep-chips{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }
+  .rep-chip{ font-family:inherit; font-size:13px; border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:999px; padding:6px 12px; cursor:pointer; }
+  .rep-chip[aria-pressed="true"]{ background:var(--green-deep); border-color:var(--green-deep); color:#fff; }
+  .rep-chip small{ opacity:.75; margin-left:4px; font-family:'IBM Plex Mono',monospace; }
+  .rep-kpis{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; margin:0 0 16px; }
+  .rep-kpi{ background:var(--card); border:1px solid var(--line); border-top:4px solid var(--line); border-radius:10px; padding:10px 12px; cursor:pointer; text-align:left; font-family:inherit; color:var(--ink); }
+  .rep-kpi b{ display:block; font-family:'IBM Plex Mono',monospace; font-size:24px; }
+  .rep-kpi span{ font-size:12.5px; color:var(--ink-soft); }
+  .rep-kpi.descarte{ border-top-color:#111; } .rep-kpi.palpar{ border-top-color:var(--rust); } .rep-kpi.prenada{ border-top-color:var(--green-mid); } .rep-kpi.obs{ border-top-color:var(--brass); }
+  .rep-grp{ margin:18px 0 8px; font-family:'Fraunces',serif; font-size:19px; display:flex; gap:10px; align-items:baseline; }
+  .rep-grp small{ font-family:'IBM Plex Sans',sans-serif; font-size:13px; color:var(--ink-soft); }
+  .rep-lista{ display:grid; grid-template-columns:repeat(auto-fill, minmax(330px,1fr)); gap:10px; }
+  .rep-card{ background:var(--card); border:1px solid var(--line); border-left:5px solid var(--line); border-radius:10px; padding:11px 13px; font-size:13.5px; }
+  .rep-card.descarte{ border-left-color:#111; } .rep-card.palpar{ border-left-color:var(--rust); } .rep-card.prenada{ border-left-color:var(--green-mid); } .rep-card.obs{ border-left-color:var(--brass); }
+  .rep-card-h{ display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+  .rep-card-h a{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:17px; color:var(--ink); cursor:pointer; text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:3px; }
+  .rep-flags{ color:#111; letter-spacing:1px; }
+  .rep-sub{ color:var(--ink-soft); font-size:12.5px; margin:2px 0 6px; }
+  .rep-row{ margin:3px 0; }
+  .rep-row b{ font-weight:600; }
+  .rep-tag{ display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:999px; background:var(--paper); border:1px solid var(--line); margin:0 4px 3px 0; }
+  .rep-com{ margin-top:6px; padding-top:6px; border-top:1px dashed var(--line); font-size:12.5px; }
+  .rep-com div{ margin:2px 0; }
+  .rep-vacio{ background:var(--card); border:1px dashed var(--line); border-radius:10px; padding:18px; text-align:center; color:var(--ink-soft); }
+  .rep-vis{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; margin:0 0 10px; }
+  .rep-vis .t{ flex:1; min-width:220px; }
+  .rep-vis .t b{ font-size:15px; }
+  .rep-vis .t span{ display:block; font-size:12.5px; color:var(--ink-soft); }
+  @media (max-width:1100px){ .rep-menu{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+  @media (max-width:700px){
+    .rep-menu{ grid-template-columns:1fr; gap:8px; }
+    .rep-menu button{ padding:11px 13px; }
+    .rep-kpis{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+    .rep-lista{ grid-template-columns:1fr; }
+    .rep-ctrl input[type=search]{ min-width:0; flex:1; }
+  }
+  @media print{ .rep-ctrl, .rep-menu, .rep-chips{ display:none !important; } }
+</style>
+<script>
+/* =====================================================================
+   PESTAÑA REPORTES — un solo lugar para:
+   1. Vacas para revisión: comentarios (BD, notas de la ficha y visitas) de
+      ojo fertilidad, si no P+ descarte, ojo leche, posible descarte y vacías,
+      con partos, IEP, última palpación, banderas ⚑ y decisión sugerida.
+   2. Animales para descarte (banderas negras), traída desde Comparativo de vacas.
+   3. Visitas ASOCEBU guardadas en este equipo, con su Excel.
+   ===================================================================== */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function N(x){ return String(x==null?'':x).trim().toUpperCase(); }
+  function fmt(iso){ if(!iso) return '—'; var p=String(iso).slice(0,10).split('-'); return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso; }
+  function J(id){ try{ return JSON.parse(document.getElementById(id).textContent); }catch(e){ return {}; } }
+  function ls(k, d){ try{ var v = JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } }
+  function hoyIso(){ var d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  function meses(a,b){ return (new Date(b)-new Date(a))/86400000/30.4375; }
+  function sumaDias(iso, n){ var d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+  var GESTACION = 290;   // días aproximados de gestación cebú
+
+  /* ---------- categorías de comentario ---------- */
+  var CATS = [
+    { k:'fert',   n:'Ojo fertilidad',       rx:/OJO\s*(A\s*LA\s*)?FERTIL|REVISAR\s*(LA\s*)?FERTIL|FERTILIDAD\s*DEMORAD|BAJA\s*FERTIL|REPETIDORA|INF[EÉ]RTIL|NO\s*QUEDA/ },
+    { k:'np',     n:'Si no P+, descarte',   rx:/SI\s*NO\s*(QUEDA\s*)?P\s*\+|SINO\s*P\s*\+|SI\s*NP\b|\bNP\s*P\s*\+/ },
+    { k:'leche',  n:'Ojo leche',            rx:/OJO\s*(A\s*LA\s*)?LECHE|SIN\s*LECHE|POCA\s*LECHE|MALA\s*(DE\s*)?LECHE|REGULAR\s*DE\s*LECHE|NO\s*DA\s*LECHE|NO\s*DI[OÓ]\s*LECHE/ },
+    { k:'desc',   n:'Posible descarte',     rx:/DESCART/, no:/(MADRE|HIJ[OA]|CR[IÍ]A|PADRE)\s+(DE\s+)?(VACA\s+)?DESCART|HU[EÉ]RFAN/ },
+    { k:'vacia',  n:'Vacía',                rx:/\bVAC[IÍ]A\b/ },
+    { k:'visita', n:'Con comentario de visita ASOCEBU', fuente:/^Visita/ }
+  ];
+  var DEC = {
+    descarte:{ n:'Descarte (2 o más ⚑)', d:'Cumplen la regla de banderas negras' },
+    palpar:  { n:'Palpar o confirmar', d:'Sin palpación después del último parto' },
+    prenada: { n:'Preñadas: vigilar el parto', d:'Si pierden la preñez o no paren, pasan a descarte' },
+    obs:     { n:'En observación', d:'Revisar en la próxima palpación' }
+  };
+  var ORDEN = ['descarte','palpar','prenada','obs'];
+
+  var PALP = null;
+  function palpaciones(r){
+    if(!PALP) PALP = J('palp-source');
+    var k = N(r.numero), base = /C$/.test(k) ? k.slice(0,-1) : null, out = [];
+    [k, base].forEach(function(x){ if(!x) return; Object.keys(PALP).forEach(function(pk){ if(N(pk)===x) (PALP[pk]||[]).forEach(function(p){ out.push({ fecha:p.fecha, estado:p.estado, toro:p.toro, dias:/^\d+$/.test(String(p.hallazgo||'').trim()) ? +p.hallazgo : null, diag:/^\d+$/.test(String(p.hallazgo||'').trim()) ? '' : (p.hallazgo||''), fuente:'BD' }); }); }); });
+    // palpaciones registradas en Actualizar Datos / modo guiado (pendientes de pasar al Excel)
+    var U = window.__updList ? window.__updList() : ls('hatosDJW_updates_v1', []);
+    (U||[]).forEach(function(u){ if(u && u.tipo==='palpacion' && N(u.numero)===k){ var d=u.detalle||{}; out.push({ fecha:d.fecha||u.fecha, estado:d.resultado||d.estado||'', toro:d.toro||'', dias:d.dias?+d.dias:null, diag:d.hallazgo||'', parto:d.parto_probable||'', fuente:'Pendiente' }); } });
+    // palpaciones de las visitas (formato nuevo)
+    var V = ls('hatos_visitas_v1', {}) || {}, VS = V.visitas||{}, VR = V.regs||{};
+    Object.keys(VR).forEach(function(x){ var g=VR[x], v=VS[g.visitaId]; if(!g || g.deleted || !v || v.deleted || v.tipo!=='palpacion' || N(g.numero)!==k) return; var d=g.datos||{};
+      out.push({ fecha:v.fecha, estado:d.estado==='PREÑADA'?'Preñada':(d.estado==='VACIA'?'Vacía':(d.estado||'')), toro:d.toro||'', dias:d.dias?+d.dias:null, diag:d.diag||'', parto:d.parto||'', fuente:'Visita' }); });
+    out.sort(function(a,b){ return String(a.fecha||'0000').localeCompare(String(b.fecha||'0000')); });
+    return out;
+  }
+  function esPrenada(p){ return p && /^P\s*\+|PRE[ÑN]/i.test(p.estado||''); }
+  function esDudosa(p){ return p && /^P\s*\*|DUDOS/i.test(p.estado||''); }
+
+  function categorias(coms){
+    var out = {};
+    coms.forEach(function(c){
+      var t = N(c.texto);
+      CATS.forEach(function(k){
+        if(k.fuente){ if(k.fuente.test(c.fuente||'') && /ASOCEBU/i.test(c.fuente||'')) out[k.k] = 1; return; }
+        if(k.rx.test(t) && !(k.no && k.no.test(t))) out[k.k] = 1;
+      });
+      if(c.descarte || c.rechazo) out.desc = 1;
+    });
+    return Object.keys(out);
+  }
+
+  function analizarVaca(r){
+    var a = window.__BN.analizar(r);
+    var cats = categorias(a.comentarios);
+    if(!cats.length) return null;
+    var partos = a.partos, ult = partos.length ? partos[partos.length-1].fecha : null;
+    var P = palpaciones(r), lp = P.length ? P[P.length-1] : null;
+    var lpFecha = lp && lp.fecha ? lp.fecha : null;
+    var abortoDespues = lp && a.abortos.some(function(x){ return x.fecha && (!lpFecha || x.fecha >= lpFecha); });
+    var palpDespuesParto = lp && (!ult || !lpFecha || lpFecha >= ult);
+    var esperado = null;
+    if(lp && (esPrenada(lp) || esDudosa(lp)) && !abortoDespues){
+      if(lp.parto) esperado = lp.parto;
+      else if(lpFecha && lp.dias != null) esperado = sumaDias(lpFecha, GESTACION - lp.dias);
+    }
+    var dec, nota = '';
+    if(a.banderas.length >= 2) dec = 'descarte';
+    else if(lp && palpDespuesParto && (esPrenada(lp) || esDudosa(lp)) && !abortoDespues){
+      dec = 'prenada';
+      if(esDudosa(lp)) nota = 'Palpación dudosa (P*): confirmar.';
+      if(esperado && esperado < hoyIso()) nota = (nota?nota+' ':'')+'Ya pasó la fecha probable de parto y no hay parto registrado.';
+      if(!lpFecha) nota = (nota?nota+' ':'')+'La palpación no tiene fecha.';
+    }
+    else if(!lp || !palpDespuesParto || abortoDespues) dec = 'palpar';
+    else dec = 'obs';
+    if(dec === 'descarte' && lp && palpDespuesParto && esPrenada(lp) && !abortoDespues) nota = 'Está palpada preñada: decidir si se espera el parto.';
+    return { r:r, a:a, cats:cats, ult:ult, mesesUlt: ult ? meses(ult, hoyIso()) : null, lp:lp, esperado:esperado, dec:dec, nota:nota };
+  }
+
+  /* ---------- estado del panel ---------- */
+  var st = { finca:'OK', cats:{}, q:'', dec:'' };
+  CATS.forEach(function(c){ st.cats[c.k] = c.k !== 'visita'; });
+  try{ var g = JSON.parse(localStorage.getItem('hatos_reportes_v1')||'null'); if(g){ if(g.finca!=null) st.finca=g.finca; if(g.cats) Object.keys(g.cats).forEach(function(k){ if(k in st.cats) st.cats[k]=!!g.cats[k]; }); } }catch(e){}
+  function guardarSt(){ try{ localStorage.setItem('hatos_reportes_v1', JSON.stringify({ finca:st.finca, cats:st.cats, panel:panel })); }catch(e){} }
+  var panel = (function(){ try{ return (JSON.parse(localStorage.getItem('hatos_reportes_v1')||'null')||{}).panel || 'revision'; }catch(e){ return 'revision'; } })();
+
+  var todas = [], vista = [];
+  function calcular(){
+    if(!window.__BN) return;
+    window.__BN.reset();
+    var F = st.finca === 'prod' ? ['OK','CACHO','TNJ'] : (st.finca ? [st.finca] : null);
+    todas = [];
+    (window.__BD__||[]).forEach(function(r){
+      if(r.sexo !== 'H' || r.activo !== 'ACTIVO' || !r.numero) return;
+      if(F && F.indexOf(r.finca) < 0) return;
+      var x = analizarVaca(r); if(x) todas.push(x);
+    });
+  }
+  function filtrar(){
+    var q = N(st.q);
+    vista = todas.filter(function(x){
+      if(!x.cats.some(function(c){ return st.cats[c]; })) return false;
+      if(st.dec && x.dec !== st.dec) return false;
+      if(q && N(x.r.numero).indexOf(q) < 0 && N(x.r.nombre).indexOf(q) < 0) return false;
+      return true;
+    });
+    vista.sort(function(a,b){ return ORDEN.indexOf(a.dec)-ORDEN.indexOf(b.dec) || b.a.banderas.length-a.a.banderas.length || String(a.r.numero).localeCompare(String(b.r.numero),'es',{numeric:true}); });
+  }
+
+  function califTxt(r){
+    var v = r.calif_conf_justa != null ? r.calif_conf_justa : r.calif_conf;
+    if(v == null) return '';
+    var A = window.__asoc; return 'Conf. '+(+v).toFixed(2)+(A ? ' ('+A.letra(A.b100(+v))+')' : '');
+  }
+  function palpTxt(p){
+    if(!p) return 'Sin palpación registrada';
+    return [p.estado||'—', p.dias!=null?p.dias+' días':'', p.toro?'toro '+p.toro:'', p.diag||'', p.fecha?'('+fmt(p.fecha)+')':'(sin fecha)', p.fuente==='Pendiente'?'· pendiente de pasar al Excel':''].filter(Boolean).join(' ');
+  }
+  function catNombre(k){ for(var i=0;i<CATS.length;i++) if(CATS[i].k===k) return CATS[i].n; return k; }
+
+  function tarjeta(x){
+    var r = x.r, a = x.a, n = a.banderas.length;
+    var iep = a.iep_prom != null ? 'IEP prom. '+a.iep_prom.toFixed(1)+' m' : '';
+    var sub = [r.finca, r.raza, r.edad_actual!=null ? r.edad_actual.toFixed(1)+' años' : '', califTxt(r)].filter(Boolean).join(' · ');
+    var coms = a.comentarios.map(function(c){ return '<div><b>'+esc(c.fuente)+(c.fecha?' ('+fmt(c.fecha)+')':'')+':</b> '+esc(c.texto)+'</div>'; }).join('');
+    return '<div class="rep-card '+x.dec+'">'+
+      '<div class="rep-card-h"><a data-id="'+r.id+'">'+esc(r.numero)+'</a>'+(n?'<span class="rep-flags" title="'+n+' banderas negras">'+'⚑'.repeat(Math.min(n,8))+'</span>':'')+'</div>'+
+      '<div class="rep-sub">'+esc(sub)+'</div>'+
+      '<div>'+x.cats.map(function(c){ return '<span class="rep-tag">'+esc(catNombre(c))+'</span>'; }).join('')+'</div>'+
+      '<div class="rep-row"><b>Partos:</b> '+a.partos.length+(iep?' · '+esc(iep):'')+(x.ult?' · último '+fmt(x.ult)+' ('+x.mesesUlt.toFixed(0)+' meses)':'')+'</div>'+
+      '<div class="rep-row"><b>Palpación:</b> '+esc(palpTxt(x.lp))+(x.esperado?' · parto probable '+fmt(x.esperado):'')+'</div>'+
+      (n ? '<div class="rep-row"><b>Banderas:</b> '+a.banderas.map(function(b){ return esc(window.__BN.ICON[b.tipo]); }).join(' · ')+'</div>' : '')+
+      (x.nota ? '<div class="rep-row" style="color:var(--rust-deep)"><b>Ojo:</b> '+esc(x.nota)+'</div>' : '')+
+      (coms ? '<div class="rep-com">'+coms+'</div>' : '')+
+    '</div>';
+  }
+
+  function pintarRevision(){
+    var box = $('rpRevLista'); if(!box) return;
+    filtrar();
+    // conteos por categoría (sobre todas, para que el usuario vea qué hay)
+    $('rpChips').innerHTML = CATS.map(function(c){ var n = todas.filter(function(x){ return x.cats.indexOf(c.k)>=0; }).length;
+      return '<button type="button" class="rep-chip" data-c="'+c.k+'" aria-pressed="'+(st.cats[c.k]?'true':'false')+'">'+esc(c.n)+'<small>'+n+'</small></button>'; }).join('');
+    $('rpChips').querySelectorAll('[data-c]').forEach(function(b){ b.onclick = function(){ var k=b.getAttribute('data-c'); st.cats[k]=!st.cats[k]; guardarSt(); pintarRevision(); }; });
+    var cnt = {}; ORDEN.forEach(function(d){ cnt[d] = 0; });
+    var base = todas.filter(function(x){ return x.cats.some(function(c){ return st.cats[c]; }); });
+    base.forEach(function(x){ cnt[x.dec]++; });
+    $('rpKpis').innerHTML = ORDEN.map(function(d){ return '<button type="button" class="rep-kpi '+d+'" data-d="'+d+'" aria-pressed="'+(st.dec===d)+'" style="'+(st.dec===d?'background:#fff;box-shadow:inset 0 0 0 1.5px var(--green-deep)':'')+'"><b>'+cnt[d]+'</b><span>'+esc(DEC[d].n)+'</span></button>'; }).join('');
+    $('rpKpis').querySelectorAll('[data-d]').forEach(function(b){ b.onclick = function(){ var d=b.getAttribute('data-d'); st.dec = st.dec===d ? '' : d; pintarRevision(); }; });
+    $('rpRevRes').textContent = vista.length+' vaca'+(vista.length===1?'':'s')+' activa'+(vista.length===1?'':'s')+' con estos comentarios'+(st.dec?' · solo «'+DEC[st.dec].n+'» (toque la tarjeta otra vez para ver todas)':'')+'.';
+    if(!vista.length){ box.innerHTML = '<div class="rep-vacio">Ninguna vaca activa tiene esos comentarios con este filtro.</div>'; return; }
+    var h = '';
+    ORDEN.forEach(function(d){
+      var L = vista.filter(function(x){ return x.dec===d; }); if(!L.length) return;
+      h += '<div class="rep-grp">'+esc(DEC[d].n)+' <small>'+L.length+' · '+esc(DEC[d].d)+'</small></div><div class="rep-lista">'+L.map(tarjeta).join('')+'</div>';
+    });
+    box.innerHTML = h;
+    box.querySelectorAll('a[data-id]').forEach(function(el){ el.onclick = function(){ if(window.__abrirFicha) window.__abrirFicha(parseInt(el.getAttribute('data-id'),10)); }; });
+    var nb = $('rpNRev'); if(nb) nb.textContent = base.length;
+  }
+
+  /* ---------- descargas ---------- */
+  function filasExport(){
+    var head = ['Numero','Nombre','Finca','Raza','Edad_anos','Calif_conf','Comentarios_marcados','Partos','IEP_promedio_meses','Ultimo_parto','Meses_desde_ultimo_parto','Ultima_palpacion','Fecha_palpacion','Parto_probable','Banderas_negras','Detalle_banderas','Decision_sugerida','Observacion','Comentarios','Decision_final'];
+    var rows = vista.map(function(x){ var r=x.r, a=x.a, cv = r.calif_conf_justa!=null?r.calif_conf_justa:r.calif_conf;
+      return [r.numero, r.nombre||'', r.finca, r.raza, r.edad_actual!=null?+r.edad_actual.toFixed(1):'', cv!=null?+(+cv).toFixed(2):'',
+        x.cats.map(catNombre).join(', '), a.partos.length, a.iep_prom!=null?+a.iep_prom.toFixed(1):'', x.ult||'', x.mesesUlt!=null?+x.mesesUlt.toFixed(1):'',
+        x.lp ? palpTxt(x.lp) : 'Sin palpación', x.lp&&x.lp.fecha?x.lp.fecha:'', x.esperado||'', a.banderas.length,
+        a.banderas.map(function(b){ return window.__BN.ICON[b.tipo]+': '+b.texto; }).join(' | '), DEC[x.dec].n, x.nota||'',
+        a.comentarios.map(function(c){ return c.fuente+(c.fecha?' ('+fmt(c.fecha)+')':'')+': '+c.texto; }).join(' | '), '' ]; });
+    return { head:head, rows:rows };
+  }
+  function bajar(nombre, blob){ var u=URL.createObjectURL(blob), el=document.createElement('a'); el.href=u; el.download=nombre; document.body.appendChild(el); el.click(); el.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 1500); }
+  function nombreBase(){ return 'vacas_para_revision_'+(st.finca==='prod'?'productivas':(st.finca||'todas'))+'_'+hoyIso(); }
+  function excel(){
+    if(!vista.length){ alert('La lista está vacía.'); return; }
+    var F = filasExport();
+    if(!window.XLSX){
+      var csv = [F.head].concat(F.rows).map(function(r){ return r.map(function(c){ c=String(c==null?'':c); return /[;"\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c; }).join(';'); }).join('\r\n');
+      bajar(nombreBase()+'.csv', new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'})); return;
+    }
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet([F.head].concat(F.rows));
+    ws['!cols'] = F.head.map(function(h){ return {wch: /Comentarios$|Detalle|Ultima_palpacion|Observacion/.test(h) ? 48 : (h==='Decision_final'?24:14)}; });
+    ws['!rows'] = [{hpt:38}];
+    ws['!autofilter'] = { ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:F.rows.length, c:F.head.length-1}}) };
+    ws['!freeze'] = { xSplit:0, ySplit:1 }; ws['!views'] = [{ state:'frozen', ySplit:1 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'VACAS');
+    var gu = XLSX.utils.aoa_to_sheet([
+      ['GUIA — Vacas para revisión'],
+      ['Generado', hoyIso()+' desde el tablero Hatos Datos (pestaña Reportes)'],
+      ['Incluye', 'Hembras activas con comentario de: '+CATS.filter(function(c){ return st.cats[c.k]; }).map(function(c){ return c.n; }).join(', ')],
+      ['Fuentes', 'Comentario de la BD, notas de la ficha, visitas ASOCEBU y palpaciones'],
+      ['Banderas negras', 'Parto muy abierto (más de 20 meses), destete bajo, aborto, cría muerta por la madre, descarte sugerido'],
+      ['Decisión sugerida', 'Descarte = 2 o más banderas · Palpar = sin palpación después del último parto · Preñada = palpada P+ · Observación = el resto'],
+      ['Parto probable', 'Fecha de palpación + ('+GESTACION+' − días de preñez). Aproximado.'],
+      ['Decision_final', 'Columna libre para escribir la decisión tomada']
+    ]);
+    gu['!cols'] = [{wch:20},{wch:110}];
+    XLSX.utils.book_append_sheet(wb, gu, 'GUIA');
+    XLSX.writeFile(wb, nombreBase()+'.xlsx');
+  }
+  function pdf(){
+    if(!vista.length){ alert('La lista está vacía.'); return; }
+    var Jp = window.jspdf && window.jspdf.jsPDF; if(!Jp){ alert('No se pudo cargar el generador de PDF. Intente con conexión a internet.'); return; }
+    var doc = new Jp({ orientation:'landscape', unit:'mm', format:'letter' }), W = 279.4, H = 215.9, M = 10, y = 14;
+    function t(s){ return String(s==null?'':s).replace(/⚑/g,'').normalize('NFC'); }
+    doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(30,54,38);
+    doc.text('GANCEBU — Vacas para revisión', M, y); y += 6;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(80,80,80);
+    doc.text('Generado el '+fmt(hoyIso())+' · '+(st.finca==='prod'?'Fincas productivas':(st.finca||'Todas las fincas'))+' · '+vista.length+' vacas · Jaramillo Williamson SAS', M, y); y += 7;
+    var cols = [['Vaca',22],['Finca',15],['Edad',11],['Comentario',62],['Partos / IEP',22],['Último parto',22],['Palpación',50],['Banderas',30],['Sugerido',25]];
+    function cab(){ doc.setFillColor(30,54,38); doc.rect(M, y-4.2, W-2*M, 6.5, 'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8); var xx=M+1.2; cols.forEach(function(c){ doc.text(c[0], xx, y); xx+=c[1]; }); y+=5.5; doc.setTextColor(36,29,20); doc.setFont('helvetica','normal'); }
+    cab();
+    var grupo = null;
+    vista.forEach(function(x){
+      var r=x.r, a=x.a;
+      if(grupo !== x.dec){ grupo = x.dec; if(y > H-20){ doc.addPage(); y=14; cab(); } doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(126,52,19); doc.text(t(DEC[x.dec].n), M, y+1); y += 5; doc.setTextColor(36,29,20); doc.setFont('helvetica','normal'); }
+      var com = a.comentarios.map(function(c){ return c.texto; }).join(' · ');
+      var cells = [r.numero, r.finca, r.edad_actual!=null?r.edad_actual.toFixed(1)+' a':'', com,
+        a.partos.length+(a.iep_prom!=null?' · '+a.iep_prom.toFixed(1)+' m':''), x.ult?fmt(x.ult)+' ('+x.mesesUlt.toFixed(0)+' m)':'—',
+        palpTxt(x.lp)+(x.esperado?' · parto ~'+fmt(x.esperado):''), a.banderas.map(function(b){ return window.__BN.ICON[b.tipo]; }).join(', ') || '—', DEC[x.dec].n.replace(/ \(.*\)/,'')+(x.nota?' — '+x.nota:'')];
+      doc.setFontSize(7.6);
+      var lines = cells.map(function(c,i){ return doc.splitTextToSize(t(c), cols[i][1]-2); });
+      var hRow = Math.max.apply(null, lines.map(function(l){ return l.length; })) * 3.3 + 1.6;
+      if(y + hRow > H-10){ doc.addPage(); y=14; cab(); }
+      var xx = M+1.2; lines.forEach(function(l,i){ doc.text(l, xx, y); xx += cols[i][1]; });
+      y += hRow; doc.setDrawColor(205,195,168); doc.line(M, y-2.6, W-M, y-2.6);
+    });
+    doc.save(nombreBase()+'.pdf');
+  }
+
+  /* ---------- Visitas ASOCEBU ---------- */
+  function excelVisitaAnterior(k){
+    var VC = window.__visitaConsulta; if(!VC || !VC.regs) return;
+    var v = VC.cab(k) || {}, regs = VC.regs(k).sort(function(a,b){ return String(a.numero).localeCompare(String(b.numero),'es',{numeric:true}); });
+    var head = ['Numero','Sexo','Resultado','Motivo','Registro_asignado','Peso_kg','Calif_1a5','Base_100','Comentario_tecnico','Tarea_pendiente'];
+    var rows = regs.map(function(r){ var c = r.calif; return [r.numero||'', r.sexo||'', r.resultado||'', (r.motivo||[]).join(', '), r.registroAsignado||'', r.peso||'', c!=null?+c.toFixed(2):'', c!=null?+(c*20).toFixed(1):'', r.obs||'', r.tarea||'']; });
+    var base = 'visita_asocebu_'+(v.finca||'')+'_'+(v.fecha||hoyIso());
+    if(!window.XLSX){ var csv=[head].concat(rows).map(function(r){ return r.map(function(c){ c=String(c==null?'':c); return /[;"\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c; }).join(';'); }).join('\r\n'); bajar(base+'.csv', new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'})); return; }
+    var wb = XLSX.utils.book_new(), ws = XLSX.utils.aoa_to_sheet([head].concat(rows));
+    ws['!cols'] = head.map(function(h){ return {wch: /Comentario|Tarea|Motivo/.test(h) ? 46 : 13}; }); ws['!rows'] = [{hpt:38}];
+    ws['!autofilter'] = { ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:rows.length, c:head.length-1}}) }; ws['!views'] = [{ state:'frozen', ySplit:1 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'ANIMALES');
+    var gu = XLSX.utils.aoa_to_sheet([['GUIA — Visita ASOCEBU'],['Fecha', v.fecha||''],['Finca', v.finca||''],['Técnico', v.tecnico||''],['Acompañante', v.acomp||''],['Objetivos', (v.obj||[]).join(', ')],['Observaciones', v.obs||''],['Compromisos', v.comp||''],['Animales', regs.length]]);
+    gu['!cols'] = [{wch:18},{wch:100}]; XLSX.utils.book_append_sheet(wb, gu, 'GUIA');
+    XLSX.writeFile(wb, base+'.xlsx');
+  }
+  function pintarVisitas(){
+    var box = $('rpVisLista'); if(!box) return;
+    var h = '', n = 0;
+    var VC = window.__visitaConsulta;
+    if(VC){ try{ VC.visitas().forEach(function(x){ if(!x.n) return; n++; var v = x.v||{};
+      h += '<div class="rep-vis"><div class="t"><b>🏅 Visita ASOCEBU · '+esc(fmt(v.fecha))+(v.finca?' · '+esc(v.finca):'')+'</b><span>'+x.n+' animales'+(v.tecnico?' · Técnico '+esc(v.tecnico):'')+' · '+(x.k==='actual'?'visita en curso':'visita anterior')+' · formato anterior</span></div>'+
+        '<button type="button" class="rep-btn ghost" data-vc="'+esc(x.k)+'">Ver visita</button><button type="button" class="rep-btn verde" data-vx="'+esc(x.k)+'">⬇ Excel de la visita</button></div>'; }); }catch(e){} }
+    var NV = window.__visitas && window.__visitas.lista ? window.__visitas.lista() : [];
+    NV.filter(function(v){ return v.tipo==='asocebu'; }).forEach(function(v){ n++;
+      h += '<div class="rep-vis"><div class="t"><b>🏅 Visita ASOCEBU · '+esc(fmt(v.fecha))+(v.finca?' · '+esc(v.finca):'')+'</b><span>'+v.n+' animales'+(v.encabezado?' · '+esc(v.encabezado):'')+(v.cerrada?' · terminada':' · en curso')+'</span></div>'+
+        '<button type="button" class="rep-btn ghost" data-nv="'+esc(v.id)+'">Ver visita</button><button type="button" class="rep-btn verde" data-nx="'+esc(v.id)+'">⬇ Excel de la visita</button></div>'; });
+    var otras = NV.filter(function(v){ return v.tipo!=='asocebu'; }).length;
+    if(!n) h = '<div class="rep-vacio"><b>No hay visitas ASOCEBU guardadas en este equipo.</b><br>Las visitas se guardan en el equipo y el navegador donde se registran (por ejemplo, la app instalada y Chrome guardan aparte). Abra el tablero en ese equipo para verlas, o registre una nueva.</div>';
+    h += '<div class="rep-ctrl" style="margin-top:12px"><button type="button" class="rep-btn" id="rpVisNueva">＋ Registrar visita ASOCEBU</button>'+(otras?'<span class="hint" style="margin:0">También hay '+otras+' visita'+(otras===1?'':'s')+' de otro tipo (palpación, pesaje, cliente o inventario): <a href="#" id="rpVisOtras">ver todas</a>.</span>':'')+'</div>';
+    box.innerHTML = h;
+    box.querySelectorAll('[data-vc]').forEach(function(b){ b.onclick = function(){ VC.abrir(b.getAttribute('data-vc')); }; });
+    box.querySelectorAll('[data-vx]').forEach(function(b){ b.onclick = function(){ excelVisitaAnterior(b.getAttribute('data-vx')); }; });
+    box.querySelectorAll('[data-nv]').forEach(function(b){ b.onclick = function(){ window.__visitas.abrirVisita(b.getAttribute('data-nv')); }; });
+    box.querySelectorAll('[data-nx]').forEach(function(b){ b.onclick = function(){ window.__visitas.csv(b.getAttribute('data-nx')); }; });
+    if($('rpVisNueva')) $('rpVisNueva').onclick = function(){ if(window.__visitas) window.__visitas.abrir(); };
+    if($('rpVisOtras')) $('rpVisOtras').onclick = function(e){ e.preventDefault(); if(window.__visitas) window.__visitas.abrir(); };
+    var nb = $('rpNVis'); if(nb) nb.textContent = n;
+  }
+
+  /* ---------- armado ---------- */
+  var listo = false;
+  function mostrar(p){
+    panel = p; guardarSt();
+    document.querySelectorAll('#rpMenu [data-p]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-p')===p); });
+    document.querySelectorAll('#viewReportes .rep-panel').forEach(function(x){ x.classList.toggle('on', x.id==='rpP-'+p); });
+    if(p==='revision'){ calcular(); pintarRevision(); }
+    if(p==='descarte'){ var f=$('bnFinca'); if(f && f.onchange) f.onchange(); }
+    if(p==='visitas') pintarVisitas();
+    if(p==='palpacion' && window.__planilla) window.__planilla.pintar();
+  }
+  function fincasSel(){ return st.finca==='prod' ? ['OK','CACHO','TNJ'] : (st.finca ? [st.finca] : null); }
+  function contarDescarte(){ try{ window.__BN.reset(); var n = window.__BN.candidatas({min:2, fincas:fincasSel()}).length; var nb=$('rpNDesc'); if(nb) nb.textContent = n; }catch(e){} }
+  function init(){
+    var V = $('viewReportes'); if(!V || listo) return; listo = true;
+    // Traer la lista "Animales para descarte" desde Comparativo de vacas
+    var lista = $('bnLista'), dest = $('rpP-descarte');
+    if(lista && dest){
+      var head = null, el = lista.previousElementSibling;
+      while(el){ if(el.classList && el.classList.contains('section-head')){ head = el; break; } el = el.previousElementSibling; }
+      var nodos = []; el = head;
+      while(el){ nodos.push(el); if(el === lista) break; el = el.nextElementSibling; }
+      nodos.forEach(function(n){ if(n.classList.contains('section-head')){ n.style.marginTop = '4px'; } dest.appendChild(n); });
+      if(head && head.parentNode === dest){ var aviso = document.createElement('p'); aviso.className='hint'; aviso.style.cssText='margin:-4px 0 14px;';
+        var lnk = document.createElement('div'); lnk.className='hint'; lnk.innerHTML = '«Animales para descarte» ahora está en la pestaña <a href="#" id="rpIrDescarte"><b>📋 Reportes</b></a>.';
+        var vac = $('viewVacas'); if(vac){ var sh = vac.querySelectorAll('.section-head'); var ref = null; sh.forEach(function(s){ if(/sugeridas para descarte/i.test(s.textContent)) ref = s; }); (ref ? vac.insertBefore(lnk, ref) : vac.appendChild(lnk)); }
+        var ir = $('rpIrDescarte'); if(ir) ir.onclick = function(e){ e.preventDefault(); abrirReportes('descarte'); };
+      }
+    }
+    $('rpMenu').querySelectorAll('[data-p]').forEach(function(b){ b.onclick = function(){ mostrar(b.getAttribute('data-p')); }; });
+    var sf = $('rpFinca'); sf.value = st.finca;
+    var bf = $('bnFinca'); if(bf) bf.value = st.finca;
+    sf.onchange = function(){ st.finca = sf.value; if(bf){ bf.value = st.finca; } guardarSt(); calcular(); pintarRevision(); contarDescarte(); };
+    if(bf) bf.addEventListener('change', function(){ st.finca = bf.value; sf.value = st.finca; guardarSt(); contarDescarte(); });
+    var sq = $('rpBuscar'); sq.oninput = function(){ st.q = sq.value; pintarRevision(); };
+    $('rpExcel').onclick = excel; $('rpPdf').onclick = pdf;
+  }
+  function alAbrir(){ init(); calcular(); pintarRevision(); pintarVisitas(); contarDescarte(); mostrar(panel); }
+  function abrirReportes(p){
+    if(p) panel = p;
+    var b = document.querySelector('.tab-btn[data-view="reportes"]'); if(b) b.click();
+    window.scrollTo(0, 0);
+  }
+  window.__reportes = { abrir:abrirReportes, palpaciones:palpaciones, esPrenada:esPrenada };
+  document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('.tab-btn'); if(b && b.getAttribute('data-view')==='reportes') setTimeout(alAbrir, 0); });
+  function arranque(){ init(); if(/^#reportes/.test(location.hash)) setTimeout(function(){ abrirReportes(location.hash.split('-')[1]); }, 300); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(arranque, 50); }); else setTimeout(arranque, 50);
+})();
+</script>
+<style>
+  /* ---------- Planilla de palpación + historia en el formulario ---------- */
+  .pl-tabla-wrap{ overflow-x:auto; background:var(--card); border:1px solid var(--line); border-radius:10px; }
+  .pl-tabla{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .pl-tabla th{ text-align:left; background:var(--green-deep); color:#fff; font-weight:600; padding:7px 8px; position:sticky; top:0; white-space:nowrap; }
+  .pl-tabla td{ padding:6px 8px; border-top:1px solid var(--line); vertical-align:top; }
+  .pl-tabla td.n{ font-family:'IBM Plex Mono',monospace; font-weight:700; white-space:nowrap; }
+  .pl-tabla td.n a{ color:var(--ink); cursor:pointer; text-decoration:underline; text-decoration-color:var(--line); }
+  .pl-tabla small{ color:var(--ink-soft); display:block; }
+  .pl-flag{ color:#111; font-weight:700; }
+  .pl-ok{ color:var(--green-mid); font-weight:600; }
+  .pl-mal{ color:var(--rust-deep); font-weight:600; }
+  .pl-ctx{ background:var(--paper-light); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin:10px 0 12px; font-size:13.5px; }
+  .pl-ctx h5{ margin:0 0 6px; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); }
+  .pl-ctx .g{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:6px 14px; }
+  .pl-ctx .g div b{ display:block; font-size:11.5px; color:var(--ink-soft); font-weight:600; }
+  .pl-ctx ul{ margin:6px 0 0; padding-left:18px; }
+  .pl-ctx .pl-alerta{ margin-top:8px; padding:6px 9px; border-radius:8px; background:#2b2b2b; color:#fff; font-weight:600; font-size:13px; }
+  .pl-ctx .pl-nota{ margin-top:6px; font-size:12.5px; color:var(--ink-soft); }
+  @media (max-width:520px){ .pl-ctx .g{ grid-template-columns:1fr; } }
+</style>
+<script>
+/* =====================================================================
+   PALPACIÓN — planilla para imprimir (pestaña Reportes) e historia de la
+   vaca en el formulario de palpación de «Agregar a visita».
+   ===================================================================== */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function N(x){ return String(x==null?'':x).trim().toUpperCase(); }
+  function fmt(iso){ if(!iso) return '—'; var p=String(iso).slice(0,10).split('-'); return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso; }
+  function hoyIso(){ var d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  function dias(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+  function meses(a,b){ return (new Date(b)-new Date(a))/86400000/30.4375; }
+  function sumaDias(iso, n){ var d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+  var GEST = 290;
+
+  /* ---------- historia reproductiva de una hembra ---------- */
+  function historia(r){
+    var BN = window.__BN, RP = window.__reportes; if(!BN || !RP) return null;
+    var a = BN.analizar(r), hoy = hoyIso();
+    var partos = a.partos, up = partos.length ? partos[partos.length-1] : null;
+    // último destete con peso (de la cría más reciente que se destetó)
+    var dest = null;
+    for(var i = partos.length-1; i >= 0 && !dest; i--){
+      (partos[i].crias||[]).forEach(function(c){ if(!dest && c.peso_dest != null) dest = { cria:c.numero, sexo:c.sexo, fecha:c.fecha_dest || null, peso:c.peso_dest, parto:partos[i].n,
+        bajo: partos[i].flags.some(function(f){ return f.tipo==='destete'; }), txt: (partos[i].flags.filter(function(f){ return f.tipo==='destete'; })[0]||{}).texto || '' }; });
+    }
+    var P = RP.palpaciones(r), lp = P.length ? P[P.length-1] : null;
+    var ult = up ? up.fecha : null;
+    var abortoDesp = lp && a.abortos.some(function(x){ return x.fecha && (!lp.fecha || x.fecha >= lp.fecha); });
+    var pren = lp && RP.esPrenada(lp) && (!ult || !lp.fecha || lp.fecha >= ult) && !abortoDesp;
+    var esperado = null, diasHoy = null;
+    if(pren && lp.fecha && lp.dias != null){ esperado = sumaDias(lp.fecha, GEST - lp.dias); diasHoy = lp.dias + dias(lp.fecha, hoy); }
+    var cat = partos.length ? 'VACA' : ((P.length || (r.edad_actual != null && r.edad_actual >= 2)) ? 'NV' : (r.edad_actual != null && r.edad_actual >= 0.7 ? 'NL' : 'TERNERA'));
+    var crUlt = up ? (up.crias||[]) : [];
+    var murio = up && up.muertes && up.muertes.length ? up.muertes[0] : null;
+    return { r:r, a:a, cat:cat, partos:partos, up:up, ult:ult, mesesUlt: ult ? meses(ult, hoy) : null, crUlt:crUlt, murio:murio,
+      dest:dest, lp:lp, pren:pren, esperado:esperado, diasHoy:diasHoy, abortoDesp:abortoDesp,
+      banderas:a.banderas, coms:a.comentarios };
+  }
+  function txtPalp(p){
+    if(!p) return 'Sin palpación';
+    var e = p.estado || '—'; if(/^VN$/i.test(e)) e = 'Vacía (VN)';
+    return [e, p.dias!=null?p.dias+' d':'', p.toro?'toro '+p.toro:'', p.diag||''].filter(Boolean).join(' · ');
+  }
+  function txtParto(h){
+    if(!h.up) return h.cat==='NV' ? 'Sin partos (novilla)' : 'Sin partos';
+    var c = h.crUlt.map(function(x){ return x.numero+(x.sexo?' '+x.sexo:''); }).join(' + ');
+    return fmt(h.ult)+(c?' · '+c:'')+(h.murio?' · murió':'');
+  }
+  function txtDestete(h){
+    if(!h.dest) return h.up ? 'Sin destete registrado' : '—';
+    return (h.dest.fecha?fmt(h.dest.fecha)+' · ':'')+h.dest.peso+' kg · '+h.dest.cria;
+  }
+  function flagsCortas(h){
+    var c = {}; h.banderas.forEach(function(b){ c[b.tipo] = (c[b.tipo]||0)+1; });
+    var L = { abierta:'Abierta', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sug.', muerte:'Cría muerta' };
+    return Object.keys(c).map(function(k){ return (L[k]||k)+(c[k]>1?' ×'+c[k]:''); }).join(', ');
+  }
+  function sugerencia(h){
+    if(h.banderas.length >= 2) return 'Candidata a descarte si sale vacía';
+    if(h.pren && h.esperado && h.esperado < hoyIso()) return 'Ya debió parir: revisar';
+    if(h.pren) return 'Confirmar preñez';
+    if(h.mesesUlt != null && h.mesesUlt > 20) return 'Más de 20 meses sin parir';
+    return '';
+  }
+
+  /* ---------- panel para el formulario de palpación ---------- */
+  window.__palpCtx = function(r){
+    try{
+      var h = historia(r); if(!h) return '';
+      var hoy = hoyIso();
+      var H = '<div class="pl-ctx"><h5>Historia para decidir</h5><div class="g">'+
+        '<div><b>Categoría</b>'+esc(h.cat)+(r.edad_actual!=null?' · '+r.edad_actual.toFixed(1)+' años':'')+' · '+h.partos.length+' parto'+(h.partos.length===1?'':'s')+(h.a.iep_prom!=null?' · IEP '+h.a.iep_prom.toFixed(1)+' m':'')+'</div>'+
+        '<div><b>Último parto</b>'+esc(txtParto(h))+(h.mesesUlt!=null?' <span class="'+(h.mesesUlt>20?'pl-mal':'')+'">('+h.mesesUlt.toFixed(1)+' meses)</span>':'')+'</div>'+
+        '<div><b>Último destete</b>'+esc(txtDestete(h))+(h.dest&&h.dest.bajo?' <span class="pl-mal">⚑ bajo</span>':'')+'</div>'+
+        '<div><b>Palpación anterior</b>'+esc(txtPalp(h.lp))+(h.lp&&h.lp.fecha?' ('+fmt(h.lp.fecha)+')':'')+
+          (h.pren && h.diasHoy!=null ? '<br>'+(h.esperado<hoy ? '<span class="pl-mal">Debió parir ≈ '+fmt(h.esperado)+' y no hay parto registrado</span>' : '<span class="pl-ok">Hoy ≈ '+h.diasHoy+' días · parto ≈ '+fmt(h.esperado)+'</span>') : '')+
+          (h.abortoDesp ? '<br><span class="pl-mal">Abortó después de esa palpación</span>' : '')+'</div>'+
+      '</div>';
+      if(h.banderas.length){
+        H += '<ul>'+h.banderas.map(function(b){ return '<li><span class="pl-flag">⚑ '+esc(window.__BN.ICON[b.tipo])+'</span> — '+esc(b.texto)+'</li>'; }).join('')+'</ul>';
+        if(h.banderas.length >= 2) H += '<div class="pl-alerta">⚑ '+h.banderas.length+' banderas negras: candidata a descarte si sale vacía.</div>';
+      } else H += '<div class="pl-nota">Sin banderas negras.</div>';
+      var cs = h.coms.slice(-2);
+      if(cs.length) H += '<div class="pl-nota">'+cs.map(function(c){ return '<b>'+esc(c.fuente)+(c.fecha?' ('+fmt(c.fecha)+')':'')+':</b> '+esc(c.texto); }).join('<br>')+'</div>';
+      return H+'</div>';
+    }catch(e){ return ''; }
+  };
+
+  /* ---------- planilla ---------- */
+  var st = { finca:'OK', orden:'numero', prenadas:true, novillas:true };
+  try{ var g = JSON.parse(localStorage.getItem('hatos_planilla_palp_v1')||'null'); if(g) Object.keys(st).forEach(function(k){ if(k in g) st[k] = g[k]; }); }catch(e){}
+  function guardar(){ try{ localStorage.setItem('hatos_planilla_palp_v1', JSON.stringify(st)); }catch(e){} }
+  var lista = [];
+  function calcular(){
+    if(!window.__BN) return [];
+    window.__BN.reset();
+    var F = st.finca === 'prod' ? ['OK','CACHO','TNJ'] : (st.finca ? [st.finca] : null), out = [];
+    (window.__BD__||[]).forEach(function(r){
+      if(r.sexo !== 'H' || r.activo !== 'ACTIVO' || !r.numero) return;
+      if(F && F.indexOf(r.finca) < 0) return;
+      var h = historia(r); if(!h) return;
+      if(h.cat !== 'VACA' && h.cat !== 'NV') return;
+      if(h.cat === 'NV' && !st.novillas) return;
+      if(h.pren && !st.prenadas) return;
+      out.push(h);
+    });
+    var num = function(a,b){ return String(a.r.numero).localeCompare(String(b.r.numero),'es',{numeric:true}); };
+    if(st.orden === 'lote') out.sort(function(a,b){ return String(a.r.lote||'~').localeCompare(String(b.r.lote||'~'),'es',{numeric:true}) || num(a,b); });
+    else if(st.orden === 'prioridad') out.sort(function(a,b){ return b.banderas.length-a.banderas.length || (a.pren?1:0)-(b.pren?1:0) || num(a,b); });
+    else out.sort(num);
+    lista = out; return out;
+  }
+  function pintar(){
+    var box = $('plLista'); if(!box) return;
+    calcular();
+    var nP = lista.filter(function(h){ return h.pren; }).length, n2 = lista.filter(function(h){ return h.banderas.length>=2; }).length;
+    $('plRes').innerHTML = '<b>'+lista.length+'</b> hembras para palpar · '+nP+' con preñez anterior por confirmar · '+n2+' con 2 o más ⚑';
+    if(!lista.length){ box.innerHTML = '<div class="rep-vacio">No hay hembras para palpar con este filtro.</div>'; return; }
+    box.innerHTML = '<div class="pl-tabla-wrap"><table class="pl-tabla"><thead><tr><th>#</th><th>Vaca</th><th>Último parto</th><th>Último destete</th><th>Palpación anterior</th><th>⚑ Banderas</th><th>Ojo</th></tr></thead><tbody>'+
+      lista.map(function(h, i){ var r = h.r;
+        return '<tr><td>'+(i+1)+'</td><td class="n"><a data-id="'+r.id+'">'+esc(r.numero)+'</a><small>'+esc(h.cat+(r.edad_actual!=null?' · '+r.edad_actual.toFixed(1)+' a':'')+(r.lote&&String(r.lote).trim()!=='0'?' · lote '+r.lote:''))+'</small></td>'+
+          '<td>'+esc(txtParto(h))+(h.mesesUlt!=null?'<small>'+h.mesesUlt.toFixed(1)+' meses'+(h.a.iep_prom!=null?' · IEP '+h.a.iep_prom.toFixed(1):'')+'</small>':'')+'</td>'+
+          '<td>'+esc(txtDestete(h))+(h.dest&&h.dest.bajo?'<small class="pl-mal">⚑ bajo</small>':'')+'</td>'+
+          '<td>'+esc(txtPalp(h.lp))+'<small>'+(h.lp&&h.lp.fecha?fmt(h.lp.fecha):'')+(h.pren&&h.esperado?' · parto ≈ '+fmt(h.esperado):'')+'</small></td>'+
+          '<td>'+(h.banderas.length?'<span class="pl-flag">'+'⚑'.repeat(Math.min(h.banderas.length,6))+'</span><small>'+esc(flagsCortas(h))+'</small>':'—')+'</td>'+
+          '<td>'+esc(sugerencia(h))+'</td></tr>'; }).join('')+'</tbody></table></div>';
+    box.querySelectorAll('a[data-id]').forEach(function(el){ el.onclick = function(){ if(window.__abrirFicha) window.__abrirFicha(parseInt(el.getAttribute('data-id'),10)); }; });
+    var nb = $('rpNPalp'); if(nb) nb.textContent = lista.length;
+  }
+  function nombre(){ return 'planilla_palpacion_'+(st.finca==='prod'?'productivas':(st.finca||'todas'))+'_'+hoyIso(); }
+  function pdf(){
+    calcular(); if(!lista.length){ alert('La lista está vacía.'); return; }
+    var Jp = window.jspdf && window.jspdf.jsPDF; if(!Jp){ alert('No se pudo cargar el generador de PDF. Intente con conexión a internet.'); return; }
+    var doc = new Jp({ orientation:'landscape', unit:'mm', format:'letter' }), W = 279.4, H = 215.9, M = 8, y, pag = 0;
+    function t(s){ return String(s==null?'':s).replace(/[⚑≈]/g, function(c){ return c==='≈'?'~':''; }); }
+    var cols = [['#',7],['Vaca',23],['Último parto',36],['Último destete',32],['Palpación anterior',38],['Banderas',31],['P+ / V',14],['Días',11],['Toro',18],['Diagnóstico / observación',53]];
+    function cab(){
+      pag++; y = 12;
+      doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(30,54,38);
+      doc.text('GANCEBU — Planilla de palpación · Finca '+(st.finca==='prod'?'OK, CACHO, TNJ':(st.finca||'todas')), M, y);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(60,60,60);
+      doc.text('Fecha: ____ / ____ / ________     Palpador: ______________________     Impreso el '+fmt(hoyIso())+' · página '+pag, M, y+5.5);
+      y += 11;
+      doc.setFillColor(30,54,38); doc.rect(M, y-4.2, W-2*M, 6.5, 'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(7.8);
+      var xx = M+1; cols.forEach(function(c){ doc.text(c[0], xx, y); xx += c[1]; }); y += 4.5;
+      doc.setTextColor(36,29,20); doc.setFont('helvetica','normal');
+    }
+    cab();
+    var x0 = M; var xBlank = M; for(var k=0;k<6;k++) xBlank += cols[k][1];
+    lista.forEach(function(h, i){
+      var r = h.r;
+      var cells = [String(i+1), r.numero+'\n'+h.cat+(r.edad_actual!=null?' '+r.edad_actual.toFixed(1)+'a':''),
+        txtParto(h)+(h.mesesUlt!=null?'\n'+h.mesesUlt.toFixed(1)+' meses'+(h.a.iep_prom!=null?' · IEP '+h.a.iep_prom.toFixed(1):''):''),
+        txtDestete(h)+(h.dest&&h.dest.bajo?'\nDESTETE BAJO':''),
+        txtPalp(h.lp)+(h.lp&&h.lp.fecha?'\n'+fmt(h.lp.fecha):'')+(h.pren&&h.esperado?'\nparto ~'+fmt(h.esperado):''),
+        (h.banderas.length?h.banderas.length+': '+flagsCortas(h):'—')+(sugerencia(h)?'\n'+sugerencia(h):'')];
+      doc.setFontSize(7.2);
+      var lines = cells.map(function(c, j){ return doc.splitTextToSize(t(c), cols[j][1]-1.6); });
+      var hRow = Math.max(9, Math.max.apply(null, lines.map(function(l){ return l.length; })) * 3.1 + 2.4);
+      if(y + hRow > H - 8){ doc.addPage(); cab(); }
+      if(h.banderas.length >= 2){ doc.setFillColor(238,233,222); doc.rect(M, y-3.2, xBlank-M, hRow, 'F'); }
+      var xx = M+1;
+      lines.forEach(function(l, j){ if(j===1){ doc.setFont('helvetica','bold'); doc.text(l[0], xx, y); doc.setFont('helvetica','normal'); if(l.length>1) doc.text(l.slice(1), xx, y+3.1); } else doc.text(l, xx, y); xx += cols[j][1]; });
+      doc.setDrawColor(150,140,120); doc.setLineWidth(0.15);
+      doc.line(M, y-3.2+hRow, W-M, y-3.2+hRow);
+      var xv = xBlank; for(var c2=6; c2<cols.length; c2++){ doc.line(xv, y-3.2, xv, y-3.2+hRow); xv += cols[c2][1]; }
+      y += hRow;
+    });
+    doc.setFontSize(7.5); doc.setTextColor(90,90,90);
+    if(y > H-14){ doc.addPage(); cab(); }
+    doc.text('Sombreadas: 2 o más banderas negras (parto muy abierto, destete bajo, aborto, cría muerta por la madre, descarte sugerido). Parto probable con ~'+GEST+' días de gestación.', M, y+3);
+    doc.save(nombre()+'.pdf');
+  }
+  function excel(){
+    calcular(); if(!lista.length){ alert('La lista está vacía.'); return; }
+    var head = ['N','Vaca','Categoria','Edad_anos','Lote','Partos','IEP_prom_meses','Ultimo_parto','Cria_ultimo_parto','Meses_desde_parto','Destete_fecha','Destete_peso_kg','Destete_cria','Destete_bajo','Palpacion_anterior','Fecha_palpacion_anterior','Parto_probable','Banderas_negras','Detalle_banderas','Ojo','RESULTADO_P+_V','DIAS','TORO','DIAGNOSTICO','OBSERVACION'];
+    var rows = lista.map(function(h, i){ var r = h.r; return [i+1, r.numero, h.cat, r.edad_actual!=null?+r.edad_actual.toFixed(1):'', r.lote&&String(r.lote).trim()!=='0'?r.lote:'', h.partos.length, h.a.iep_prom!=null?+h.a.iep_prom.toFixed(1):'',
+      h.ult||'', h.crUlt.map(function(x){ return x.numero; }).join(' + '), h.mesesUlt!=null?+h.mesesUlt.toFixed(1):'', h.dest&&h.dest.fecha||'', h.dest?h.dest.peso:'', h.dest?h.dest.cria:'', h.dest&&h.dest.bajo?'SI':'',
+      txtPalp(h.lp), h.lp&&h.lp.fecha||'', h.pren&&h.esperado||'', h.banderas.length, h.banderas.map(function(b){ return window.__BN.ICON[b.tipo]+': '+b.texto; }).join(' | '), sugerencia(h), '', '', '', '', '']; });
+    if(!window.XLSX){ var csv=[head].concat(rows).map(function(r){ return r.map(function(c){ c=String(c==null?'':c); return /[;"\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c; }).join(';'); }).join('\r\n');
+      var b = new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}), u=URL.createObjectURL(b), a=document.createElement('a'); a.href=u; a.download=nombre()+'.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); },1500); return; }
+    var wb = XLSX.utils.book_new(), ws = XLSX.utils.aoa_to_sheet([head].concat(rows));
+    ws['!cols'] = head.map(function(x){ return {wch: /Detalle|OBSERV|DIAGN/.test(x)?40:(/Palpacion_anterior|Ojo/.test(x)?26:12)}; }); ws['!rows'] = [{hpt:38}];
+    ws['!autofilter'] = { ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:rows.length, c:head.length-1}}) }; ws['!views'] = [{ state:'frozen', ySplit:1 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'PALPACION');
+    var gu = XLSX.utils.aoa_to_sheet([['GUIA — Planilla de palpación'],['Generada', hoyIso()+' desde el tablero Hatos Datos (Reportes → Planilla de palpación)'],['Hembras', 'Vacas y novillas de vientre activas de la finca '+(st.finca||'todas')],['Columnas en MAYÚSCULA', 'Para llenar en la palpación: RESULTADO (P+ o V), DIAS, TORO, DIAGNOSTICO (FOD, CLOD, UCT…), OBSERVACION'],['Banderas negras','Parto muy abierto (más de 20 meses), destete bajo, aborto, cría muerta por la madre, descarte sugerido'],['Parto probable','Fecha de palpación + ('+GEST+' − días de preñez). Aproximado.']]);
+    gu['!cols'] = [{wch:22},{wch:100}]; XLSX.utils.book_append_sheet(wb, gu, 'GUIA');
+    XLSX.writeFile(wb, nombre()+'.xlsx');
+  }
+  function registrar(){
+    if(!window.__visitas){ return; }
+    window.__visitas.abrir();
+  }
+  var listo = false;
+  function init(){
+    if(listo || !$('plFinca')) return; listo = true;
+    $('plFinca').value = st.finca; $('plOrden').value = st.orden; $('plPren').checked = !!st.prenadas; $('plNov').checked = !!st.novillas;
+    $('plFinca').onchange = function(){ st.finca = this.value; guardar(); pintar(); };
+    $('plOrden').onchange = function(){ st.orden = this.value; guardar(); pintar(); };
+    $('plPren').onchange = function(){ st.prenadas = this.checked; guardar(); pintar(); };
+    $('plNov').onchange = function(){ st.novillas = this.checked; guardar(); pintar(); };
+    $('plPdf').onclick = pdf; $('plExcel').onclick = excel; $('plReg').onclick = registrar;
+  }
+  window.__planilla = { pintar:function(){ init(); pintar(); }, pdf:function(){ init(); pdf(); }, contar:function(){ init(); calcular(); var nb = $('rpNPalp'); if(nb) nb.textContent = lista.length; }, historia:historia };
+  document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('.tab-btn'); if(b && b.getAttribute('data-view')==='reportes') setTimeout(function(){ try{ window.__planilla.contar(); }catch(x){} }, 30); });
 })();
 </script>
 

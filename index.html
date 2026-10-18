@@ -10988,7 +10988,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       {icon:'🔎', label:'Consultar información', sub:'Un animal, vacas por parir, vacías, resumen de la finca', tono:'verde', onClick:function(){ go(scrConsultar, 'Consultar', 'rama'); }},
       {icon:'📊', label:'Ver informes y análisis', sub:'Comparativos de toros y vacas, grupos, simulador', tono:'oro', onClick:function(){ go(scrInformes, 'Informes', 'rama'); }},
       {icon:'📋', label:'Reportes de vacas', sub:'Vacas para revisión, animales para descarte y visitas ASOCEBU', tono:'verde', onClick:function(){ cerrar(); if(window.__reportes) window.__reportes.abrir(); }},
-      {icon:'🤖', label:'Pregúntele al asistente', sub:'Pida cualquier listado o reporte, escribiendo o por voz', tono:'rust', onClick:function(){ cerrar(); if(window.__asistente) window.__asistente.abrir(); }},
+      {icon:'🎧', label:'Pregúntele a la asistente', sub:'Pida cualquier listado o reporte, escribiendo o por voz', tono:'rust', onClick:function(){ cerrar(); if(window.__asistente) window.__asistente.abrir(); }},
       {icon:'📤', label:'Enviar lo registrado', sub: n ? n+' registro(s) pendientes por pasar al Excel' : 'No hay registros pendientes', badge: n||'', onClick:function(){ go(scrEnviar, 'Enviar', 'rama'); }}
     ], 'g-opts-home');
     var pie = document.createElement('div'); pie.className='g-pie';
@@ -14340,7 +14340,9 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
   #asisToggle{ width:52px; height:52px; border-radius:50%; border:none; background:var(--rust); color:#fff; cursor:pointer;
     box-shadow:0 4px 14px rgba(0,0,0,.3); transition:transform .15s, background .15s; display:flex; align-items:center; justify-content:center; padding:0; }
   #asisToggle:hover{ background:var(--rust-deep); transform:scale(1.06); }
-  #asisToggle svg{ width:26px; height:26px; }
+  #asisToggle svg{ width:50px; height:50px; display:block; }
+  #asisToggle{ overflow:hidden; border:2px solid #F2EDE0 !important; }
+  .as-head .as-ava{ background:var(--rust); border-radius:50%; flex:none; }
   #asisPanel{ display:none; position:fixed; right:24px; bottom:88px; width:min(760px, calc(100vw - 48px)); height:min(720px, calc(100vh - 120px));
     background:#FBF8F1; border:1px solid var(--line); border-radius:14px; box-shadow:0 14px 40px rgba(0,0,0,.32); z-index:2600;
     flex-direction:column; overflow:hidden; font-family:'IBM Plex Sans',sans-serif; color:var(--ink); }
@@ -15548,7 +15550,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     'Animales vendidos este año',
     'Inventario del hato'
   ];
-  var ICO_AS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="12" cy="3.2" r="1"/><circle cx="9" cy="12.5" r="1.3" fill="currentColor"/><circle cx="15" cy="12.5" r="1.3" fill="currentColor"/><path d="M9.5 16h5"/><path d="M2 12v3M22 12v3"/></svg>';
+  var ICO_AS = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M11.5 27c0-11 5.4-18 12.5-18s12.5 7 12.5 18v8.5c-2 1.2-4.2 1.2-5.5 0h-14c-1.3 1.2-3.5 1.2-5.5 0z" fill="#3B2416"/><path d="M7 48c.8-8.6 7.4-13 17-13s16.2 4.4 17 13z" fill="#F2EDE0"/><path d="M19 35.2l5 4.6 5-4.6" fill="none" stroke="#33513B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><rect x="21" y="28" width="6" height="7.5" rx="2.5" fill="#E2AC85"/><ellipse cx="24" cy="21.5" rx="8" ry="9.5" fill="#F1C9A5"/><path d="M15.6 19.5c.9-6.3 4.3-9.6 8.4-9.6s7.6 3.3 8.5 9.6c-3.4-.8-6.3-3-7.7-6.2-1.6 3.3-5 5.6-9.2 6.2z" fill="#3B2416"/><circle cx="20.9" cy="22.4" r="1" fill="#3B2416"/><circle cx="27.1" cy="22.4" r="1" fill="#3B2416"/><path d="M21.6 26.4q2.4 1.9 4.8 0" fill="none" stroke="#A9481A" stroke-width="1.2" stroke-linecap="round"/><path d="M14.3 22c0-11.5 19.4-11.5 19.4 0" fill="none" stroke="#E9E4D6" stroke-width="2.6" stroke-linecap="round"/><rect x="11.8" y="19.2" width="4.6" height="7" rx="2" fill="#E9E4D6" stroke="#1E3626" stroke-width=".8"/><rect x="31.6" y="19.2" width="4.6" height="7" rx="2" fill="#E9E4D6" stroke="#1E3626" stroke-width=".8"/><path d="M14.4 25.8c.4 3.6 3.2 5.2 6.4 4.4" fill="none" stroke="#E9E4D6" stroke-width="1.9" stroke-linecap="round"/><ellipse cx="21.6" cy="29.9" rx="1.7" ry="1.5" fill="#1E3626" stroke="#E9E4D6" stroke-width=".8"/></svg>';
   var ICO_MIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>';
 
   var ultimo = [];
@@ -15561,7 +15563,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     document.body.appendChild(fab);
     var p = document.createElement('div'); p.id = 'asisPanel'; p.setAttribute('role', 'dialog'); p.setAttribute('aria-label', 'Asistente de reportes');
     p.innerHTML =
-      '<div class="as-head">'+ICO_AS.replace('<svg', '<svg width="24" height="24"')+'<b>Asistente<small id="asisSub">Pídale listados y reportes, escribiendo o por voz</small></b>'+
+      '<div class="as-head">'+ICO_AS.replace('<svg', '<svg class="as-ava" width="34" height="34"')+'<b>Asistente<small id="asisSub">Pídale listados y reportes, escribiendo o por voz</small></b>'+
         '<button type="button" id="asisCfgB" title="Configurar inteligencia artificial">⚙</button>'+
         '<button type="button" id="asisVoz" title="Leer las respuestas en voz alta">🔊</button>'+
         '<button type="button" id="asisLimpiar" title="Borrar la conversación">Limpiar</button>'+

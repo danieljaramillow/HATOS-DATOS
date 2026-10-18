@@ -1668,7 +1668,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 18 oct 2026 · 9:15 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 18 oct 2026 · 9:55 a.m.</b>
     </div>
   </header>
 
@@ -14799,7 +14799,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
   function describir(f){
     var C = CAMPOS[f.campo]; if(!C) return f.campo;
     if(f.texto) return f.texto;
-    if(C.tipo === 'bool'){ var si = !(f.valor === false || f.valor === 'false' || f.op === 'no_existe' || f.op === '!='); var BL = { registro:['Con registro','Sin registro'], reserva:['Reserva o reproductor','Sin reservas ni reproductores'], reproductor:['Reproductores','No reproductores'], rechazado:['Rechazados en visita','No rechazados'] }[f.campo]; return BL ? BL[si ? 0 : 1] : (si ? C.t : 'Sin '+nomC(C)); }
+    if(C.tipo === 'bool'){ var si = !(f.valor === false || f.valor === 'false' || f.op === 'no_existe' || f.op === '!='); var BL = { registro:['Con registro','Sin registro'], reserva:['Reserva o reproductor','Sin reservas ni reproductores'], reproductor:['Reproductores o reservas','Sin reproductores ni reservas'], rechazado:['Rechazados en visita','No rechazados'] }[f.campo]; return BL ? BL[si ? 0 : 1] : (si ? C.t : 'Sin '+nomC(C)); }
     if(f.op === 'existe') return 'Con '+C.t.toLowerCase();
     if(f.op === 'no_existe') return 'Sin '+C.t.toLowerCase();
     if(f.campo === 'finca' && f.auto) return 'Fincas productivas (OK, CACHO, TNJ)';
@@ -15099,6 +15099,38 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     if(!spec.reporte && eat(/\b(inventario|resumen|composicion|estado) (general )?(del|de la|de las|de los)? ?(hato|finca|fincas|ganado|ganaderia)?\b/)) spec.reporte = 'inventario';
     if(!spec.reporte && has(/\b(machos?|toros?|toretes?)\b/) && eat(/\bsin calificaci?o?n?\b|\bsin calificar\b|\bno (han sido |estan )?calificad[oa]s\b|\bfaltan? por calificar\b/)){ spec.reporte = 'comercial'; spec.sinCalif = true; }
 
+    /* ---- 1b. exclusiones: "quitando los reproductores y los que tienen crías" ---- */
+    var NEG = [
+      [/^(?:a )?(?:los |las )?(?:que (?:son |sean |esten )?)?(reproductores?|sementales?|padrotes?|toros? (?:de |en )?servicio|toros? padres?)\b/, function(){ add({ campo:'reproductor', op:'=', valor:false }); }],
+      [/^(?:a )?(?:los |las )?(?:que )?(?:ya )?(?:tienen |tengan |tiene |tenga |han tenido |hayan tenido |con |dejaron |han dejado )?(?:sus )?(crias|hijos|hijas|descendencia|descendientes|terneros|progenie)(?: registrad[oa]s| en el registro| en la base)?\b/, function(){ add({ campo:'hijos', op:'=', valor:0, texto:'Sin crías registradas' }); }],
+      [/^(?:a )?(?:los |las )?(?:que (?:son |sean |estan |esten )?)?(?:de )?(reservas?)\b/, function(){ add({ campo:'reserva', op:'=', valor:false }); }],
+      [/^(?:a )?(?:los |las )?(?:que (?:son |sean |estan |esten |tienen |tengan )?)?(registrad[oa]s|con registro|registro)\b/, function(){ add({ campo:'registro', op:'=', valor:false }); }],
+      [/^(?:a )?(?:las |los )?(?:que (?:estan |esten )?)?(prenadas?|cargadas?|gestantes?)\b/, function(){ add({ campo:'palp', op:'!=', valor:'preñada', texto:'No preñadas' }); }],
+      [/^(?:a )?(?:las |los )?(?:que (?:estan |esten )?)?(vacias?)\b/, function(){ add({ campo:'palp', op:'!=', valor:'vacía', texto:'No vacías' }); }],
+      [/^(?:a )?(?:los |las )?(?:que (?:estan |esten |han sido )?)?(calificad[oa]s|con calificacion)\b/, function(){ add({ campo:'calif', op:'no_existe' }); }],
+      [/^(?:a )?(?:los |las )?(?:que (?:han sido |fueron )?)?(rechazad[oa]s)\b/, function(){ add({ campo:'rechazado', op:'=', valor:false }); }],
+      [/^(?:a )?(?:las |los )?(?:que (?:tienen |tengan )?)?(?:con )?(banderas?)(?: negras?)?\b/, function(){ add({ campo:'banderas', op:'=', valor:0, texto:'Sin banderas negras' }); }],
+      [/^(?:a )?(?:las |los )?(?:que )?(abortaron|han abortado|con abortos?)\b/, function(){ add({ campo:'abortos', op:'=', valor:0, texto:'Sin abortos' }); }],
+      [/^(?:a )?(?:los |las )?(?:de |de la |del )?(?:finca )?(ok|cacho|tnj)\b/, function(m){ add({ campo:'finca', op:'!=', valor:m[1].toUpperCase() }); }],
+      [/^(?:a )?(?:los |las )?(guzera|guzerat|brahman|braman|girolando)\b/, function(m){ add({ campo:'raza', op:'!=', valor:/guz/.test(m[1]) ? 'Guzerá' : /bra/.test(m[1]) ? 'Brahman' : 'Girolando' }); }]
+    ];
+    var RX_EXCL = /\b(quitando|quitar|quite|quitale|quitele|quitandole|excepto|exceptuando|excluyendo|excluir|excluya|excluye|sacando|saque|sacar|sin contar|descontando|dejando (?:por )?fuera|fuera de|salvo|menos|que no sean|que no esten|no incluya|no incluir|sin incluir|sin)\s+/g;
+    var me, posiciones = [];
+    while((me = RX_EXCL.exec(resto))) posiciones.push({ i:me.index, f:me.index + me[0].length, w:me[1] });
+    for(var pi = posiciones.length - 1; pi >= 0; pi--){
+      var P0 = posiciones[pi], cola = resto.slice(P0.f), usado = 0, algun = false;
+      while(true){
+        var seg = cola.slice(usado);
+        var lead = seg.match(/^(?:\s*(?:,|y|ni|o|tampoco|ademas|tambien)\s+)*/)[0];
+        var cuerpo = seg.slice(lead.length);
+        var hit = null;
+        for(var ni = 0; ni < NEG.length && !hit; ni++){ var mm0 = cuerpo.match(NEG[ni][0]); if(mm0){ hit = mm0; NEG[ni][1](mm0); } }
+        if(!hit) break;
+        algun = true; usado += lead.length + hit[0].length;
+        if(!/^\s*(?:,|y|ni|o|tampoco)\s+/.test(cola.slice(usado))) break;
+      }
+      if(algun){ resto = resto.slice(0, P0.i)+' '+cola.slice(usado); spec.excluye = true; }
+    }
     var preMet = null, preDir = null;
     var mDir = eat(/\bde (mayor a menor|menor a mayor|mas a menos|menos a mas|mas alt[oa] a mas baj[oa]|mas baj[oa] a mas alt[oa])\b/);
     if(mDir) preDir = /^(mayor|mas a|mas alt)/.test(mDir[1]) ? 'desc' : 'asc';
@@ -15257,6 +15289,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     if(mE){ var u3 = unidadCampo(mE[2]); if(u3.c === 'hijos' && /\bvacas?\b/.test(t)) u3.c = 'partos'; add({ campo:u3.c, op:'=', valor:+mE[1] }); }
 
     /* ---- 8. sí / no, con / sin ---- */
+    eat(/\b(crias|hijos) registrad[oa]s\b/) && !F.some(function(f){ return f.campo === 'hijos'; }) && add({ campo:'hijos', op:'>=', valor:1, texto:'Con crías registradas' });
     if(eat(/\bsin registro\b|\bno registrad[oa]s\b|\bno tienen registro\b/)) add({ campo:'registro', op:'=', valor:false });
     else if(eat(/\bcon registro\b|\bregistrad[oa]s\b|\bque tienen registro\b/)) add({ campo:'registro', op:'=', valor:true });
     if(eat(/\b(sin palpar|no (han sido |estan |fueron )?palpad[oa]s|sin palpacion|sin palpaciones|falta(n)? (por )?palpar)\b/)) add({ campo:'palp', op:'=', valor:'sin dato', texto:'Sin palpación registrada' });
@@ -15324,7 +15357,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     if(eat(/\b(terneras|becerras|ternera|becerra)\b/)) sujetos.push('ternera');
     if(eat(/\b(terneros|becerros|ternero|becerro|crias|recrias?|destetos?)\b/)) sujetos.push(has(/\bmachos?\b/) ? 'ternero' : 'terneros');
     if(eat(/\b(toretes?|novillos?|toritos?|levante)\b/)) sujetos.push('torete');
-    if(eat(/\b(toros?)\b/)) sujetos.push('toros');
+    if(eatAll(/\b(toros?)\b/)) sujetos.push('toros');
     if(eat(/\b(hembras?)\b/)) sujetos.push('H');
     if(eat(/\b(machos?)\b/)) sujetos.push('M');
     var hayEdad = F.some(function(f){ return f.campo === 'edad'; });
@@ -15368,8 +15401,15 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     if(mNum && !spec.reporte){ spec.animal = mNum[1].toUpperCase(); resto = resto.replace(mNum[0], ' '); }
 
     /* ---- 16. orden: mejores, peores, más alto… ---- */
-    var hayVenta = !!eat(/\b(para (la )?venta|para vender|vendibles?|a la venta|ofrecer|negociables?|en venta)\b/);
-    if(hayVenta){ if(!F.some(function(f){ return f.campo === 'reserva'; })) add({ campo:'reserva', op:'=', valor:false, texto:'Sin reservas ni reproductores' }); }
+    var hayVenta = !!eat(/\b(para (la )?venta|para vender|vendibles?|a la venta|de venta|ofrecer|negociables?|en venta|comerciales)\b/);
+    if(hayVenta){
+      if(!F.some(function(f){ return f.campo === 'reserva'; })) add({ campo:'reserva', op:'=', valor:false, texto:'Sin reservas (según comentario)' });
+      var machos = F.some(function(f){ return (f.campo === 'sexo' && f.valor === 'M') || (f.campo === 'categoria' && /toro|torete|ternero/.test([].concat(f.valor).join())); });
+      if(machos){
+        if(!F.some(function(f){ return f.campo === 'reproductor'; })) add({ campo:'reproductor', op:'=', valor:false });
+        if(!F.some(function(f){ return f.campo === 'hijos'; })) add({ campo:'hijos', op:'=', valor:0, texto:'Sin crías registradas' });
+      }
+    }
     var dirW = (resto.match(/\b(mejor(es)?|peor(es)?|mas alt[oa]s?|mas baj[oa]s?|mas grandes?|mas pequen[oa]s?|mayor(es)?|menor(es)?|mas viej[oa]s?|mas joven(es)?|mas nuev[oa]s?|mas pesad[oa]s?|mas livian[oa]s?|mas productiv[oa]s?|mas lecher[oa]s?|mas fertiles?|menos fertiles?|primer[oa]s?|ultim[oa]s?|top|ranking|ordenad[oa]s? por|ordenar por|organizad[oa]s? por|clasificad[oa]s? por|mas|menos)\b/) || [])[0];
     var metrica = null;
     var tras2 = resto;
@@ -15459,7 +15499,9 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       '- Por defecto solo animales ACTIVOS de las fincas productivas; no pongas esos filtros, el tablero los agrega. Si la pregunta es de salidas (vendidos, muertos), filtra salida y el tablero incluye inactivos.\n'+
       '- "toros" sin edad = categoria en ["torete","toro"]; "toros mayores de 16 meses" = sexo M + edad > 16. "vacas" = categoria vaca. "novillas" = categoria novilla. "terneros"/"crías" = categoria en ["ternero","ternera"].\n'+
       '- Edad siempre en meses (años × 12). Fechas como "AAAA-MM-DD". Raza con su nombre: "Brahman", "Guzerá". Sexo "M" o "H". palp: "preñada","vacía","posible","parió","sin dato".\n'+
-      '- "para la venta" = filtro reserva = false. "reproductores" = reproductor = true.\n'+
+      '- "para la venta" / "de venta" = reserva = false; si son machos además reproductor = false y hijos = 0 (toro de venta = no reproductor y sin crías registradas). "reproductores" = reproductor = true.\n'+
+      '- Exclusiones ("quitando", "sin", "excepto", "menos", "ni") NIEGAN la condición: "quitando los reproductores" = reproductor = false; "sin los que tienen crías" = hijos = 0. Nunca conviertas una exclusión en filtro positivo.\n'+
+      '- "crías registradas" se refiere a hijos, no al campo registro.\n'+
       '- Índice lechero = arla. Fertilidad = iep (menor es mejor) o ara (mayor es mejor). "mejores" sin indicador: calif para machos, ara para vacas.\n'+
       '- "las 5 mejores" → limite 5 con orden. Superlativo singular ("la vaca más vieja") → limite 1. Ranking sin número → limite 20.\n'+
       '- Promedios por grupo: agrupar + medida. "cuántos" → contar true (y agrupar finca si lo piden por finca).\n'+

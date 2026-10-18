@@ -1668,7 +1668,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 16 oct 2026 · 3:25 p.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 18 oct 2026 · 9:15 a.m.</b>
     </div>
   </header>
 
@@ -10988,6 +10988,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       {icon:'🔎', label:'Consultar información', sub:'Un animal, vacas por parir, vacías, resumen de la finca', tono:'verde', onClick:function(){ go(scrConsultar, 'Consultar', 'rama'); }},
       {icon:'📊', label:'Ver informes y análisis', sub:'Comparativos de toros y vacas, grupos, simulador', tono:'oro', onClick:function(){ go(scrInformes, 'Informes', 'rama'); }},
       {icon:'📋', label:'Reportes de vacas', sub:'Vacas para revisión, animales para descarte y visitas ASOCEBU', tono:'verde', onClick:function(){ cerrar(); if(window.__reportes) window.__reportes.abrir(); }},
+      {icon:'🤖', label:'Pregúntele al asistente', sub:'Pida cualquier listado o reporte, escribiendo o por voz', tono:'rust', onClick:function(){ cerrar(); if(window.__asistente) window.__asistente.abrir(); }},
       {icon:'📤', label:'Enviar lo registrado', sub: n ? n+' registro(s) pendientes por pasar al Excel' : 'No hay registros pendientes', badge: n||'', onClick:function(){ go(scrEnviar, 'Enviar', 'rama'); }}
     ], 'g-opts-home');
     var pie = document.createElement('div'); pie.className='g-pie';
@@ -14332,5 +14333,1422 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
 })();
 </script>
 
+
+<style>
+  /* ---------- Asistente de reportes (botón junto a la lupa) ---------- */
+  #asisFab{ position:fixed; bottom:24px; right:88px; z-index:501; font-family:'IBM Plex Sans',sans-serif; }
+  #asisToggle{ width:52px; height:52px; border-radius:50%; border:none; background:var(--rust); color:#fff; cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,.3); transition:transform .15s, background .15s; display:flex; align-items:center; justify-content:center; padding:0; }
+  #asisToggle:hover{ background:var(--rust-deep); transform:scale(1.06); }
+  #asisToggle svg{ width:26px; height:26px; }
+  #asisPanel{ display:none; position:fixed; right:24px; bottom:88px; width:min(760px, calc(100vw - 48px)); height:min(720px, calc(100vh - 120px));
+    background:#FBF8F1; border:1px solid var(--line); border-radius:14px; box-shadow:0 14px 40px rgba(0,0,0,.32); z-index:2600;
+    flex-direction:column; overflow:hidden; font-family:'IBM Plex Sans',sans-serif; color:var(--ink); }
+  #asisPanel.on{ display:flex; }
+  .as-head{ display:flex; align-items:center; gap:10px; padding:12px 14px; background:var(--green-deep); color:#F2EDE0; }
+  .as-head b{ font-family:'Fraunces',serif; font-size:19px; font-weight:600; flex:1; }
+  .as-head small{ display:block; font-family:'IBM Plex Sans',sans-serif; font-size:12px; font-weight:400; opacity:.8; }
+  .as-head button{ background:transparent; border:1px solid rgba(242,237,224,.35); color:#F2EDE0; border-radius:8px; padding:5px 9px; cursor:pointer; font-size:14px; }
+  .as-head button:hover{ background:rgba(242,237,224,.12); }
+  .as-head button.off{ opacity:.5; }
+  #asisLog{ flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:12px; background:var(--paper-light); }
+  .as-msg{ max-width:100%; }
+  .as-yo{ align-self:flex-end; background:var(--green-deep); color:#F2EDE0; padding:8px 12px; border-radius:12px 12px 2px 12px; font-size:14.5px; max-width:85%; }
+  .as-yo .as-mic{ font-size:12px; opacity:.75; margin-right:4px; }
+  .as-res{ align-self:stretch; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; }
+  .as-res h4{ margin:0 0 4px; font-family:'Fraunces',serif; font-size:18px; color:var(--green-deep); font-weight:600; }
+  .as-chips{ display:flex; flex-wrap:wrap; gap:5px; margin:6px 0 8px; align-items:center; }
+  .as-chips .lbl{ font-size:12px; color:var(--ink-soft); margin-right:2px; }
+  .as-chip{ font-size:12px; background:var(--green-pale); color:var(--green-deep); border-radius:999px; padding:2px 9px; }
+  .as-sum{ font-size:14.5px; line-height:1.45; margin:4px 0 8px; }
+  .as-sum b{ color:var(--rust-deep); }
+  .as-note{ font-size:12.5px; color:var(--ink-soft); margin:6px 0 0; line-height:1.4; }
+  .as-tw{ overflow:auto; max-height:360px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  .as-t{ border-collapse:collapse; width:100%; font-size:13px; }
+  .as-t th{ position:sticky; top:0; background:var(--green-pale); color:var(--green-deep); text-align:left; padding:6px 8px; font-weight:600; white-space:nowrap; z-index:1; }
+  .as-t td{ padding:5px 8px; border-top:1px solid #EEE7D6; vertical-align:top; white-space:nowrap; }
+  .as-t td.lg{ white-space:normal; min-width:220px; max-width:340px; }
+  .as-t td.n{ text-align:right; font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
+  .as-t tr:hover td{ background:#FBF6EA; }
+  .as-t a.as-an{ color:var(--rust-deep); font-weight:600; cursor:pointer; text-decoration:underline; text-decoration-style:dotted; white-space:nowrap; }
+  .as-let{ display:inline-block; min-width:26px; text-align:center; border-radius:5px; padding:0 4px; font-weight:700; font-size:12px; color:#fff; }
+  .as-acts{ display:flex; gap:8px; flex-wrap:wrap; margin-top:9px; }
+  .as-acts button{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:6px 11px; cursor:pointer; font-size:13px; color:var(--ink); font-family:inherit; }
+  .as-acts button:hover{ border-color:var(--green-mid); }
+  .as-sug{ display:flex; flex-wrap:wrap; gap:6px; }
+  .as-sug button{ background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 11px; cursor:pointer; font-size:13px; color:var(--ink); font-family:inherit; text-align:left; }
+  .as-sug button:hover{ border-color:var(--rust); color:var(--rust-deep); }
+  .as-help{ font-size:14px; line-height:1.45; }
+  .as-help p{ margin:0 0 8px; }
+  .as-in{ display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--line); background:#FBF8F1; align-items:center; }
+  .as-in input{ flex:1; min-width:0; border:1.5px solid var(--line); border-radius:10px; padding:11px 12px; font-size:16px; font-family:inherit; background:#fff; color:var(--ink); }
+  .as-in input:focus{ outline:none; border-color:var(--green-mid); }
+  .as-in button{ border:none; border-radius:10px; height:44px; min-width:44px; cursor:pointer; font-size:15px; font-family:inherit; }
+  #asisMic{ background:var(--green-pale); color:var(--green-deep); width:48px; display:flex; align-items:center; justify-content:center; }
+  #asisMic svg{ width:22px; height:22px; }
+  #asisMic.rec{ background:#B3261E; color:#fff; animation:asPulse 1.1s infinite; }
+  @keyframes asPulse{ 0%{ box-shadow:0 0 0 0 rgba(179,38,30,.55); } 70%{ box-shadow:0 0 0 12px rgba(179,38,30,0); } 100%{ box-shadow:0 0 0 0 rgba(179,38,30,0); } }
+  #asisGo{ background:var(--green-deep); color:#F2EDE0; padding:0 16px; font-weight:600; }
+  .as-escucha{ font-size:12.5px; color:#B3261E; padding:0 14px 6px; min-height:0; background:#FBF8F1; }
+  .as-escucha:empty{ display:none; }
+  @media (max-width:640px){
+    #asisFab{ bottom:16px; right:80px; }
+    #asisPanel{ right:0; left:0; bottom:0; top:0; width:100%; height:100%; border-radius:0; border:none; }
+    .as-tw{ max-height:none; }
+    .as-t{ font-size:12.5px; }
+  }
+  @media print{ #asisFab, #asisPanel{ display:none !important; } }
+  .as-cfg{ display:none; padding:12px 14px; background:#fff; border-bottom:1px solid var(--line); font-size:13.5px; line-height:1.4; max-height:60%; overflow:auto; }
+  .as-cfg.on{ display:block; }
+  .as-cfg p{ margin:6px 0; color:var(--ink-soft); }
+  .as-cfg label{ display:block; margin:8px 0 0; font-weight:600; font-size:13px; }
+  .as-cfg input[type=password], .as-cfg select{ display:block; width:100%; margin-top:4px; border:1.5px solid var(--line); border-radius:8px; padding:9px 10px; font-size:15px; font-family:inherit; background:#fff; color:var(--ink); }
+  .as-cfg .as-chk{ font-weight:400; display:flex; gap:8px; align-items:center; }
+  .as-no .as-chip{ background:#F6E3D8; color:var(--rust-deep); }
+  .as-no .lbl{ color:var(--rust-deep); font-weight:600; }
+  .as-warn{ color:var(--rust-deep); }
+  .as-note a, .as-help a{ color:var(--rust-deep); font-weight:600; }
+  .as-esp{ color:var(--ink-soft); font-style:italic; }
+</style>
+<script>
+/* ---------- Sin autollenado de tarjeta/direcciones en los buscadores ----------
+   Chrome y Safari "adivinan" que un campo que pide un número es de tarjeta de
+   crédito y ofrecen los datos guardados. autocomplete="off" no siempre basta,
+   así que a cada campo de texto/número/búsqueda se le da un valor propio que el
+   navegador no reconoce (así no ofrece nada) y se le quitan nombres o ids que
+   suenen a tarjeta. Se aplica también a los campos que se crean después. */
+(function(){
+  var TIPOS = { '':1, text:1, search:1, number:1, tel:1 };
+  function limpiar(el){
+    if(!el || el.tagName !== 'INPUT' || el.__sinAuto) return;
+    var t = (el.getAttribute('type') || '').toLowerCase();
+    if(!TIPOS[t]) return;
+    el.__sinAuto = true;
+    el.setAttribute('autocomplete', 'hatos-buscar');
+    el.setAttribute('autocorrect', 'off');
+    el.setAttribute('autocapitalize', 'off');
+    el.setAttribute('spellcheck', 'false');
+    el.setAttribute('data-lpignore', 'true');
+    el.setAttribute('data-1p-ignore', 'true');
+    el.setAttribute('data-form-type', 'other');
+    if(!el.getAttribute('name')) el.setAttribute('name', 'hb_' + Math.random().toString(36).slice(2, 8));
+  }
+  function barrer(raiz){
+    if(!raiz) return;
+    if(raiz.tagName === 'INPUT') limpiar(raiz);
+    if(raiz.querySelectorAll) Array.prototype.forEach.call(raiz.querySelectorAll('input'), limpiar);
+  }
+  function arrancar(){
+    barrer(document.body);
+    Array.prototype.forEach.call(document.querySelectorAll('form'), function(f){ f.setAttribute('autocomplete', 'off'); });
+    new MutationObserver(function(ms){
+      ms.forEach(function(m){ Array.prototype.forEach.call(m.addedNodes || [], function(n){ if(n.nodeType === 1) barrer(n); }); });
+    }).observe(document.body, { childList:true, subtree:true });
+    // por si un campo se creó sin pasar por el observador (p. ej. al enfocar)
+    document.addEventListener('focusin', function(e){ limpiar(e.target); }, true);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrancar); else arrancar();
+})();
+</script>
+<script>
+/* ===================== ASISTENTE DE REPORTES (v2) =====================
+   Botón junto a la lupa. Se le pide en palabras (escritas o dictadas por voz)
+   un listado o reporte.
+
+   Cómo funciona:
+   1. La pregunta se convierte en una CONSULTA: qué animales (filtros), en qué
+      orden, cuántos, si se agrupa (por finca, raza…) y qué se promedia.
+      - Sin IA: un intérprete propio que conoce todos los datos del tablero.
+        Lo que no entiende NO lo ignora en silencio: lo muestra en «No entendí».
+      - Con IA (opcional, ⚙): la pregunta se le manda a Claude, que devuelve
+        la misma consulta. Solo viaja el texto de la pregunta, nunca los datos.
+   2. La consulta se ejecuta aquí, con los mismos cálculos del tablero:
+      edad = (hoy − nacimiento) ÷ 30 días; IEP, ARA y banderas de window.__BN;
+      ARLA de leche-source; calificación de la última visita ASOCEBU o de la BD. */
+(function(){
+  var BD = window.__BD__ || [];
+  var PROD = ['OK','CACHO','TNJ'];
+  function $(id){ return document.getElementById(id); }
+  function J(id){ try{ return JSON.parse(document.getElementById(id).textContent); }catch(e){ return {}; } }
+  function N(x){ return String(x == null ? '' : x).trim().toUpperCase(); }
+  function esc(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function hoyIso(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  function addDias(iso, n){ var d = new Date(iso+'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0,10); }
+  function fmtF(f){ if(!f) return '—'; var p = String(f).slice(0,10).split('-'); return p.length === 3 ? p[2]+'/'+p[1]+'/'+p[0] : f; }
+  function n1(v, d){ return v == null || isNaN(v) ? '—' : (+v).toFixed(d == null ? 1 : d); }
+  function prom(a){ a = a.filter(function(x){ return x != null && !isNaN(x); }); return a.length ? a.reduce(function(s,x){ return s+x; },0)/a.length : null; }
+  function pl(n, a, b){ return n === 1 ? a : b; }
+  function sinTildes(t){ return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  function U(t){ return sinTildes(N(t)); }
+  function anioHoy(){ return +hoyIso().slice(0,4); }
+  var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+  /* ---------------- datos de apoyo ---------------- */
+  var LECHE = null, PALP = null, PESOS = null;
+  function leche(){ if(!LECHE){ var L = J('leche-source'); LECHE = L.vacas || {}; } return LECHE; }
+  function palp(){ if(!PALP) PALP = J('palp-source') || {}; return PALP; }
+  function pesos(){ if(!PESOS) PESOS = J('pesos-source') || {}; return PESOS; }
+  var RAZA = { BR:'Brahman', GZ:'Guzerá', GOL:'Girolando', JE:'Jersey', JY:'Jersey', EQ:'Equino' };
+
+  function cache(r){ return r.__as || (r.__as = {}); }
+  function memo(r, k, fn){ var c = cache(r); if(!(k in c)){ try{ c[k] = fn(r); }catch(e){ c[k] = null; } } return c[k]; }
+  function limpiarCache(){ BD.forEach(function(r){ delete r.__as; }); CAL_VIS = null; HIJOS = null; try{ window.__BN && window.__BN.reset(); }catch(e){} }
+
+  function edadMeses(r){ if(!r || !r.fecha_nac) return null; return (new Date(hoyIso()) - new Date(r.fecha_nac)) / 864e5 / 30; }
+  function analisis(r){ return memo(r, 'an', function(){ return (N(r.sexo) === 'H' && window.__BN) ? window.__BN.analizar(r) : null; }); }
+  function fert(r){
+    return memo(r, 'fe', function(){
+      var a = analisis(r), o = { partos:0, iep:null, ara:null, banderas:[], ultParto:null, abortos:0, primer:null };
+      if(!a) return o;
+      var P = a.partos || [];
+      o.partos = P.length; o.iep = a.iep_prom; o.banderas = a.banderas || []; o.abortos = (a.abortos || []).length;
+      o.ultParto = P.length ? P[P.length-1].fecha : null; o.primer = P.length ? P[0].fecha : null;
+      var conc = P.filter(function(p){ return p.kg_ano != null && p.peso_destete != null; });
+      o.ara = conc.length ? conc.reduce(function(s,p){ return s+p.kg_ano; },0)/conc.length : null;
+      return o;
+    });
+  }
+  function lecheDe(r){
+    return memo(r, 'le', function(){
+      var ls = leche()[r.numero] || leche()[N(r.numero)] || null;
+      if(!ls || !ls.length) return null;
+      var conA = ls.filter(function(x){ return x.arla_dia != null; });
+      return { n:ls.length, ldia:prom(ls.map(function(x){ return x.litros_dia_prom; })),
+        pico:Math.max.apply(null, ls.map(function(x){ return x.pico_litros_dia || 0; })) || null,
+        arla:conA.length ? prom(conA.map(function(x){ return x.arla_dia; })) : null };
+    });
+  }
+  function esPrenada(p){ return p && /^P\s*\+|PRE[ÑN]/i.test(p.estado || ''); }
+  function esPosible(p){ return p && /^P\s*P|^P\s*\*|POSIBLE|DUDOS/i.test(p.estado || ''); }
+  function esVacia(p){ return p && /^V|VAC/i.test(sinTildes(p.estado || '')); }
+  function ultimaPalp(r){
+    return memo(r, 'pa', function(){
+      var l = [];
+      try{ if(window.__reportes && window.__reportes.palpaciones) l = window.__reportes.palpaciones(r) || []; }catch(e){ l = []; }
+      if(!l.length) l = (palp()[r.numero] || palp()[N(r.numero)] || []).slice();
+      var h = hoyIso();
+      l = l.filter(function(p){ return p && p.fecha && String(p.fecha).slice(0,10) <= h; }).sort(function(a,b){ return String(a.fecha).localeCompare(String(b.fecha)); });
+      var p = l.length ? l[l.length-1] : null;
+      if(!p) return null;
+      // si parió después de la palpación, esa palpación ya no dice el estado actual
+      var up = fert(r).ultParto;
+      if(up && up > String(p.fecha).slice(0,10) && esPrenada(p)) return { fecha:p.fecha, estado:'PARIÓ', toro:p.toro, viejo:true };
+      return p;
+    });
+  }
+  function diasPrenez(p){ if(!p) return null; if(p.dias != null) return +p.dias; return /^\d+$/.test(String(p.hallazgo || '').trim()) ? +p.hallazgo : null; }
+  function partoProbable(r){
+    var p = ultimaPalp(r); if(!esPrenada(p)) return null;
+    if(p.parto) return String(p.parto).slice(0,10);
+    var d = diasPrenez(p); if(d == null || d <= 0 || d > 290) return null;
+    return addDias(String(p.fecha).slice(0,10), 283 - d);
+  }
+  function estadoPalp(r){ var p = ultimaPalp(r); if(!p) return 'sin dato'; if(p.viejo) return 'parió'; if(esPrenada(p)) return 'preñada'; if(esPosible(p)) return 'posible'; if(esVacia(p)) return 'vacía'; return 'otro'; }
+  function palpTxt(r){
+    var p = ultimaPalp(r); if(!p) return '—';
+    if(p.viejo) return 'Parió después de la palpación del '+fmtF(p.fecha);
+    var d = p.diag != null ? p.diag : (p.hallazgo && !/^\d+$/.test(String(p.hallazgo)) ? p.hallazgo : '');
+    var dias = diasPrenez(p);
+    var e = esPrenada(p) ? 'Preñada'+(dias ? ' '+dias+' d' : '')+(p.toro ? ' de '+p.toro : '')
+      : esPosible(p) ? 'Posible preñez'+(p.toro ? ' de '+p.toro : '')
+      : esVacia(p) ? 'Vacía'+(d ? ' '+d : '') : (p.estado || '—')+(d ? ' '+d : '');
+    return e+' · '+fmtF(p.fecha);
+  }
+  function ultimoPeso(r){
+    return memo(r, 'up', function(){
+      var l = (pesos()[r.numero] || []).filter(function(p){ return p.fecha && p.peso; }).sort(function(a,b){ return a.fecha.localeCompare(b.fecha); });
+      return l.length ? l[l.length-1] : null;
+    });
+  }
+  /* hijos por padre y por madre */
+  var HIJOS = null;
+  function hijosIdx(){
+    if(HIJOS) return HIJOS;
+    HIJOS = { p:{}, m:{} };
+    BD.forEach(function(c){
+      [['p', c.padre], ['m', c.madre]].forEach(function(x){
+        var k = U(x[1]); if(!k || k === '0') return;
+        (HIJOS[x[0]][k] = HIJOS[x[0]][k] || []).push(c);
+        var t = k.split(/\s+/)[0]; if(t !== k && /\d/.test(t)) (HIJOS[x[0]]['#'+t] = HIJOS[x[0]]['#'+t] || []).push(c);
+      });
+    });
+    return HIJOS;
+  }
+  function hijosDe(r){
+    return memo(r, 'hi', function(){
+      var I = hijosIdx(), lado = N(r.sexo) === 'M' ? 'p' : 'm', k = U(r.numero);
+      var l = I[lado][k] || I[lado]['#'+k.split(/\s+/)[0]] || [];
+      return l.filter(function(c){ return !(window.esFetoAbortado && window.esFetoAbortado(c)); });
+    });
+  }
+  function refCoincide(ref, val){
+    var a = U(ref).replace(/\s+/g, ' '), b = U(val).replace(/\s+/g, ' ');
+    if(!a || !b) return false;
+    if(a === b || a.indexOf(b+' ') === 0 || a.replace(/\s/g,'') === b.replace(/\s/g,'')) return true;
+    return b.length >= 4 && !/^\d/.test(b) && a.indexOf(b) >= 0;   // por nombre: "espiao"
+  }
+
+  /* ---- visitas (ASOCEBU y demás) guardadas en el equipo ---- */
+  function visitas(){ try{ var s = JSON.parse(localStorage.getItem('hatos_visitas_v1')) || {}; s.visitas = s.visitas || {}; s.regs = s.regs || {}; return s; }catch(e){ return { visitas:{}, regs:{} }; } }
+  var RASGOS = [['temp','Temperamento'],['ombligo','Ombligo'],['caract','Caract. racial'],['conf','Conformación'],['musc','Musculatura'],['aplo','Aplomos'],['tamano_fs','Tamaño'],['dorso','Dorso'],['longitud_corp','Longitud corporal']];
+  function numv(v){ v = String(v == null ? '' : v).replace(',', '.').trim(); var n = parseFloat(v); return isNaN(n) ? null : n; }
+  function califReg(d){ var s = 0, n = 0; RASGOS.forEach(function(x){ var v = numv(d && d.scores && d.scores[x[0]]); if(v != null){ s += v; n++; } }); return n ? s/n : null; }
+  var CAL_VIS = null;
+  function califVisitas(){
+    if(CAL_VIS) return CAL_VIS;
+    var S = visitas(), out = {};
+    Object.keys(S.regs).forEach(function(k){
+      var g = S.regs[k], v = S.visitas[g.visitaId];
+      if(!g || g.deleted || !v || v.deleted) return;
+      var d = g.datos || {}, kk = N(g.numero);
+      if(v.tipo === 'asocebu'){
+        var c = califReg(d);
+        if(c != null && (!out[kk] || (v.fecha || '') >= out[kk].fecha)) out[kk] = { v5:c, fecha:v.fecha || '', resultado:d.resultado || '', obs:d.obs || '', scores:d.scores || {} };
+      }
+      if(d.descarte || /Rechaz/i.test(d.resultado || '')){ out[kk] = out[kk] || { fecha:v.fecha || '' }; out[kk].marcaDescarte = true; }
+    });
+    return (CAL_VIS = out);
+  }
+  function calif(r){
+    return memo(r, 'ca', function(){
+      var v = califVisitas()[N(r.numero)], v5 = null, fuente = '';
+      if(v && v.v5 != null){ v5 = v.v5; fuente = 'Visita ASOCEBU '+fmtF(v.fecha); }
+      else if(r.calif_final_justa != null){ v5 = r.calif_final_justa; fuente = 'BD'; }
+      else if(r.calif_conf_justa != null){ v5 = r.calif_conf_justa; fuente = 'BD'; }
+      var p = v5 == null ? null : v5 * 20;
+      return p == null ? (v && v.marcaDescarte ? { b100:null, letra:null, marca:true } : null)
+        : { b100:p, letra:(window.__asoc ? window.__asoc.letra(p) : null), fuente:fuente, marca:!!(v && v.marcaDescarte) };
+    });
+  }
+  function rasgo(r, k){ var v = califVisitas()[N(r.numero)]; var x = v && v.scores ? numv(v.scores[k]) : null; return x != null ? x : (r[k] != null ? r[k] : null); }
+  function letraHtml(l){
+    if(!l) return '—';
+    var col = (window.__asoc && window.__asoc.COLOR && window.__asoc.COLOR[l]) || '#777';
+    return '<span class="as-let" style="background:'+col+(l === 'R' || l === 'R+' ? ';color:#241D14' : '')+'">'+l+'</span>';
+  }
+  function textoAnimal(r){
+    return memo(r, 'tx', function(){
+      var t = [r.comentario, r.obs_salida, r.causa_salida, r.nombre];
+      var a = analisis(r); if(a && a.comentarios) a.comentarios.forEach(function(c){ t.push(c.texto); });
+      else if(window.__visitas && window.__visitas.comentariosDe){ try{ window.__visitas.comentariosDe(r).forEach(function(c){ t.push(c.texto); }); }catch(e){} }
+      return U(t.filter(Boolean).join(' · '));
+    });
+  }
+  var RX_RESERVA = /RESERVA|REPRODUCTOR|NO\s+VENTA|VENDID|\bPROP\b|PROPIEDAD|\bCIA\b/;
+  function categoria(r){
+    var m = edadMeses(r), sx = N(r.sexo);
+    if(sx === 'H'){ if(fert(r).partos > 0 || (r.crias_ids && r.crias_ids.length)) return 'vaca'; return m != null && m <= 12 ? 'ternera' : 'novilla'; }
+    if(sx === 'M'){ if(m != null && m <= 12) return 'ternero'; return m != null && m <= 30 ? 'torete' : 'toro'; }
+    return '—';
+  }
+  function salidaTipo(r){
+    if(r.activo === 'ACTIVO') return null;
+    var c = U(r.causa_salida)+' '+U(r.obs_salida);
+    if(/VENTA|VENDID/.test(c)) return 'venta';
+    if(/MUER|MURI|MUERT/.test(c)) return 'muerte';
+    if(/DESC|DESCRTE|BAJA EFIC|MATADERO/.test(c)) return 'descarte';
+    if(/DEVOL/.test(c)) return 'devolución';
+    return r.fecha_salida || r.causa_salida ? 'otra' : null;
+  }
+
+  /* ---------------- CATÁLOGO DE DATOS ----------------
+     Cada dato que se puede filtrar, ordenar, promediar o mostrar.
+     tipo: num | txt | cat | fecha | bool.  c = costo (los baratos se evalúan primero). */
+  var CAMPOS = {
+    numero:{ t:'Número', tipo:'txt', c:0, v:function(r){ return r.numero; }, an:true, d:'número del animal' },
+    nombre:{ t:'Nombre', tipo:'txt', c:0, v:function(r){ return r.nombre || null; } },
+    finca:{ t:'Finca', tipo:'cat', c:0, v:function(r){ return r.finca; }, d:'OK, CACHO, TNJ (productivas) o códigos de referencia JDH, GZBR, V8, LM, JTW, BB, VARIOS' },
+    sexo:{ t:'Sexo', tipo:'cat', c:0, v:function(r){ var s = N(r.sexo); return s === 'M' || s === 'H' ? s : null; }, d:'M o H' },
+    raza:{ t:'Raza', tipo:'cat', c:0, v:function(r){ return RAZA[r.raza] || (r.raza && r.raza !== '0' ? r.raza : null); }, d:'Brahman, Guzerá, Girolando, Jersey' },
+    categoria:{ t:'Categoría', tipo:'cat', c:2, v:categoria, d:'vaca (hembra con partos), novilla (hembra >12 m sin partos), ternera (hembra ≤12 m), ternero (macho ≤12 m), torete (macho 12–30 m), toro (macho >30 m)' },
+    edad:{ t:'Edad (meses)', tipo:'num', c:0, n:1, u:'meses', v:function(r){ var m = edadMeses(r); return m == null ? null : Math.round(m*10)/10; }, d:'edad en meses' },
+    fecha_nac:{ t:'Nacimiento', tipo:'fecha', c:0, v:function(r){ return r.fecha_nac || null; } },
+    anio_nac:{ t:'Año nac.', tipo:'num', c:0, n:0, v:function(r){ return r.fecha_nac ? +r.fecha_nac.slice(0,4) : null; } },
+    mes_nac:{ t:'Mes nac.', tipo:'num', c:0, n:0, v:function(r){ return r.fecha_nac ? +r.fecha_nac.slice(5,7) : null; }, d:'1 a 12' },
+    estado:{ t:'Estado', tipo:'cat', c:0, v:function(r){ return r.activo === 'ACTIVO' ? 'ACTIVO' : 'INACTIVO'; }, d:'ACTIVO o INACTIVO (ya salió)' },
+    salida:{ t:'Tipo de salida', tipo:'cat', c:0, v:salidaTipo, d:'venta, muerte, descarte, devolución, otra' },
+    causa_salida:{ t:'Causa de salida', tipo:'txt', c:0, v:function(r){ return r.causa_salida || null; } },
+    fecha_salida:{ t:'Fecha salida', tipo:'fecha', c:0, v:function(r){ return r.fecha_salida || null; } },
+    anio_salida:{ t:'Año salida', tipo:'num', c:0, n:0, v:function(r){ return r.fecha_salida ? +String(r.fecha_salida).slice(0,4) : null; } },
+    vendido_a:{ t:'Vendido a', tipo:'txt', c:0, v:function(r){ return r.vendido_a || null; } },
+    padre:{ t:'Padre', tipo:'txt', c:0, v:function(r){ return r.padre || null; }, ref:true, d:'número o nombre del toro padre' },
+    madre:{ t:'Madre', tipo:'txt', c:0, v:function(r){ return r.madre || null; }, ref:true, d:'número de la madre' },
+    registro:{ t:'Registro', tipo:'bool', c:0, v:function(r){ return !!(r.registro && r.registro !== '0'); }, show:function(r){ return r.registro && r.registro !== '0' ? r.registro : '—'; }, d:'tiene registro ASOCEBU' },
+    lote:{ t:'Lote', tipo:'txt', c:0, v:function(r){ return r.lote && r.lote !== '0' ? String(r.lote) : null; } },
+    comentario:{ t:'Comentarios', tipo:'txt', c:3, lg:true, v:textoAnimal, show:function(r){ return [r.comentario, r.obs_salida].filter(Boolean).join(' · ') || '—'; }, d:'texto de comentarios de la BD, notas, salidas y visitas' },
+    reserva:{ t:'Reserva/reproductor', tipo:'bool', c:0, v:function(r){ return RX_RESERVA.test(N(r.comentario)); }, d:'marcado en comentario como reserva, reproductor, no venta o de otro dueño' },
+    reproductor:{ t:'Reproductor', tipo:'bool', c:2, v:function(r){ if(N(r.sexo) !== 'M') return false; if(/REPRODUCTOR|RESERVA/.test(N(r.comentario))) return true; var lim = addDias(hoyIso(), -730); return hijosDe(r).some(function(c){ return c.fecha_nac && c.fecha_nac >= lim; }); }, d:'macho con crías en los últimos 2 años o marcado reproductor/reserva' },
+    peso_nac:{ t:'Peso nac. (kg)', tipo:'num', c:0, n:0, u:'kg', v:function(r){ return r.peso_nacimiento != null ? r.peso_nacimiento : null; } },
+    peso_dest:{ t:'Peso destete (kg)', tipo:'num', c:0, n:0, u:'kg', v:function(r){ return r.peso_dest != null ? r.peso_dest : null; } },
+    peso_aj_8m:{ t:'Peso aj. 8 m (kg)', tipo:'num', c:0, n:0, u:'kg', v:function(r){ return r.peso_aj_8m != null ? Math.round(r.peso_aj_8m) : null; }, d:'peso al destete ajustado a 8 meses' },
+    indice_dest:{ t:'Índice destete', tipo:'num', c:0, n:1, v:function(r){ return r.indice_peso_dest != null ? Math.round(r.indice_peso_dest*10)/10 : null; } },
+    gpd:{ t:'GPD (kg/día)', tipo:'num', c:0, n:2, v:function(r){ return r.gpd != null ? r.gpd : null; }, d:'ganancia de peso diaria' },
+    ultimo_peso:{ t:'Último peso (kg)', tipo:'num', c:1, n:0, u:'kg', v:function(r){ var p = ultimoPeso(r); return p ? p.peso : null; } },
+    fecha_ultimo_peso:{ t:'Fecha últ. peso', tipo:'fecha', c:1, v:function(r){ var p = ultimoPeso(r); return p ? p.fecha : null; } },
+    calif:{ t:'Calif. (base 100)', tipo:'num', c:1, n:1, v:function(r){ var c = calif(r); return c && c.b100 != null ? Math.round(c.b100*10)/10 : null; }, d:'calificación base 100 (visita ASOCEBU o BD)' },
+    letra:{ t:'Letra', tipo:'cat', c:1, v:function(r){ var c = calif(r); return c ? c.letra : null; }, h:letraHtml, d:'MB, B+, B, R+, R (de mejor a peor)' },
+    rechazado:{ t:'Rechazado/descarte en visita', tipo:'bool', c:1, v:function(r){ var c = calif(r); return !!(c && c.marca); } },
+    temp:{ t:'Temperamento', tipo:'num', c:1, n:1, v:function(r){ return rasgo(r, 'temp'); }, d:'1 a 5' },
+    conf:{ t:'Conformación', tipo:'num', c:1, n:1, v:function(r){ return rasgo(r, 'conf'); }, d:'1 a 5' },
+    musc:{ t:'Musculatura', tipo:'num', c:1, n:1, v:function(r){ return rasgo(r, 'musc'); }, d:'1 a 5' },
+    aplo:{ t:'Aplomos', tipo:'num', c:1, n:1, v:function(r){ return rasgo(r, 'aplo'); }, d:'1 a 5' },
+    ombligo:{ t:'Ombligo', tipo:'num', c:1, n:1, v:function(r){ return rasgo(r, 'ombligo'); }, d:'1 a 5' },
+    caract:{ t:'Caract. racial', tipo:'num', c:1, n:1, v:function(r){ return rasgo(r, 'caract'); }, d:'1 a 5' },
+    partos:{ t:'Partos', tipo:'num', c:2, n:0, v:function(r){ return N(r.sexo) === 'H' ? fert(r).partos : null; }, d:'partos de la vaca (gemelares = 1; TE y abortos no cuentan)' },
+    iep:{ t:'IEP (meses)', tipo:'num', c:2, n:1, u:'meses', v:function(r){ var v = fert(r).iep; return v == null ? null : Math.round(v*10)/10; }, d:'intervalo entre partos promedio' },
+    ara:{ t:'ARA (kg/año)', tipo:'num', c:2, n:1, u:'kg/año', v:function(r){ var v = fert(r).ara; return v == null ? null : Math.round(v*10)/10; }, d:'aporte real anual: kg destetados por año de intervalo' },
+    abortos:{ t:'Abortos', tipo:'num', c:2, n:0, v:function(r){ return N(r.sexo) === 'H' ? fert(r).abortos : null; } },
+    banderas:{ t:'Banderas', tipo:'num', c:2, n:0, v:function(r){ return N(r.sexo) === 'H' ? fert(r).banderas.length : null; }, d:'banderas negras (parto abierto, destete bajo, aborto, cría muerta por la madre, descarte sugerido)' },
+    motivos:{ t:'Motivos', tipo:'txt', c:2, lg:true, v:function(r){ var I = (window.__BN && window.__BN.ICON) || {}; var c = {}; fert(r).banderas.forEach(function(b){ var k = I[b.tipo] || b.tipo; c[k] = (c[k] || 0) + 1; }); return Object.keys(c).map(function(k){ return k+(c[k] > 1 ? ' ×'+c[k] : ''); }).join(' · ') || null; } },
+    ult_parto:{ t:'Último parto', tipo:'fecha', c:2, v:function(r){ return fert(r).ultParto; } },
+    anio_ult_parto:{ t:'Año últ. parto', tipo:'num', c:2, n:0, v:function(r){ var f = fert(r).ultParto; return f ? +f.slice(0,4) : null; } },
+    meses_sin_parir:{ t:'Meses sin parir', tipo:'num', c:2, n:1, u:'meses', v:function(r){ var f = fert(r).ultParto; return f ? Math.round((new Date(hoyIso()) - new Date(f)) / 864e5 / 30.4375 * 10)/10 : null; }, d:'meses desde el último parto' },
+    edad_primer_parto:{ t:'Edad 1er parto (meses)', tipo:'num', c:2, n:1, u:'meses', v:function(r){ var f = fert(r).primer; return f && r.fecha_nac ? Math.round((new Date(f) - new Date(r.fecha_nac)) / 864e5 / 30.4375 * 10)/10 : null; } },
+    arla:{ t:'ARLA (L/día)', tipo:'num', c:1, n:2, u:'L/día', v:function(r){ var l = lecheDe(r); return l && l.arla != null ? Math.round(l.arla*100)/100 : null; }, d:'índice lechero: litros por día contando los días vacía' },
+    litros_dia:{ t:'L/día lactancia', tipo:'num', c:1, n:2, u:'L/día', v:function(r){ var l = lecheDe(r); return l && l.ldia != null ? Math.round(l.ldia*100)/100 : null; } },
+    pico:{ t:'Pico (L/día)', tipo:'num', c:1, n:2, u:'L/día', v:function(r){ var l = lecheDe(r); return l && l.pico ? Math.round(l.pico*100)/100 : null; } },
+    lactancias:{ t:'Lactancias', tipo:'num', c:1, n:0, v:function(r){ var l = lecheDe(r); return l ? l.n : null; } },
+    palp:{ t:'Palpación', tipo:'cat', c:2, v:estadoPalp, show:palpTxt, lg:true, d:'última palpación: preñada, vacía, posible, parió, sin dato' },
+    fecha_palp:{ t:'Fecha palpación', tipo:'fecha', c:2, v:function(r){ var p = ultimaPalp(r); return p ? String(p.fecha).slice(0,10) : null; } },
+    toro_prenez:{ t:'Toro de la preñez', tipo:'txt', c:2, ref:true, v:function(r){ var p = ultimaPalp(r); return esPrenada(p) ? (p.toro || null) : null; } },
+    parto_probable:{ t:'Parto probable', tipo:'fecha', c:2, v:partoProbable },
+    mes_parto:{ t:'Mes parto prob.', tipo:'num', c:2, n:0, v:function(r){ var f = partoProbable(r); return f ? +f.slice(5,7) : null; }, d:'mes del parto probable 1 a 12' },
+    dias_para_parto:{ t:'Días para parir', tipo:'num', c:2, n:0, v:function(r){ var f = partoProbable(r); return f ? Math.round((new Date(f) - new Date(hoyIso())) / 864e5) : null; } },
+    hijos:{ t:'Crías', tipo:'num', c:2, n:0, v:function(r){ return hijosDe(r).length; }, d:'crías registradas (de toros y vacas)' },
+    destete_hijos:{ t:'Destete prom. crías (kg)', tipo:'num', c:2, n:0, u:'kg', v:function(r){ var p = prom(hijosDe(r).map(function(c){ return c.peso_aj_8m; })); return p == null ? null : Math.round(p); }, d:'peso al destete ajustado 8 m promedio de sus crías' },
+    calif_hijos:{ t:'Calif. prom. crías', tipo:'num', c:3, n:1, v:function(r){ var p = prom(hijosDe(r).map(function(c){ var k = calif(c); return k ? k.b100 : null; })); return p == null ? null : Math.round(p*10)/10; } }
+  };
+  var CAMPO_KEYS = Object.keys(CAMPOS);
+
+  /* ---------------- MOTOR: ejecuta una consulta ---------------- */
+  var OPS = { '=':'=', '!=':'≠', '>':'>', '>=':'≥', '<':'<', '<=':'≤', 'entre':'entre', 'contiene':'contiene', 'no_contiene':'no contiene', 'existe':'con dato', 'no_existe':'sin dato', 'en':'en' };
+  function cmpTxt(a){ return U(a).replace(/\s+/g, ' ').trim(); }
+  function pasa(r, f){
+    var C = CAMPOS[f.campo]; if(!C) return true;
+    var v = C.v(r), x = f.valor, y = f.valor2;
+    switch(f.op){
+      case 'existe': return C.tipo === 'bool' ? !!v : (v != null && v !== '' && !(Array.isArray(v) && !v.length));
+      case 'no_existe': return C.tipo === 'bool' ? !v : (v == null || v === '');
+    }
+    if(C.tipo === 'bool'){ var b = !(x === false || x === 'false' || x === 0 || x === 'no'); return f.op === '!=' ? !!v !== b : !!v === b; }
+    if(v == null) return f.op === '!=' || f.op === 'no_contiene';
+    if(C.tipo === 'num' || C.tipo === 'fecha'){
+      var a = C.tipo === 'num' ? +v : String(v).slice(0,10), p = C.tipo === 'num' ? +x : String(x).slice(0,10), q = y == null ? null : (C.tipo === 'num' ? +y : String(y).slice(0,10));
+      switch(f.op){
+        case '=': return a == p; case '!=': return a != p; case '>': return a > p; case '>=': return a >= p; case '<': return a < p; case '<=': return a <= p;
+        case 'entre': return a >= p && a <= q;
+        case 'en': return [].concat(x).some(function(z){ return a == z; });
+      }
+      return true;
+    }
+    var s = cmpTxt(v);
+    switch(f.op){
+      case '=': return C.ref ? refCoincide(v, x) : s === cmpTxt(x);
+      case '!=': return C.ref ? !refCoincide(v, x) : s !== cmpTxt(x);
+      case 'en': return [].concat(x).some(function(z){ return C.ref ? refCoincide(v, z) : s === cmpTxt(z); });
+      case 'contiene': return [].concat(x).some(function(z){ return s.indexOf(cmpTxt(z)) >= 0; });
+      case 'no_contiene': return ![].concat(x).some(function(z){ return s.indexOf(cmpTxt(z)) >= 0; });
+    }
+    return true;
+  }
+  function usaCampo(spec, k){ return (spec.filtros || []).some(function(f){ return f.campo === k; }); }
+  function baseFiltros(spec){
+    var F = (spec.filtros || []).slice();
+    var salidas = ['salida','fecha_salida','anio_salida','causa_salida','vendido_a','estado'].some(function(k){ return usaCampo(spec, k); });
+    if(!salidas && !spec.todos) F.unshift({ campo:'estado', op:'=', valor:'ACTIVO', auto:true });
+    if(!usaCampo(spec, 'finca') && !spec.referencia) F.unshift({ campo:'finca', op:'en', valor:PROD.slice(), auto:true });
+    if(!usaCampo(spec, 'raza')) F.push({ campo:'raza', op:'!=', valor:'Equino', auto:true, oculto:true });
+    F.sort(function(a,b){ return ((CAMPOS[a.campo] || {}).c || 0) - ((CAMPOS[b.campo] || {}).c || 0); });
+    return F;
+  }
+  function filtrar(spec){
+    var F = baseFiltros(spec), vistos = {};
+    return BD.filter(function(r){
+      if(!r || !r.numero) return false;
+      if(spec.referencia === false && r.grupo === 'REFERENCIA') return false;
+      for(var i = 0; i < F.length; i++) if(!pasa(r, F[i])) return false;
+      // el mismo animal registrado en OK y en CACHO (sufijo C) cuenta una vez
+      var kk = U(r.numero).replace(/C$/, '')+'|'+r.fecha_nac+'|'+N(r.sexo);
+      if(vistos[kk]) return false; vistos[kk] = 1;
+      return true;
+    });
+  }
+  function ordenar(l, orden){
+    (orden || []).slice().reverse().forEach(function(o){
+      var C = CAMPOS[o.campo]; if(!C) return;
+      var d = o.dir === 'asc' ? 1 : -1;
+      l.sort(function(a,b){
+        var x = C.v(a), y = C.v(b);
+        if(x == null && y == null) return 0; if(x == null) return 1; if(y == null) return -1;
+        if(C.tipo === 'num') return (x - y) * d;
+        return String(x).localeCompare(String(y), 'es', { numeric:true }) * d;
+      });
+    });
+    return l;
+  }
+  function fmtValor(C, x){
+    if(x == null) return '';
+    if(Array.isArray(x)) return x.map(function(z){ return fmtValor(C, z); }).join(' o ');
+    if(C && C.tipo === 'fecha') return fmtF(x);
+    if(C && (C.k === 'mes_parto' || C.k === 'mes_nac')) return MESES[(+x)-1] || x;
+    return String(x);
+  }
+  CAMPO_KEYS.forEach(function(k){ CAMPOS[k].k = k; });
+  function nomC(C){ var s = C.t.replace(/\s*\(.*\)$/, ''); return /^[A-ZÁÉÍÓÚ]([A-ZÁÉÍÓÚ\/]|$)/.test(s) ? s : s.charAt(0).toLowerCase()+s.slice(1); }
+  function sing(q){ return { vacas:'vaca', toros:'toro', animales:'animal', hembras:'hembra', machos:'macho', terneros:'ternero', terneras:'ternera', novillas:'novilla', toretes:'torete' }[q] || q; }
+  function describir(f){
+    var C = CAMPOS[f.campo]; if(!C) return f.campo;
+    if(f.texto) return f.texto;
+    if(C.tipo === 'bool'){ var si = !(f.valor === false || f.valor === 'false' || f.op === 'no_existe' || f.op === '!='); var BL = { registro:['Con registro','Sin registro'], reserva:['Reserva o reproductor','Sin reservas ni reproductores'], reproductor:['Reproductores','No reproductores'], rechazado:['Rechazados en visita','No rechazados'] }[f.campo]; return BL ? BL[si ? 0 : 1] : (si ? C.t : 'Sin '+nomC(C)); }
+    if(f.op === 'existe') return 'Con '+C.t.toLowerCase();
+    if(f.op === 'no_existe') return 'Sin '+C.t.toLowerCase();
+    if(f.campo === 'finca' && f.auto) return 'Fincas productivas (OK, CACHO, TNJ)';
+    if(f.campo === 'estado' && f.auto) return 'Activos';
+    var nm = C.t.replace(/\s*\(.*\)$/, '');
+    if(f.op === 'entre') return nm+' entre '+fmtValor(C, f.valor)+' y '+fmtValor(C, f.valor2)+(C.u && C.tipo === 'num' ? ' '+C.u : '');
+    if(f.op === '=' || f.op === 'en') return nm+': '+fmtValor(C, f.valor);
+    return nm+' '+OPS[f.op]+' '+fmtValor(C, f.valor)+(C.u && C.tipo === 'num' ? ' '+C.u : '');
+  }
+
+  var MEDIDA = { promedio:'Promedio', suma:'Suma', max:'Máximo', min:'Mínimo', conteo:'Cantidad' };
+  function calcMedida(l, m){
+    if(!m || m.fn === 'conteo' || !CAMPOS[m.campo]) return null;
+    var C = CAMPOS[m.campo], vs = l.map(C.v).filter(function(x){ return x != null && !isNaN(x); });
+    if(!vs.length) return { v:null, n:0 };
+    var v = m.fn === 'suma' ? vs.reduce(function(s,x){ return s+x; },0) : m.fn === 'max' ? Math.max.apply(null, vs) : m.fn === 'min' ? Math.min.apply(null, vs) : vs.reduce(function(s,x){ return s+x; },0)/vs.length;
+    return { v:v, n:vs.length };
+  }
+
+  /* columnas a mostrar según la consulta */
+  function columnas(spec, l){
+    var c = ['numero','finca'];
+    var hayM = l.some(function(r){ return N(r.sexo) === 'M'; }), hayH = l.some(function(r){ return N(r.sexo) === 'H'; });
+    if(hayM && hayH) c.push('sexo');
+    c.push('raza','edad');
+    (spec.orden || []).forEach(function(o){ c.push(o.campo); });
+    if(spec.medida && spec.medida.campo) c.push(spec.medida.campo);
+    (spec.filtros || []).forEach(function(f){ if(['finca','sexo','raza','estado','edad','numero','reserva'].indexOf(f.campo) < 0) c.push(f.campo === 'anio_nac' || f.campo === 'mes_nac' ? 'fecha_nac' : f.campo === 'anio_salida' ? 'fecha_salida' : f.campo === 'mes_parto' || f.campo === 'dias_para_parto' ? 'parto_probable' : f.campo === 'anio_ult_parto' ? 'ult_parto' : f.campo); });
+    (spec.columnas || []).forEach(function(k){ c.push(k); });
+    var salieron = l.length && l.every(function(r){ return r.activo !== 'ACTIVO'; });
+    if(salieron) c.push('salida','fecha_salida','causa_salida','vendido_a');
+    else if(hayH && !hayM){
+      var adultas = l.some(function(r){ return fert(r).partos > 0; });
+      if(adultas) c.push('partos','iep','ara','palp'); else c.push('peso_aj_8m','calif','letra','palp');
+    } else if(hayM && !hayH) c.push('peso_aj_8m','calif','letra','padre');
+    if(c.indexOf('letra') < 0 && c.indexOf('calif') >= 0) c.splice(c.indexOf('calif')+1, 0, 'letra');
+    c.push('comentario');
+    c = c.filter(function(k, i, a){ return CAMPOS[k] && a.indexOf(k) === i; });
+    if(c.length > 13){ var fin = c.pop(); c = c.slice(0, 12).concat(fin); }
+    return c;
+  }
+  function colDeCampo(k){
+    var C = CAMPOS[k];
+    return { k:k, t:C.t, an:C.an, lg:C.lg, h:C.h, n:C.tipo === 'num' ? (C.n == null ? 1 : C.n) : null,
+      v:C.show || (C.tipo === 'bool' ? function(r){ return C.v(r) ? 'Sí' : 'No'; } : C.v), f:C.tipo === 'fecha' ? fmtF : null };
+  }
+
+  var NOM_GRUPO = { finca:'Finca', raza:'Raza', sexo:'Sexo', categoria:'Categoría', padre:'Padre', madre:'Madre', anio_nac:'Año de nacimiento', mes_nac:'Mes de nacimiento', salida:'Tipo de salida', anio_salida:'Año de salida', letra:'Letra', palp:'Palpación', lote:'Lote', estado:'Estado', mes_parto:'Mes de parto probable', anio_ult_parto:'Año del último parto', toro_prenez:'Toro de la preñez', vendido_a:'Comprador' };
+  function quien(spec){
+    var cat = (spec.filtros || []).filter(function(f){ return f.campo === 'categoria'; })[0];
+    var sx = (spec.filtros || []).filter(function(f){ return f.campo === 'sexo' && f.op === '='; })[0];
+    if(cat){ var v = [].concat(cat.valor); var m = { vaca:'vacas', novilla:'novillas', ternera:'terneras', ternero:'terneros', torete:'toretes', toro:'toros' };
+      if(v.length === 2 && v.indexOf('torete') >= 0 && v.indexOf('toro') >= 0) return 'toros';
+      if(v.length === 2 && v.indexOf('ternera') >= 0 && v.indexOf('ternero') >= 0) return 'terneros';
+      return v.length === 1 ? (m[v[0]] || 'animales') : 'animales'; }
+    if(sx) return sx.valor === 'M' ? 'machos' : 'hembras';
+    return 'animales';
+  }
+
+  function ejecutar(spec){
+    if(spec.reporte && PRESETS[spec.reporte]) return PRESETS[spec.reporte](spec);
+    if(spec.animal) return rAnimal(spec);
+    var l = filtrar(spec);
+    var qn = quien(spec);
+    var chips = baseFiltros(spec).filter(function(f){ return !f.oculto; }).map(describir);
+    var notas = [];
+    // agrupado
+    if(spec.agrupar && (CAMPOS[spec.agrupar] || spec.agrupar === 'finca')){
+      var G = CAMPOS[spec.agrupar], g = {};
+      l.forEach(function(r){ var k = G.v(r); k = k == null || k === '' ? '(sin dato)' : (Array.isArray(k) ? k.join(', ') : k); (g[k] = g[k] || []).push(r); });
+      var m = spec.medida && spec.medida.fn !== 'conteo' ? spec.medida : null;
+      var filas = Object.keys(g).map(function(k){ var x = calcMedida(g[k], m); return { g:k, n:g[k].length, m:x ? x.v : null, nm:x ? x.n : null, lista:g[k] }; });
+      var ord = spec.orden && spec.orden[0];
+      filas.sort(function(a,b){ if(m && ord) return ord.dir === 'asc' ? (a.m - b.m) : (b.m - a.m); if(m && !ord && G.tipo !== 'num') return b.n - a.n; return G.tipo === 'num' ? (+a.g - +b.g) : (b.n - a.n) || String(a.g).localeCompare(String(b.g), 'es', { numeric:true }); });
+      if(spec.limite) filas = filas.slice(0, spec.limite);
+      var MC = m ? CAMPOS[m.campo] : null;
+      var cols = [{ t:NOM_GRUPO[spec.agrupar] || (G ? G.t : spec.agrupar), v:function(f){ return spec.agrupar === 'mes_nac' || spec.agrupar === 'mes_parto' ? (MESES[(+f.g)-1] || f.g) : f.g; } },
+        { t:'Cantidad', v:function(f){ return f.n; }, n:0 }];
+      if(m) cols.push({ t:MEDIDA[m.fn]+' '+nomC(MC)+(MC.u ? ' ('+MC.u+')' : ''), v:function(f){ return f.m == null ? null : f.m; }, n:MC.n == null ? 1 : MC.n },
+        { t:'Con dato', v:function(f){ return f.nm; }, n:0 });
+      var tot = calcMedida(l, m);
+      var sum = '<b>'+l.length+'</b> '+qn+' en total, en '+filas.length+' '+pl(filas.length, 'grupo', 'grupos')+' por '+(NOM_GRUPO[spec.agrupar] || spec.agrupar).toLowerCase()+'.';
+      if(m && tot && tot.v != null) sum += ' '+MEDIDA[m.fn]+' general: <b>'+n1(tot.v, MC.n)+' '+(MC.u || '')+'</b> ('+tot.n+' con dato).';
+      chips.push('Agrupado por '+(NOM_GRUPO[spec.agrupar] || spec.agrupar).toLowerCase());
+      return { titulo:spec.titulo || tituloDe(spec, qn), chips:chips, resumen:sum, cols:cols, rows:filas, notas:notas, grupo:true,
+        voz:l.length+' '+qn+', en '+filas.length+' grupos.' };
+    }
+    // lista ordenada
+    var orden = spec.orden && spec.orden.length ? spec.orden : null;
+    if(orden){ var sinDato = 0; var OC = CAMPOS[orden[0].campo]; if(OC){ var con = l.filter(function(r){ return OC.v(r) != null; }); sinDato = l.length - con.length; l = con; }
+      ordenar(l, orden);
+      if(sinDato) notas.push(sinDato+' '+qn+' sin dato de '+(nomC(OC))+' no entran en la lista.');
+      chips.push('Orden: '+orden.map(function(o){ var C = CAMPOS[o.campo]; return (C ? C.t.replace(/\s*\(.*\)$/, '') : o.campo)+(o.dir === 'asc' ? ' ↑' : ' ↓'); }).join(', '));
+    } else l.sort(function(a,b){ return (edadMeses(b) || 0) - (edadMeses(a) || 0); });
+    var total = l.length;
+    if(spec.limite) l = l.slice(0, spec.limite);
+    var cols = columnas(spec, l).map(colDeCampo);
+    var sum;
+    if(spec.limite && orden && l.length){
+      var C0 = CAMPOS[orden[0].campo], v0 = C0.v(l[0]);
+      sum = (spec.limite === 1 ? 'Es ' : 'De <b>'+total+'</b> '+qn+' con dato, encabeza ')+'<b>'+esc(l[0].numero)+'</b> ('+l[0].finca+') con <b>'+fmtNum(C0, v0)+'</b>.';
+    } else {
+      sum = (spec.contar ? (total === 1 ? 'Hay ' : 'Hay ') : 'Encontré ')+'<b>'+total+'</b> '+(total === 1 ? sing(qn) : qn)+'.';
+      if(spec.contar || total > 15){
+        var pf = {}; l.forEach(function(r){ pf[r.finca] = (pf[r.finca] || 0) + 1; });
+        var kf = Object.keys(pf); if(kf.length > 1 && !spec.limite) sum += ' Por finca: '+kf.sort().map(function(k){ return k+' '+pf[k]; }).join(' · ')+'.';
+      }
+    }
+    var med = spec.medida && spec.medida.fn !== 'conteo' ? calcMedida(filtrar(spec), spec.medida) : null;
+    if(med){ var MC2 = CAMPOS[spec.medida.campo]; sum += ' '+MEDIDA[spec.medida.fn]+' de '+nomC(MC2)+': <b>'+(med.v == null ? 'sin datos' : n1(med.v, MC2.n)+' '+(MC2.u || ''))+'</b>'+(med.v == null ? '' : ' ('+med.n+' con dato)')+'.'; }
+    if(orden && OC_EXPL[orden[0].campo]) notas.unshift(OC_EXPL[orden[0].campo]);
+    if(orden && orden[0].campo === 'iep' && l.some(function(r){ return CAMPOS.iep.v(r) > 60; })) notas.push('Un IEP de más de 60 meses casi siempre es un parto que falta en el registro; revise la ficha de esas vacas.');
+    var voz = spec.contar ? 'Hay '+total+' '+qn+'.' : (orden && l.length ? 'Los primeros son: '+l.slice(0, Math.min(5, l.length)).map(function(r){ return String(r.numero).replace('/', ' raya '); }).join(', ')+'.' : 'Encontré '+total+' '+qn+'.');
+    return { titulo:spec.titulo || tituloDe(spec, qn), chips:chips, resumen:sum, cols:cols, rows:l, notas:notas, voz:voz };
+  }
+  function fmtNum(C, v){ return C.tipo === 'num' ? n1(v, C.n)+(C.u ? ' '+C.u : '') : C.tipo === 'fecha' ? fmtF(v) : esc(v); }
+  var OC_EXPL = {
+    arla:'ARLA = litros de la lactancia ÷ meses de IEP × 12, llevado a litros por día: lo que la vaca aporta de verdad al año, contando los días vacía.',
+    ara:'ARA = kilos destetados por año de intervalo entre partos; solo partos con destete concluido.',
+    iep:'IEP = promedio de los intervalos entre partos, cada uno medido por separado.',
+    calif:'Calificación de la última visita ASOCEBU si la tiene; si no, la calificación ajustada de la base.',
+    destete_hijos:'Promedio del peso al destete ajustado a 8 meses de todas sus crías registradas.'
+  };
+  function tituloDe(spec, qn){
+    var t = qn.charAt(0).toUpperCase()+qn.slice(1);
+    if(spec.limite && spec.orden && spec.orden.length){
+      var C = CAMPOS[spec.orden[0].campo], alto = spec.orden[0].dir !== 'asc';
+      return (spec.limite === 1 ? '' : 'Top '+spec.limite+' · ')+t+' por '+nomC(C)+(alto ? ' (de mayor a menor)' : ' (de menor a mayor)');
+    }
+    if(spec.agrupar && spec.medida && CAMPOS[spec.medida.campo] && spec.medida.fn !== 'conteo') return MEDIDA[spec.medida.fn]+' de '+nomC(CAMPOS[spec.medida.campo])+' por '+(NOM_GRUPO[spec.agrupar] || spec.agrupar).toLowerCase()+' ('+qn+')';
+    if(spec.agrupar) return t+' por '+(NOM_GRUPO[spec.agrupar] || spec.agrupar).toLowerCase();
+    if(spec.medida && CAMPOS[spec.medida.campo] && spec.medida.fn !== 'conteo') return MEDIDA[spec.medida.fn]+' de '+nomC(CAMPOS[spec.medida.campo])+' ('+qn+')';
+    return 'Listado de '+qn;
+  }
+
+  /* ---------------- reportes especiales ---------------- */
+  var PRESETS = {};
+  PRESETS.descarte = function(spec){
+    try{ window.__BN.reset(); }catch(e){}
+    BD.forEach(function(r){ if(r.__as){ delete r.__as.an; delete r.__as.fe; } });
+    var s = clonar(spec); s.filtros = (s.filtros || []).filter(function(f){ return f.campo !== 'sexo'; }).concat([{ campo:'sexo', op:'=', valor:'H' }]);
+    var l = filtrar(s).filter(function(r){ return (r.crias_ids && r.crias_ids.length) || edadMeses(r) >= 24; });
+    var dos = [], una = [];
+    l.forEach(function(r){ var b = fert(r).banderas.length; if(b >= 2) dos.push(r); else if(b === 1) una.push(r); });
+    function orden(a,b){ return fert(b).banderas.length - fert(a).banderas.length || (fert(a).ara || 0) - (fert(b).ara || 0); }
+    dos.sort(orden); una.sort(orden);
+    var rows = spec.incluirObservacion ? dos.concat(una) : dos;
+    if(spec.limite) rows = rows.slice(0, spec.limite);
+    var chips = baseFiltros(s).filter(function(f){ return !f.oculto; }).map(describir).concat(['2 o más banderas negras']);
+    return { titulo:'Vacas para posible descarte por rendimiento', chips:chips,
+      resumen:'<b>'+dos.length+'</b> vacas tienen 2 o más banderas negras y entran a descarte'+(una.length ? '; otras <b>'+una.length+'</b> tienen 1 bandera y quedan en observación'+(spec.incluirObservacion ? ' (incluidas abajo)' : '') : '')+'.',
+      cols:['numero','finca','raza','edad','banderas','motivos','partos','iep','ara','arla','palp','comentario'].map(colDeCampo), rows:rows,
+      notas:['Banderas: parto muy abierto (más de 20 meses), destete bajo frente a sus contemporáneas, aborto, cría muerta por causa de la madre, o descarte sugerido en comentarios o en la visita ASOCEBU. Es la misma regla de Reportes → Animales para descarte.'].concat(!spec.incluirObservacion && una.length ? ['Para ver también las de una bandera, pida: «vacas para descarte, incluir las de observación».'] : []),
+      voz:dos.length+' vacas para posible descarte'+(una.length ? ', y '+una.length+' en observación.' : '.') };
+  };
+  PRESETS.comercial = function(spec){
+    var s = clonar(spec); s.filtros = (s.filtros || []).filter(function(f){ return f.campo !== 'sexo'; }).concat([{ campo:'sexo', op:'=', valor:'M' }, { campo:'reserva', op:'=', valor:false }]);
+    if(!usaCampo(s, 'edad')) s.filtros.push({ campo:'edad', op:'>=', valor:6 });
+    var cuts = (window.__asoc && window.__asoc.cortes && window.__asoc.cortes()) || { B:70 };
+    var l = filtrar(s), bajos = [], sinCal = [];
+    l.forEach(function(r){ var c = calif(r); if(!c || c.b100 == null){ if(c && c.marca) bajos.push(r); else sinCal.push(r); return; } if(c.b100 < cuts.B || c.marca) bajos.push(r); });
+    bajos.sort(function(a,b){ return ((calif(a) || {}).b100 || 0) - ((calif(b) || {}).b100 || 0); });
+    var rows = spec.sinCalif ? sinCal : bajos; if(spec.limite) rows = rows.slice(0, spec.limite);
+    var sum = '<b>'+bajos.length+'</b> '+pl(bajos.length, 'macho queda', 'machos quedan')+' por debajo de B (R o R+) o '+pl(bajos.length, 'fue rechazado', 'fueron rechazados')+' en una visita: candidatos a venta comercial.';
+    if(sinCal.length) sum += ' Otros <b>'+sinCal.length+'</b> machos no tienen calificación'+(spec.sinCalif ? ' (son los de abajo)' : '')+'.';
+    return { titulo:spec.sinCalif ? 'Machos sin calificación' : 'Machos de baja calificación para venta comercial', chips:baseFiltros(s).filter(function(f){ return !f.oculto; }).map(describir).concat(['Letra R o R+ o rechazados']), resumen:sum,
+      cols:['numero','finca','raza','edad','calif','letra','peso_aj_8m','ultimo_peso','padre','madre','comentario'].map(colDeCampo), rows:rows,
+      notas:['Corte usado: B desde '+cuts.B+' en base 100 (cortes provisionales del tablero). Se excluyen los marcados como reserva, reproductor o de otro dueño.'].concat(!spec.sinCalif && sinCal.length ? ['Para ver los que faltan por calificar, pida: «machos sin calificación».'] : []),
+      voz:bajos.length+' machos de baja calificación para venta comercial.' };
+  };
+  PRESETS.inventario = function(spec){
+    var l = filtrar(spec), M = {}, cats = ['vaca','novilla','ternera','toro','torete','ternero'], fincas = [];
+    l.forEach(function(r){ var f = r.finca, c = categoria(r); if(!M[f]){ M[f] = {}; fincas.push(f); } M[f][c] = (M[f][c] || 0) + 1; });
+    fincas.sort(function(a,b){ return PROD.indexOf(a) - PROD.indexOf(b); });
+    var NOM = { vaca:'Vacas', novilla:'Novillas', ternera:'Terneras', toro:'Toros (>30 m)', torete:'Toretes (12–30 m)', ternero:'Terneros' };
+    var rows = fincas.map(function(f){ var o = { g:f, tot:0 }; cats.forEach(function(c){ o[c] = M[f][c] || 0; o.tot += o[c]; }); return o; });
+    var T = { g:'TOTAL', tot:0 }; cats.forEach(function(c){ T[c] = rows.reduce(function(s,o){ return s+o[c]; }, 0); T.tot += T[c]; }); if(rows.length > 1) rows.push(T);
+    var cols = [{ t:'Finca', v:function(o){ return o.g; } }].concat(cats.map(function(c){ return { t:NOM[c], v:function(o){ return o[c]; }, n:0 }; })).concat([{ t:'Total', v:function(o){ return o.tot; }, n:0 }]);
+    var pre = l.filter(function(r){ return categoria(r) === 'vaca' && estadoPalp(r) === 'preñada'; }).length, vac = l.filter(function(r){ return categoria(r) === 'vaca'; }).length;
+    return { titulo:'Inventario del hato', chips:baseFiltros(spec).filter(function(f){ return !f.oculto; }).map(describir), grupo:true,
+      resumen:'<b>'+l.length+'</b> animales activos: '+T.vaca+' vacas, '+T.novilla+' novillas, '+(T.ternera+T.ternero)+' crías, '+(T.toro+T.torete)+' toros y toretes.'+(vac ? ' De las vacas, '+pre+' están preñadas según la última palpación.' : ''),
+      cols:cols, rows:rows, notas:['Categorías: vaca = hembra con partos; novilla = hembra de más de 12 meses sin partos; ternera/ternero = 12 meses o menos; torete = macho de 12 a 30 meses; toro = macho de más de 30 meses.'],
+      voz:l.length+' animales activos.' };
+  };
+  PRESETS.asocebu = function(spec){
+    var S = visitas();
+    var fin = (spec.filtros || []).filter(function(f){ return f.campo === 'finca'; })[0];
+    var vs = Object.keys(S.visitas).map(function(k){ return S.visitas[k]; }).filter(function(v){ return v && !v.deleted && v.tipo === 'asocebu'; })
+      .sort(function(a,b){ return (b.fecha || '').localeCompare(a.fecha || '') || (b.ts || 0) - (a.ts || 0); });
+    if(fin) vs = vs.filter(function(v){ return [].concat(fin.valor).indexOf(v.finca) >= 0; });
+    if(!vs.length) return { titulo:'Resumen de visita ASOCEBU', chips:[], cols:[], rows:[],
+      resumen:'No encuentro visitas ASOCEBU guardadas en este equipo'+(fin ? ' para '+[].concat(fin.valor).join(', ') : '')+'.',
+      notas:['Las visitas se registran en «Visitas» (modo guiado o pestaña Reportes) y se sincronizan entre equipos con la llave de GitHub.'], voz:'No encuentro visitas ASOCEBU guardadas.' };
+    var v = vs[0], x = v.extra || {};
+    var regs = Object.keys(S.regs).map(function(k){ return S.regs[k]; }).filter(function(g){ return g && !g.deleted && g.visitaId === v.id; });
+    var byNum = {}; BD.forEach(function(r){ if(r.numero && !byNum[N(r.numero)]) byNum[N(r.numero)] = r; });
+    var filas = regs.map(function(g){
+      var d = g.datos || {}, r = byNum[N(g.numero)] || { numero:g.numero, finca:v.finca };
+      var c = califReg(d), p = c == null ? null : c*20;
+      return { r:r, b100:p, letra:p != null && window.__asoc ? window.__asoc.letra(p) : null, resultado:d.resultado || '', peso:numv(d.peso), obs:[d.obs, d.motivo].filter(Boolean).join(' · '), descarte:!!d.descarte || /Rechaz/i.test(d.resultado || '') };
+    });
+    filas.sort(function(a,b){ return (b.b100 == null ? -1 : b.b100) - (a.b100 == null ? -1 : a.b100); });
+    var con = filas.filter(function(f){ return f.b100 != null; });
+    var pr = prom(con.map(function(f){ return f.b100; }));
+    var letras = {}; con.forEach(function(f){ letras[f.letra] = (letras[f.letra] || 0) + 1; });
+    var res = {}; filas.forEach(function(f){ if(f.resultado) res[f.resultado] = (res[f.resultado] || 0) + 1; });
+    var M = filas.filter(function(f){ return N(f.r.sexo) === 'M'; }).length, H = filas.length - M;
+    var sum = 'Visita del <b>'+fmtF(v.fecha)+'</b> en <b>'+esc(v.finca || '—')+'</b>'+(x.tecnico ? ' con el técnico '+esc(x.tecnico) : '')+'. '+
+      'Se vieron <b>'+filas.length+'</b> '+pl(filas.length, 'animal', 'animales')+' ('+H+' '+pl(H, 'hembra', 'hembras')+', '+M+' '+pl(M, 'macho', 'machos')+'); '+con.length+' calificados'+(pr != null ? ', promedio <b>'+pr.toFixed(1)+'</b> en base 100 ('+(window.__asoc ? window.__asoc.letra(pr) : '')+')' : '')+'.';
+    var dist = ['MB','B+','B','R+','R'].filter(function(l){ return letras[l]; }).map(function(l){ return l+': '+letras[l]; }).join(' · ');
+    if(dist) sum += '<br>Letras — '+dist+'.';
+    var rs = Object.keys(res).map(function(k){ return k+': '+res[k]; }).join(' · '); if(rs) sum += '<br>Resultados — '+esc(rs)+'.';
+    var desc = filas.filter(function(f){ return f.descarte; });
+    if(desc.length) sum += '<br>Rechazados o marcados para descarte: <b>'+desc.map(function(f){ return esc(f.r.numero); }).join(', ')+'</b>.';
+    if(con.length >= 6) sum += '<br>Mejores: '+con.slice(0,3).map(function(f){ return esc(f.r.numero)+' ('+f.b100.toFixed(1)+')'; }).join(', ')+'. Más bajos: '+con.slice(-3).reverse().map(function(f){ return esc(f.r.numero)+' ('+f.b100.toFixed(1)+')'; }).join(', ')+'.';
+    var notas = [];
+    if(x.obs || x.observaciones) notas.push('Observaciones generales: '+esc(x.obs || x.observaciones));
+    if(vs.length > 1) notas.push('Hay '+vs.length+' visitas ASOCEBU guardadas; este es el resumen de la más reciente'+(fin ? ' en '+[].concat(fin.valor).join(', ') : '')+'. Para otra finca pida, por ejemplo, «resumen visita ASOCEBU en TNJ».');
+    var cols = [
+      { t:'Número', v:function(f){ return f.r.numero; }, an:true, rid:function(f){ return f.r.id; } },
+      { t:'Sexo', v:function(f){ return N(f.r.sexo) === 'M' ? 'M' : (f.r.sexo ? 'H' : '—'); } },
+      { t:'Raza', v:function(f){ return RAZA[f.r.raza] || '—'; } },
+      { t:'Edad (meses)', v:function(f){ var m = edadMeses(f.r); return m == null ? null : Math.round(m*10)/10; }, n:1 },
+      { t:'Calif. (base 100)', v:function(f){ return f.b100 == null ? null : Math.round(f.b100*10)/10; }, n:1 },
+      { t:'Letra', v:function(f){ return f.letra; }, h:letraHtml },
+      { t:'Resultado', v:function(f){ return f.resultado || '—'; } },
+      { t:'Peso (kg)', v:function(f){ return f.peso; }, n:0 },
+      { lg:true, t:'Observación', v:function(f){ return (f.descarte ? '⚑ ' : '')+(f.obs || ''); } }
+    ];
+    return { titulo:'Resumen de la visita ASOCEBU', chips:[fmtF(v.fecha), v.finca || '', x.tecnico ? 'Técnico '+x.tecnico : ''].filter(Boolean), resumen:sum, cols:cols, rows:filas, notas:notas,
+      voz:'Visita del '+fmtF(v.fecha)+': '+filas.length+' animales'+(pr != null ? ', promedio '+pr.toFixed(0)+' en base cien' : '')+(desc.length ? ', '+desc.length+' rechazados o para descarte' : '')+'.' };
+  };
+  function buscarAnimal(ref){
+    var k = U(ref), r = null;
+    BD.forEach(function(x){ if(!r && U(x.numero) === k) r = x; });
+    if(!r) BD.forEach(function(x){ if(!r && (U(x.numero).indexOf(k+' ') === 0 || (x.nombre && U(x.nombre) === k))) r = x; });
+    if(!r && k.length >= 4) BD.forEach(function(x){ if(!r && U(x.numero).indexOf(k) >= 0) r = x; });
+    return r;
+  }
+  function rAnimal(spec){
+    var r = buscarAnimal(spec.animal);
+    if(!r) return { titulo:'Animal '+spec.animal, chips:[], resumen:'No encuentro el animal '+esc(spec.animal)+' en la base.', rows:[], cols:[], voz:'No lo encuentro.' };
+    var c = ['numero','finca','sexo','raza','categoria','edad','padre','madre','registro','calif','letra'];
+    if(N(r.sexo) === 'H') c.push('partos','iep','ara','arla','palp','banderas','hijos'); else c.push('peso_aj_8m','ultimo_peso','hijos','destete_hijos');
+    c.push('estado','comentario');
+    var cols = c.map(colDeCampo);
+    var lineas = cols.slice(1).map(function(k){ var v = k.v(r); if(v == null || v === '' || v === '—') return null; return k.t+': '+(k.f ? k.f(v) : k.n != null ? n1(v, k.n) : v); }).filter(Boolean);
+    return { titulo:'Animal '+r.numero, chips:[r.activo || ''], resumen:esc(lineas.join(' · '))+'<br>Toque el número para abrir su ficha completa.', cols:cols, rows:[r], notas:[], voz:'Aquí está el '+String(r.numero).replace('/', ' raya ')+'.' };
+  }
+  function clonar(o){ return JSON.parse(JSON.stringify(o || {})); }
+
+  /* ================= INTÉRPRETE LOCAL (sin internet) =================
+     Convierte la frase en una consulta. Va "consumiendo" lo que entiende;
+     lo que sobra se muestra al usuario como «No entendí». */
+  var NUMS = { un:1, uno:1, una:1, dos:2, tres:3, cuatro:4, cinco:5, seis:6, siete:7, ocho:8, nueve:9, diez:10, once:11, doce:12, trece:13, catorce:14,
+    quince:15, dieciseis:16, diecisiete:17, dieciocho:18, diecinueve:19, veinte:20, veintiuno:21, veintidos:22, veintitres:23, veinticuatro:24, veinticinco:25,
+    veintiseis:26, veintisiete:27, veintiocho:28, veintinueve:29, treinta:30, cuarenta:40, cincuenta:50, sesenta:60, setenta:70, ochenta:80, noventa:90, cien:100, ciento:100, doscientos:200, trescientos:300, cuatrocientos:400, quinientos:500 };
+  function normalizar(t){
+    t = sinTildes(String(t || '').toLowerCase()).replace(/[¿?¡!,;:"“”()]/g, ' ').replace(/(\d)\s*\.\s*(\d)/g, '$1,$2');
+    t = t.replace(/\b(dieci|veinti)\s+(\w+)/g, '$1$2');
+    t = t.replace(/\b(treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa) y (uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve)\b/g, function(m, a, b){ return String(NUMS[a] + NUMS[b]); });
+    t = t.replace(/\b(doscientos|trescientos|cuatrocientos|quinientos|ciento) (\w+)\b/g, function(m, a, b){ return NUMS[b] != null && NUMS[b] < 100 ? String(NUMS[a] + NUMS[b]) : m; });
+    t = t.replace(/\b(\d+)\s+(?:raya|slash|barra|diagonal|sobre)\s+(\d+)\b/g, '$1/$2');
+    t = t.replace(/\b([a-z]+)\b/g, function(w){ return NUMS[w] != null && w !== 'un' && w !== 'una' && w !== 'uno' ? String(NUMS[w]) : w; });
+    t = t.replace(/\b(un|una|uno) (ano|anos|mes|meses|vaca|toro|animal)\b/g, '1 $2');
+    t = t.replace(/(\d),(\d)/g, '$1.$2');
+    t = t.replace(/\b(kilos?|kgs?)\b/g, 'kg').replace(/\baños\b/g, 'anos').replace(/\bnumero\b/g, ' ');
+    return ' '+t.replace(/\s+/g, ' ').trim()+' ';
+  }
+  var STOP = ('quiero quisiera necesito dame deme damelo muestrame mostrar muestre ver saber conocer dime digame diga sacar saca saque hacer haga genera generar busca buscar buscame encuentra encontrar listar lista listado listados reporte reportes informe relacion favor porfa por fa porfavor hola gracias ' +
+    'cual cuales cuantos cuantas cuanto cuanta quien quienes como que donde cuando es son esta estan estas este esto hay tengo tenemos tiene tienen tener mis mi nuestros nuestras mios mias ' +
+    'el la los las lo un una unos unas de del al a en con y o u por para que se le les me nos su sus ese esa esos esas aquel todo todos toda todas ' +
+    'resumen producen produce dan da dieron listas lista_ animales animal ganado hato hatos bovinos cabezas reses res datos dato informacion registros registro_ actual actuales hoy ahora favor solo solamente tambien ademas mas muy etc').split(' ');
+  var STOPSET = {}; STOP.forEach(function(w){ STOPSET[w] = 1; });
+
+  function interpretar(texto){
+    var t = normalizar(texto), resto = t;
+    var spec = { filtros:[], orden:[], texto:texto, noEntendi:[] };
+    var F = spec.filtros;
+    function has(rx){ return rx.test(resto); }
+    function eat(rx){ var m = resto.match(rx); if(m){ resto = resto.replace(m[0], ' '); } return m; }
+    function eatAll(rx){ var m, any = null; while((m = resto.match(rx))){ any = m; resto = resto.replace(m[0], ' '); } return any; }
+    function add(f){ F.push(f); return f; }
+    function num(x){ return x == null ? null : parseFloat(String(x).replace(',', '.')); }
+    var anio = anioHoy();
+    function anioDe(s){ s = s || ''; if(/este ano|ano actual|en curso/.test(s)) return anio; if(/ano pasado|anterior/.test(s)) return anio-1; var m = s.match(/\b(19|20)\d{2}\b/); return m ? +m[0] : null; }
+
+    /* ---- 1. reportes especiales ---- */
+    if(has(/asocebu|visita/) && !has(/\b(mejor|peor)/)){
+      if(eat(/\b(resumen|informe|reporte|como (fue|le fue|salio|nos fue)|que paso en|de la|ultima)?\s*(la |el )?(ultima )?visita( de)?( la)?( asocebu)?\b/) || eat(/\basocebu\b/)){ eat(/\basocebu\b/); spec.reporte = 'asocebu'; }
+    }
+    if(!spec.reporte && eat(/\b(posible |para |a )?(descarte|descartar|descartes|eliminar|sacar del hato)\b/)){
+      if(!has(/\b(vendid|salieron|que se|dados de baja)/) || has(/\bvacas?|hembras?\b/)){ spec.reporte = 'descarte'; eat(/\bpor (bajo |mal )?(rendimiento|desempeno|fertilidad|produccion)\b/); eatAll(/\b(rendimiento|desempeno|fertilidad|y|bajo|mal)\b/); if(eat(/\b(incluir|incluye|incluyendo|con|tambien)? ?(las )?(de )?(observacion|una bandera)\b/)) spec.incluirObservacion = true; }
+      else add({ campo:'salida', op:'=', valor:'descarte' });
+    }
+    if(!spec.reporte && (eat(/\b(venta |para venta )?comercial\b/) || eat(/\bpara (la )?ceba\b|\bmatadero\b|\bfrigorifico\b/))){ spec.reporte = 'comercial'; eatAll(/\b(baja|bajas|mala|malas|calificacion|calificados?|venta|vender|machos?|toros?|toretes?|para)\b/); }
+    if(!spec.reporte && eat(/\b(inventario|resumen|composicion|estado) (general )?(del|de la|de las|de los)? ?(hato|finca|fincas|ganado|ganaderia)?\b/)) spec.reporte = 'inventario';
+    if(!spec.reporte && has(/\b(machos?|toros?|toretes?)\b/) && eat(/\bsin calificaci?o?n?\b|\bsin calificar\b|\bno (han sido |estan )?calificad[oa]s\b|\bfaltan? por calificar\b/)){ spec.reporte = 'comercial'; spec.sinCalif = true; }
+
+    var preMet = null, preDir = null;
+    var mDir = eat(/\bde (mayor a menor|menor a mayor|mas a menos|menos a mas|mas alt[oa] a mas baj[oa]|mas baj[oa] a mas alt[oa])\b/);
+    if(mDir) preDir = /^(mayor|mas a|mas alt)/.test(mDir[1]) ? 'desc' : 'asc';
+    var mCon = eat(/\b(?:con|que tiene|que tenga|que ha tenido|de) (mas|menos|mayor numero de|menor numero de|mas cantidad de) (crias|hijos|hijas|partos|terneros|descendientes)\b/);
+    if(mCon){ preMet = /parto/.test(mCon[2]) ? 'partos' : 'hijos'; preDir = /menos|menor/.test(mCon[1]) ? 'asc' : 'desc'; }
+    if(eat(/\b(?:por |segun |en )?(?:el )?(?:peso|destete) (?:al destete |promedio )?de (?:sus|las|los) (?:crias|hijos|hijas|terneros)\b|\b(?:mejores|mas pesad[oa]s) (?:crias|hijos|terneros)\b/)) preMet = 'destete_hijos';
+    else if(eat(/\b(?:calificacion|nota) de (?:sus|las|los) (?:crias|hijos|hijas)\b/)) preMet = 'calif_hijos';
+    var mRel = eat(/\b(madres|padres|abuel[oa]s|herman[oa]s) de (los|las|mis|sus|esos|esas)\b/);
+    if(mRel) spec.noEntendi.push(mRel[0].trim());
+    /* ---- 2. parentesco: hijos de X, crías del toro X ---- */
+    var REF = '([0-9]{1,5}(?:\\s*[\\/-]\\s*[0-9]{1,4})?[a-z]?(?:\\s+[a-z]{2,5})?|[a-z][a-z0-9]{3,}(?:\\s+[a-z0-9]{3,})?)';
+    var mP = resto.match(new RegExp('\\b(hij[oa]s?|crias?|descendencia|descendientes|progenie|terner[oa]s|becerr[oa]s|nietas?|nietos?)\\s+(del|de la|de el|de)\\s+(toro|vaca|reproductor|semental|madre|padre)?\\s*'+REF));
+    if(mP){
+      var ref = mP[4].trim(), animal = buscarAnimal(ref) || buscarAnimal(ref.split(/\s+/)[0]);
+      if(animal && !buscarAnimal(ref)) ref = ref.split(/\s+/)[0];
+      var esMadre = /de la|vaca|madre/.test(mP[2]+' '+(mP[3] || '')) || (animal && N(animal.sexo) === 'H');
+      add({ campo:esMadre ? 'madre' : 'padre', op:'=', valor:(animal ? animal.numero : ref).toUpperCase() });
+      if(/^hija|nieta/.test(mP[1])) add({ campo:'sexo', op:'=', valor:'H' }); else if(/^hijos$|^nietos$/.test(mP[1]) && has(/\bmachos?\b/)) add({ campo:'sexo', op:'=', valor:'M' });
+      if(/^hij|^crias?|^desc|^prog/.test(mP[1]) && !has(/\bactiv/)) spec.todos = true;
+      resto = resto.replace(mP[0], ' ');
+    }
+    var mT = eat(/\b(preñadas?|prenadas?|cargadas?) (del|de|por el|con el|con) (toro )?([0-9]{1,5}(?:\/[0-9]{1,4})?[a-z]?|[a-z]{4,})\b/);
+    if(mT){ add({ campo:'toro_prenez', op:'=', valor:mT[4].toUpperCase() }); add({ campo:'palp', op:'=', valor:'preñada' }); }
+
+    /* ---- 3. salidas: vendidos / muertos ---- */
+    var mS = eat(/\b(que se )?(vendid[oa]s|vendi|vendimos|se vendieron|ventas|venta de|muert[oa]s|murieron|se murieron|se muri[oe]|muertes|salieron|salidas|dados de baja|que salieron|devuelt[oa]s|devoluciones|descartad[oa]s)\b/);
+    if(mS){
+      var w = mS[2];
+      if(/vend|venta/.test(w)) add({ campo:'salida', op:'=', valor:'venta' });
+      else if(/muer|muri/.test(w)) add({ campo:'salida', op:'=', valor:'muerte' });
+      else if(/devuel|devol/.test(w)) add({ campo:'salida', op:'=', valor:'devolución' });
+      else if(/descart/.test(w)) add({ campo:'salida', op:'=', valor:'descarte' });
+      else add({ campo:'estado', op:'=', valor:'INACTIVO' });
+      var aS = eat(/\b(en |durante |del? )?(el )?(este ano|ano pasado|ano anterior|(?:en )?(?:el )?(?:ano )?(19|20)\d{2})\b/);
+      if(aS) add({ campo:'anio_salida', op:'=', valor:anioDe(aS[0]) });
+      var mC = eat(/\b(a|al|a la|para) (cliente |comprador |senor |don )?([a-z]{3,}(?: [a-z]{3,})?)\b/);
+      if(mC && !/finca|venta|ceba|cria|matadero/.test(mC[3]) && !STOPSET[mC[3]]) add({ campo:'vendido_a', op:'contiene', valor:mC[3].toUpperCase() });
+      else if(mC) resto += ' '+mC[0];
+    }
+
+    /* ---- 4. partos próximos / meses de parto ---- */
+    if(eat(/\b(proximas? a parir|por parir|que van a parir|a punto de parir|partos? proximos?|proximos? partos?|paren pronto)\b/)){
+      add({ campo:'palp', op:'=', valor:'preñada' });
+      var mD = eat(/\b(en |dentro de )?(los )?(proximos?|siguientes) (\d+) (dias|semanas|meses)\b/);
+      var dd = mD ? (+mD[4]) * (/sem/.test(mD[5]) ? 7 : /mes/.test(mD[5]) ? 30 : 1) : 60;
+      add({ campo:'dias_para_parto', op:'entre', valor:-15, valor2:dd, texto:'Parto probable en los próximos '+dd+' días' });
+      spec.orden.push({ campo:'parto_probable', dir:'asc' });
+    }
+    var mMesP = eat(/\b(paren|pariran|van a parir|parto probable|que paririan|deben parir|parir|paran)\s+(en|para|de|el mes de|en el mes de)?\s*(?:el mes de )?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\b/);
+    if(mMesP){ var mi = MESES.indexOf(mMesP[3] === 'setiembre' ? 'septiembre' : mMesP[3]) + 1; add({ campo:'palp', op:'=', valor:'preñada' }); add({ campo:'mes_parto', op:'=', valor:mi }); spec.orden.push({ campo:'parto_probable', dir:'asc' }); }
+    var mPar = eat(/\b(parieron|paridas?|que parieron|con parto|partos?) (en |durante |el |este |del )*(este ano|ano pasado|(19|20)\d{2})\b/);
+    if(mPar) add({ campo:'anio_ult_parto', op:'=', valor:anioDe(mPar[0]), texto:'Último parto en '+anioDe(mPar[0]) });
+
+    /* ---- 5. nacimientos ---- */
+    var mN = eat(/\b(nacid[oa]s|nacio|nacieron|nacimientos|que nacieron|crias? de|nacidas? en|de la cosecha|cosecha)\s*(en |durante |el |del |de )*(este ano|ano pasado|ano anterior|(?:ano )?(19|20)\d{2})\b/);
+    if(mN) add({ campo:'anio_nac', op:'=', valor:anioDe(mN[0]), texto:'Nacidos en '+anioDe(mN[0]) });
+    if(!mN && has(/\b(nacid[oa]s|nacio|nacieron|nacimientos)\b/)){
+      var mY = resto.match(/\b(este ano|ano pasado|ano anterior|(?:el )?(?:ano )?(19|20)\d{2})\b/);
+      if(mY && !/\b(nacid[oa]s|nacieron|nacio) (despues|antes)\b/.test(resto) && !/(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/.test(resto)){ add({ campo:'anio_nac', op:'=', valor:anioDe(mY[0]), texto:'Nacidos en '+anioDe(mY[0]) }); resto = resto.replace(mY[0], ' '); eat(/\b(nacid[oa]s|nacio|nacieron|nacimientos)\b/); }
+    }
+    var mNm = eat(/\b(nacid[oa]s|nacieron|nacio)\s+(en )?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)(?: de (?:(19|20)\d{2}|este ano))?\b/);
+    if(mNm){ add({ campo:'mes_nac', op:'=', valor:MESES.indexOf(mNm[3]) + 1 }); var an2 = anioDe(mNm[0]); if(an2) add({ campo:'anio_nac', op:'=', valor:an2 }); }
+    var mNr = eat(/\b(nacid[oa]s|nacieron) (despues|antes) (de|del) (19|20)(\d{2})\b/);
+    if(mNr) add({ campo:'anio_nac', op:mNr[2] === 'despues' ? '>' : '<', valor:+(mNr[4]+mNr[5]) });
+
+    /* ---- 6. sin parir / abiertas ---- */
+    var mSP = eat(/\b(sin parir|que no han parido|que no paren|sin parto|abiertas?|vacias?) (hace |desde hace |por )?(mas de |mas que |por encima de |sobre )?(\d+(?:\.\d+)?) (meses|anos)\b/) || eat(/\b(mas de |mas que )(\d+(?:\.\d+)?) (meses|anos) (sin parir|sin parto|abiertas?|vacias?)\b/);
+    if(mSP){ var nn = num(mSP[4] || mSP[2]), uu = mSP[5] || mSP[3]; add({ campo:'meses_sin_parir', op:'>', valor:nn * (/ano/.test(uu) ? 12 : 1) }); add({ campo:'categoria', op:'=', valor:'vaca', oculto:true }); }
+    var mNP = eat(/\b(no han parido|no parieron|sin parir|no paren|que no pario) (en )?(el )?(este ano|ano pasado|(?:ano )?(19|20)\d{2})\b/);
+    if(mNP){ var aa = anioDe(mNP[0]); add({ campo:'anio_ult_parto', op:'<', valor:aa, texto:'Sin parto en '+aa+(aa === anio ? ' (último parto antes de este año)' : '') }); }
+    if(eat(/\b(nunca han parido|no han parido|sin partos|sin parir|vacas? sin crias)\b/)) add({ campo:'partos', op:'=', valor:0, texto:'Sin partos' });
+
+    /* ---- 7. comparaciones numéricas: "<dato> mayor a N", "más de N <unidad>" ---- */
+    var SIN = [
+      ['edad_primer_parto', /\bedad (al |del |de )?primer parto\b/],
+      ['meses_sin_parir', /\b(meses|tiempo) (sin parir|desde (el )?(ultimo )?parto)\b/],
+      ['dias_para_parto', /\bdias para (el )?parto\b/],
+      ['iep', /\b(iep|intervalos? entre partos?|intervalo)\b/],
+      ['ara', /\b(ara|aporte real( anual)?)\b/],
+      ['arla', /\b(arla|indice lechero|aporte lechero)\b/],
+      ['litros_dia', /\b(litros?(?: por| al)? dia|produccion de leche|produccion lechera|leche)\b/],
+      ['pico', /\bpico( de leche| de lactancia)?\b/],
+      ['partos', /\b(partos|paridas?|parto)\b/],
+      ['abortos', /\babortos?\b/],
+      ['banderas', /\bbanderas?( negras?)?\b/],
+      ['destete_hijos', /\b(peso|destete) (al destete )?de (sus|las) (crias|hijos|hijas)\b/],
+      ['hijos', /\b(hijos|hijas|crias|descendientes)\b/],
+      ['peso_aj_8m', /\b(peso (ajustado )?(al |de )?destete|destete( ajustado)?|peso ajustado|peso a los 8 meses|peso 8 meses)\b/],
+      ['peso_nac', /\bpeso (al |de )?nac(er|imiento)\b/],
+      ['gpd', /\b(gpd|ganancia( de peso)?( diaria)?)\b/],
+      ['ultimo_peso', /\b(peso actual|ultimo peso|pesan|pesa|pesaje|peso)\b/],
+      ['calif', /\b(calificacion|calificaciones|puntaje|nota|base 100|calificad[oa]s?)\b/],
+      ['conf', /\bconformacion\b/], ['musc', /\bmusculatura\b/], ['aplo', /\baplomos?\b/], ['temp', /\btemperamento\b/], ['ombligo', /\bombligo\b/], ['caract', /\bcaracterizacion( racial)?\b/],
+      ['edad_primer_parto', /\bedad (al |del |de )?primer parto\b/],
+      ['meses_sin_parir', /\b(meses|tiempo) (sin parir|desde (el )?(ultimo )?parto)\b/],
+      ['dias_para_parto', /\bdias para (el )?parto\b/],
+      ['lactancias', /\blactancias\b/],
+      ['edad', /\b(edad|anos de edad|meses de edad)\b/]
+    ];
+    var COMP = '(mayor(?:es)?|mas|menor(?:es)?|menos|superior(?:es)?|inferior(?:es)?|por encima|por debajo|arriba|encima|debajo|sobre|hasta|maximo|minimo|al menos|minimo de|igual(?:es)?|exactamente|de mas|de menos)';
+    var NUMRX = '(\\d+(?:\\.\\d+)?)';
+    function opDe(w, incl){
+      if(/mayor|mas|superior|encima|arriba|sobre|de mas/.test(w)) return incl ? '>=' : '>';
+      if(/menor|menos|inferior|debajo|de menos/.test(w)) return incl ? '<=' : '<';
+      if(/hasta|maximo/.test(w)) return '<=';
+      if(/al menos|minimo/.test(w)) return '>=';
+      return '=';
+    }
+    function unidadCampo(u){
+      if(!u) return null;
+      if(/^ano/.test(u)) return { c:'edad', f:12 };
+      if(/^mes/.test(u)) return { c:'edad', f:1 };
+      if(/^kg/.test(u)) return { c:'ultimo_peso', f:1 };
+      if(/^litro/.test(u)) return { c:'litros_dia', f:1 };
+      if(/^parto/.test(u)) return { c:'partos', f:1 };
+      if(/^cria|^hij/.test(u)) return { c:'hijos', f:1 };
+      if(/^aborto/.test(u)) return { c:'abortos', f:1 };
+      if(/^bandera/.test(u)) return { c:'banderas', f:1 };
+      if(/^lactancia/.test(u)) return { c:'lactancias', f:1 };
+      if(/^punto/.test(u)) return { c:'calif', f:1 };
+      if(/^dia/.test(u)) return null;
+      return null;
+    }
+    var UNI = '(anos?|meses|mes|kg|litros?|partos?|crias|hijos|hijas|abortos?|banderas?|lactancias?|puntos?|dias)';
+    // a) <dato> ... <comp> N [y M] [unidad]
+    SIN.forEach(function(s){
+      var rx = new RegExp(s[1].source.replace(/\\b\(/, '\\b(').replace(/\)\\b$/, ')\\b')+'\\s+(?:promedio\\s+|prom\\s+)?(?:(?:de|es|sea|que sea|que este|este)\\s+)?(?:(entre)\\s+'+NUMRX+'\\s+y\\s+'+NUMRX+'|'+COMP+'\\s*(?:a|de|que|o igual a)?\\s*'+NUMRX+')\\s*'+UNI+'?');
+      var m = resto.match(rx);
+      if(!m) return;
+      var g = m.slice(1), L = g.length;
+      var entre = g[L-6], a1 = g[L-5], a2 = g[L-4], cw = g[L-3], nv = g[L-2], un = g[L-1];
+      var campo = s[0], f = 1;
+      if(campo === 'edad' && un && /^ano/.test(un)) f = 12;
+      if(campo === 'meses_sin_parir' && un && /^ano/.test(un)) f = 12;
+      if(entre) add({ campo:campo, op:'entre', valor:num(a1)*f, valor2:num(a2)*f });
+      else add({ campo:campo, op:opDe(cw, /o igual/.test(m[0])), valor:num(nv)*f });
+      resto = resto.replace(m[0], ' ');
+    });
+    // b) <comp> N <unidad>  ("más de 5 partos", "menos de 300 kg", "mayores de 16 meses")
+    var rxB = new RegExp('\\b'+COMP+'\\s*(?:a|de|que)?\\s*'+NUMRX+'\\s*'+UNI+'\\b(\\s+de edad)?', 'g');
+    resto = resto.replace(rxB, function(m0, cw, nv, un){
+      var u = unidadCampo(un); if(!u) return m0;
+      var campo = u.c;
+      if(campo === 'ultimo_peso' && /destete/.test(t)) campo = 'peso_aj_8m';
+      if(campo === 'hijos' && /\bvacas?\b|\bhembras?\b/.test(t)) campo = 'partos';
+      add({ campo:campo, op:opDe(cw, false), valor:num(nv)*u.f }); return ' ';
+    });
+    // c) "de 12 a 18 meses", "entre 18 y 30 meses"
+    var mR = eat(new RegExp('\\b(?:de|entre)\\s+'+NUMRX+'\\s+(?:a|y|hasta)\\s+'+NUMRX+'\\s*'+UNI+'\\b'));
+    if(mR){ var u2 = unidadCampo(mR[3]) || { c:'edad', f:1 }; if(u2.c === 'ultimo_peso' && /destete/.test(t)) u2.c = 'peso_aj_8m'; add({ campo:u2.c, op:'entre', valor:num(mR[1])*u2.f, valor2:num(mR[2])*u2.f }); }
+    // d) "de 16 meses", "de 2 años" (edad aproximada)
+    var mA = eat(/\b(?:de|con) (\d+(?:\.\d+)?) (meses|mes|anos?)( de edad)?\b/);
+    if(mA){ var x = num(mA[1]) * (/ano/.test(mA[2]) ? 12 : 1); add({ campo:'edad', op:'entre', valor:Math.max(0, x - (x >= 24 ? 6 : 1)), valor2:x + (x >= 24 ? 6 : 1) }); }
+    // e) "N partos" / "con 3 partos" exactos
+    var mE = eat(/\b(?:con|de|tienen|tengan)?\s*(\d+) (partos|crias|abortos|lactancias)\b/);
+    if(mE){ var u3 = unidadCampo(mE[2]); if(u3.c === 'hijos' && /\bvacas?\b/.test(t)) u3.c = 'partos'; add({ campo:u3.c, op:'=', valor:+mE[1] }); }
+
+    /* ---- 8. sí / no, con / sin ---- */
+    if(eat(/\bsin registro\b|\bno registrad[oa]s\b|\bno tienen registro\b/)) add({ campo:'registro', op:'=', valor:false });
+    else if(eat(/\bcon registro\b|\bregistrad[oa]s\b|\bque tienen registro\b/)) add({ campo:'registro', op:'=', valor:true });
+    if(eat(/\b(sin palpar|no (han sido |estan |fueron )?palpad[oa]s|sin palpacion|sin palpaciones|falta(n)? (por )?palpar)\b/)) add({ campo:'palp', op:'=', valor:'sin dato', texto:'Sin palpación registrada' });
+    if(eat(/\b(sin calificar|sin calificacion|no (han sido |estan )?calificad[oa]s)\b/)) add({ campo:'calif', op:'no_existe' });
+    else if(eat(/\b(con calificacion|calificad[oa]s)\b/)) add({ campo:'calif', op:'existe' });
+    if(eat(/\b(que )?(abortaron|han abortado|con abortos?|tuvieron abortos?|abortadoras?)\b/)) add({ campo:'abortos', op:'>=', valor:1, texto:'Con abortos' });
+    if(eat(/\b(con banderas?( negras?)?)\b/)) add({ campo:'banderas', op:'>=', valor:1, texto:'Con banderas negras' });
+    if(eat(/\bsin (peso al destete|destete|pesar al destete)\b/)) add({ campo:'peso_aj_8m', op:'no_existe' });
+    if(eat(/\bsin (datos? de )?leche\b/)) add({ campo:'arla', op:'no_existe' });
+    if(eat(/\b(rechazad[oa]s|marcad[oa]s para descarte)\b/)) add({ campo:'rechazado', op:'=', valor:true });
+    if(eat(/\b(que )?no (son |sean |es |esten )?(reproductores?|sementales?|padrotes?|de servicio|en servicio)\b/)) add({ campo:'reproductor', op:'=', valor:false });
+    if(eat(/\b(que )?no (son |sean |es |esten )?(de )?(reservas?)\b/)) add({ campo:'reserva', op:'=', valor:false });
+    if(eat(/\b(reproductores?|sementales?|padrotes?|toros? (en )?servicio|toros? padres?)\b/)) add({ campo:'reproductor', op:'=', valor:true });
+    if(eat(/\b(reservas?|de reserva)\b/)) add({ campo:'reserva', op:'=', valor:true });
+
+    /* ---- 9. palpación ---- */
+    if(eat(/\b(sin prenar|sin prenez|sin cargar|no (estan |han quedado )?prenadas?|sin quedar prenadas?)\b/)) add({ campo:'palp', op:'!=', valor:'preñada', texto:'No preñadas (según la última palpación)' });
+    if(eat(/\b(prenadas?|preñadas?|cargadas?|en cinta|gestantes?)\b/)) { if(!F.some(function(f){ return f.campo === 'palp'; })) add({ campo:'palp', op:'=', valor:'preñada' }); }
+    if(eat(/\b(vacias?|horras?|no prenadas?|abiertas)\b/)) add({ campo:'palp', op:'=', valor:'vacía' });
+    if(eat(/\b(posible prenez|posibles? prenadas?|dudosas?)\b/)) add({ campo:'palp', op:'=', valor:'posible' });
+    if(eat(/\bpalpad[oa]s\b|\bcon palpacion\b/)) add({ campo:'palp', op:'!=', valor:'sin dato', texto:'Con palpación' });
+
+    /* ---- 10. letra ---- */
+    var mL = eat(/\b(?:letra|calificacion|calificad[oa]s|con|de)?\s*(mb|b\+|b mas|bmas|b|r\+|r mas|r)( o mejor| o mas| o peor| o menos| para arriba| para abajo| hacia arriba| hacia abajo)?\b(?=\s|$)/);
+    if(mL && /letra|calific|\bmb\b|\+|mas|mejor|peor/.test(mL[0])){
+      var L5 = ['MB','B+','B','R+','R'], lv = mL[1].replace(/ ?mas/, '+').toUpperCase().replace('BMAS','B+'), ix = L5.indexOf(lv);
+      if(ix >= 0){ var set = /mejor|arriba|o mas/.test(mL[2] || '') ? L5.slice(0, ix+1) : /peor|abajo|o menos/.test(mL[2] || '') ? L5.slice(ix) : [lv]; add({ campo:'letra', op:'en', valor:set }); }
+    } else if(mL) resto += ' '+mL[0];
+
+    /* ---- 11. texto en comentarios ---- */
+    var mCom = eat(/\b(?:con |que (?:tengan|tienen|digan|dicen|diga|mencionen|mencione) )?(?:el |un |algun )?(?:comentarios?|notas?|observacion(?:es)?|que (?:digan|dicen|diga|mencionen))\s+(?:de |que diga |que digan |con |sobre |acerca de |=)?\s*([a-z0-9][a-z0-9 \/]*?)(?=\s+(?:en|de la finca|y|que|con|para|mayor|menor|ordenad)\b|\s*$)/);
+    if(mCom && mCom[1].trim()) add({ campo:'comentario', op:'contiene', valor:mCom[1].trim().toUpperCase(), texto:'Comentario dice «'+mCom[1].trim()+'»' });
+    var FRASES = ['mala madre','poca leche','buena madre','cojera','coja','cojo','patas','pezunas','testiculo','prolapso','ubre','pezon','brava','agresiv','quiste','metritis','retencion','gemelar','gemelos','transferencia'];
+    FRASES.forEach(function(fr){ var rx = new RegExp('\\b(?:con |de |por )?'+fr+'[a-z]*\\b'); var m = resto.match(rx); if(m && !F.some(function(f){ return f.campo === 'comentario'; })){ add({ campo:'comentario', op:'contiene', valor:fr.trim().toUpperCase(), texto:'Comentario dice «'+fr.trim()+'»' }); resto = resto.replace(m[0], ' '); } });
+
+    /* ---- 12. lote, padre suelto ---- */
+    var mLo = eat(/\b(?:del |en el |de )?lote (\w+)\b/); if(mLo) add({ campo:'lote', op:'=', valor:mLo[1] });
+    var mPa = eat(/\b(?:cuyo |con )?padre (?:es |sea |=)?(?:el )?(?:toro )?([0-9]{1,5}(?:\/[0-9]{1,4})?[a-z]?|[a-z]{4,})\b/); if(mPa) add({ campo:'padre', op:'=', valor:mPa[1].toUpperCase() });
+    var mMa = eat(/\b(?:cuya |con )?madre (?:es |sea |=)?(?:la )?(?:vaca )?([0-9]{1,5}(?:\/[0-9]{1,4})?[a-z]?)\b/); if(mMa) add({ campo:'madre', op:'=', valor:mMa[1].toUpperCase() });
+
+    /* ---- 13. agrupar y medidas ---- */
+    var GRP = [['finca', /fincas?|predios?|hatos?/], ['raza', /razas?/], ['sexo', /sexos?/], ['categoria', /categorias?|tipos? de animal|clase/], ['padre', /padres?|toros? padres?|toro padre|reproductores?/], ['madre', /madres?/],
+      ['anio_nac', /anos? de nacimiento|ano de nacimiento|anos?|generacion|cosecha/], ['mes_nac', /mes(es)? de nacimiento/], ['salida', /tipos? de salida|causas?( de salida)?/], ['anio_salida', /ano de salida/], ['letra', /letras?/], ['palp', /estado (de )?(palpacion|reproductivo)|palpacion/], ['lote', /lotes?/], ['mes_parto', /mes(es)? de parto/], ['vendido_a', /compradores?|clientes?/]];
+    var mG = resto.match(/\b(por|segun|agrupad[oa]s? por|separad[oa]s? por|dividid[oa]s? por|discriminad[oa]s? por|por cada|en cada|de cada)\s+(?:la |el |los |las |cada )?([a-z ]+?)(?=\s+(?:en|de|con|para|que|y)\b|\s*$)/g);
+    if(mG) mG.some(function(m0){
+      var cuerpo = m0.replace(/^\s*\S+(\s+por)?\s+(la |el |los |las |cada )?/, '').trim();
+      for(var i = 0; i < GRP.length; i++){ if(new RegExp('^(?:'+GRP[i][1].source+')$').test(cuerpo)){ if(/agrup|separ|divid|discrim|cada|segun/.test(m0) || /^por\s/.test(m0.trim())){ spec.agrupar = GRP[i][0]; resto = resto.replace(m0, ' '); return true; } } }
+      return false;
+    });
+    var mM = resto.match(/\b(promedio|media|promedios|total|suma|maximo|minimo)\s*(?:de |del |de la |de los |de las )?/);
+    if(mM){
+      var tras = resto.slice(resto.indexOf(mM[0]) + mM[0].length - 1);
+      var fn = /prom|media/.test(mM[1]) ? 'promedio' : /total|suma/.test(mM[1]) ? 'suma' : /max|mayor/.test(mM[1]) ? 'max' : 'min';
+      for(var i2 = 0; i2 < SIN.length; i2++){ var mm = tras.match(SIN[i2][1]); if(mm && tras.indexOf(mm[0]) < 30){ spec.medida = { fn:fn, campo:SIN[i2][0] }; resto = resto.replace(mM[0], ' ').replace(mm[0], ' '); break; } }
+      if(!spec.medida && fn !== 'suma'){ for(var i3 = 0; i3 < SIN.length; i3++){ var m3 = resto.match(SIN[i3][1]); if(m3){ var cc = SIN[i3][0]; if(cc === 'ultimo_peso' && /destete/.test(t)) cc = 'peso_aj_8m'; spec.medida = { fn:fn, campo:cc }; resto = resto.replace(mM[0], ' ').replace(m3[0], ' '); eat(/\b(al |de )?destete\b/); if(cc === 'peso_aj_8m') eat(/\bpeso\b/); break; } } }
+      if(!spec.medida && /total/.test(mM[1])){ spec.contar = true; resto = resto.replace(mM[0], ' '); }
+    }
+    if(spec.medida && spec.medida.campo === 'peso_aj_8m'){ eat(/\bpeso\b/); eat(/\b(al |de )?destete\b/); }
+    if(eat(/\b(cuant[oa]s|numero de|cantidad de|contar|conteo|total de)\b/)) spec.contar = true;
+
+    /* ---- 14. quiénes: sexo, categoría, raza, finca ---- */
+    var sujetos = [];
+    if(eat(/\b(vacas?|vientres?|madres?|paridas)\b/)) sujetos.push('vaca');
+    if(eat(/\bnovillas?( de vientre| de levante)?\b/)) sujetos.push('novilla');
+    if(eat(/\b(terneras|becerras|ternera|becerra)\b/)) sujetos.push('ternera');
+    if(eat(/\b(terneros|becerros|ternero|becerro|crias|recrias?|destetos?)\b/)) sujetos.push(has(/\bmachos?\b/) ? 'ternero' : 'terneros');
+    if(eat(/\b(toretes?|novillos?|toritos?|levante)\b/)) sujetos.push('torete');
+    if(eat(/\b(toros?)\b/)) sujetos.push('toros');
+    if(eat(/\b(hembras?)\b/)) sujetos.push('H');
+    if(eat(/\b(machos?)\b/)) sujetos.push('M');
+    var hayEdad = F.some(function(f){ return f.campo === 'edad'; });
+    var cats = [], sexos = [];
+    sujetos.forEach(function(s){
+      if(s === 'H' || s === 'M') sexos.push(s);
+      else if(s === 'toros'){ if(hayEdad) sexos.push('M'); else cats.push('torete', 'toro'); }
+      else if(s === 'terneros'){ if(hayEdad) {} else cats.push('ternero', 'ternera'); }
+      else if(s === 'torete' && hayEdad) sexos.push('M');
+      else if(s === 'novilla' && hayEdad){ cats.push('novilla'); }
+      else cats.push(s);
+    });
+    if(cats.length) add({ campo:'categoria', op:cats.length > 1 ? 'en' : '=', valor:cats.length > 1 ? cats : cats[0], texto:'Categoría: '+cats.join(', ')+(sujetos.indexOf('toros') >= 0 && !hayEdad ? ' (machos > 12 m)' : '') });
+    sexos = sexos.filter(function(s, i, a){ return a.indexOf(s) === i; });
+    if(sexos.length === 1 && !F.some(function(f){ return f.campo === 'sexo'; })) add({ campo:'sexo', op:'=', valor:sexos[0] });
+    var CH = ['partos','iep','ara','arla','litros_dia','pico','abortos','banderas','meses_sin_parir','palp','mes_parto','dias_para_parto','toro_prenez','lactancias','edad_primer_parto','anio_ult_parto'];
+    if(!sujetos.length && spec.medida && CH.indexOf(spec.medida.campo) >= 0) add({ campo:'sexo', op:'=', valor:'H' });
+    if(!sujetos.length && F.some(function(f){ return ['partos','iep','ara','arla','litros_dia','pico','abortos','banderas','meses_sin_parir','palp','mes_parto','dias_para_parto','toro_prenez','lactancias'].indexOf(f.campo) >= 0; }) && !F.some(function(f){ return f.campo === 'sexo'; })) add({ campo:'sexo', op:'=', valor:'H', oculto:false });
+
+    var razas = [];
+    if(eat(/\b(guzera|guzerat|gz|gusera|guserat|guzerado|guzeras)\b/)) razas.push('Guzerá');
+    if(eat(/\b(brahm?an|brahaman|braman|br|brahmanes|bramanes)\b/)) razas.push('Brahman');
+    if(eat(/\b(girolando|gol)\b/)) razas.push('Girolando');
+    if(eat(/\b(jersey|yersi|jersi)\b/)) razas.push('Jersey');
+    if(razas.length) add({ campo:'raza', op:razas.length > 1 ? 'en' : '=', valor:razas.length > 1 ? razas : razas[0] });
+    eatAll(/\b(rojos?|rojas?|blancos?|blancas?|grises?|puros?|puras?)\b/);
+
+    var fincas = [];
+    eat(/\b(de |en )?(la |el )?finca\b/);
+    if(eat(/\b(ok|okey|o k|la ok|toluviejo|sucre)\b/)) fincas.push('OK');
+    if(eat(/\b(cacho|el cacho|orocue|casanare)\b/)) fincas.push('CACHO');
+    if(eat(/\b(tnj|t n j|arboletes|antioquia)\b/)) fincas.push('TNJ');
+    if(fincas.length) add({ campo:'finca', op:fincas.length > 1 ? 'en' : '=', valor:fincas.length > 1 ? fincas : fincas[0] });
+    if(eat(/\b(referencias?|toda la base|todas las fincas y referencias|incluye(ndo)? referencias)\b/)) spec.referencia = true;
+    if(eat(/\b(activ[oa]s e inactiv[oa]s|incluye(ndo)? (los )?(vendidos|inactivos)|historic[oa]s?|todos los que han existido|que han tenido)\b/)) spec.todos = true;
+    else if(eat(/\binactiv[oa]s\b/)) add({ campo:'estado', op:'=', valor:'INACTIVO' });
+    eatAll(/\bactiv[oa]s\b|\bdisponibles?\b|\bvivos?\b|\bvivas?\b|\bque hay\b|\ben (el )?hato\b/);
+
+    /* ---- 15. animal puntual ---- */
+    var mNum = resto.match(/\b(\d{1,5}\/\d{1,4}[a-z]?)\b/);
+    if(mNum && !spec.reporte){ spec.animal = mNum[1].toUpperCase(); resto = resto.replace(mNum[0], ' '); }
+
+    /* ---- 16. orden: mejores, peores, más alto… ---- */
+    var hayVenta = !!eat(/\b(para (la )?venta|para vender|vendibles?|a la venta|ofrecer|negociables?|en venta)\b/);
+    if(hayVenta){ if(!F.some(function(f){ return f.campo === 'reserva'; })) add({ campo:'reserva', op:'=', valor:false, texto:'Sin reservas ni reproductores' }); }
+    var dirW = (resto.match(/\b(mejor(es)?|peor(es)?|mas alt[oa]s?|mas baj[oa]s?|mas grandes?|mas pequen[oa]s?|mayor(es)?|menor(es)?|mas viej[oa]s?|mas joven(es)?|mas nuev[oa]s?|mas pesad[oa]s?|mas livian[oa]s?|mas productiv[oa]s?|mas lecher[oa]s?|mas fertiles?|menos fertiles?|primer[oa]s?|ultim[oa]s?|top|ranking|ordenad[oa]s? por|ordenar por|organizad[oa]s? por|clasificad[oa]s? por|mas|menos)\b/) || [])[0];
+    var metrica = null;
+    var tras2 = resto;
+    var SINO = [['destete_hijos', /\b(peso|destete) (al destete )?de (sus|las) (crias|hijos|hijas)|crias mas pesadas\b/], ['arla', /\b(indice lechero|lecher[oa]s?|arla|aporte lechero)\b/], ['litros_dia', /\b(leche|litros|produccion de leche|producen)\b/],
+      ['ara', /\b(ara|aporte real|aporte)\b/], ['iep', /\b(iep|intervalo|entre partos|fertiles?|fertilidad)\b/], ['peso_aj_8m', /\b(destete|peso al destete|peso ajustado)\b/], ['calif', /\b(calificacion|calificad[oa]s|puntaje|nota|conformacion general|asocebu)\b/],
+      ['conf', /\bconformacion\b/], ['musc', /\bmusculatura\b/], ['aplo', /\baplomos\b/], ['temp', /\btemperamento\b/], ['partos', /\b(partos|paridoras?|productiv[oa]s?)\b/], ['hijos', /\b(crias|hijos|hijas)\b/], ['gpd', /\bganancia\b/], ['ultimo_peso', /\b(pesad[oa]s?|livian[oa]s?|peso|pesan|grandes?|pequen[oa]s?)\b/], ['edad', /\b(viej[oa]s?|joven(es)?|nuev[oa]s?|edad)\b/], ['meses_sin_parir', /\b(sin parir|abiertas)\b/], ['banderas', /\bbanderas\b/]];
+    if(spec.medida && !dirW && !spec.agrupar) {}
+    for(var j = 0; j < SINO.length && !spec.reporte; j++){
+      var mm2 = tras2.match(SINO[j][1]);
+      if(mm2 && (dirW || preDir || /\b(por|segun|en|de)\s+$/.test(tras2.slice(0, tras2.indexOf(mm2[0])).slice(-8)) || /viej|joven|pesad|livian|lecher|productiv|fertil|paridora/.test(mm2[0]))){
+        if(SINO[j][0] === 'hijos' && !has(/\b(mas|mejor|mayor|menor|peor|menos)\b/)) continue;
+        metrica = SINO[j][0]; resto = resto.replace(mm2[0], ' '); eatAll(SINO[j][1]); if(metrica === 'litros_dia' || metrica === 'arla') eatAll(/\b(leche|litros|lecher[oa]s?|produccion|producen)\b/); break;
+      }
+    }
+    if(preMet && !metrica) metrica = preMet;
+    if(preMet === 'hijos' && metrica === 'hijos' && F.some(function(f){ return f.campo === 'categoria' && /vaca|novilla/.test([].concat(f.valor).join()); })) metrica = 'partos';
+    if(metrica){
+      if(metrica === 'hijos' && F.some(function(f){ return f.campo === 'categoria' && [].concat(f.valor).indexOf('vaca') >= 0; })) metrica = 'partos';
+      var BUENO = { iep:'asc', meses_sin_parir:'asc', edad:'desc', banderas:'desc', temp:'desc' };
+      var dir = BUENO[metrica] || 'desc';
+      var dw = dirW || '';
+      if(metrica === 'edad') dir = /joven|nuev/.test(t) ? 'asc' : 'desc';
+      else if(metrica === 'ultimo_peso' && /livian|pequen/.test(t)) dir = 'asc';
+      else if(/menos fertil/.test(t)) dir = 'desc';
+      else if(/peor/.test(dw)) dir = BUENO[metrica] === 'asc' ? 'desc' : 'asc';
+      else if(/mas baj|menor|menos/.test(dw) || /\bmas baj|\bmenor(es)? /.test(t)) dir = 'asc';
+      else if(/mas alt|mayor|mas grand/.test(dw)) dir = 'desc';
+      if(/ultim/.test(dw)) dir = dir === 'asc' ? 'desc' : 'asc';
+      if(preDir) dir = preDir;
+      spec.orden.unshift({ campo:metrica, dir:dir });
+      if(dirW) resto = resto.replace(dirW, ' ');
+    } else if(dirW && /mejor|peor/.test(dirW) && !spec.reporte){
+      // "mejores toros" sin decir en qué: por calificación (machos) o por ARA (vacas)
+      var esH = F.some(function(f){ return (f.campo === 'sexo' && f.valor === 'H') || (f.campo === 'categoria' && /vaca/.test([].concat(f.valor).join())); });
+      spec.orden.unshift({ campo:esH ? 'ara' : 'calif', dir:/peor/.test(dirW) ? 'asc' : 'desc' });
+      spec.notaOrden = 'No dijo en qué indicador; usé '+(esH ? 'el ARA' : 'la calificación')+'. Puede pedir por ejemplo «mejores por IEP», «por índice lechero» o «por peso al destete».';
+      resto = resto.replace(dirW, ' ');
+    }
+    eatAll(/\b(ordenad[oa]s?|ordenar|organizad[oa]s?|clasificad[oa]s?|de mayor a menor|de menor a mayor|alt[oa]s?|baj[oa]s?|en|indice)\b/);
+    if(/de menor a mayor/.test(t) && spec.orden[0]) spec.orden[0].dir = 'asc';
+
+    /* ---- 17. cuántos (top N) ---- */
+    var mTop = resto.match(/\b(?:top|primer[oa]s|ultim[oa]s)?\s*(\d{1,3})\b/);
+    if(mTop && (spec.orden.length || dirW || /\b(top|primer|ultim|mis|las|los)\b/.test(t))){ spec.limite = +mTop[1]; resto = resto.replace(mTop[0], ' '); }
+    else if(spec.orden.length && /\b(cual es|quien es)?\s*(la|el) (vaca|toro|novilla|animal|macho|hembra|torete|ternero|ternera)?\s*(con |que tiene |que tenga |de )?(mas|mejor|peor|menos|mayor|menor)\b/.test(t)) spec.limite = 1;
+    else if(spec.orden.length && !spec.limite && !spec.contar) spec.limite = 20;
+
+    /* ---- 18. lo que sobró ---- */
+    resto.split(/\s+/).forEach(function(w){ if(w && w.length > 2 && !STOPSET[w] && !/^\d+$/.test(w)) spec.noEntendi.push(w); });
+    spec.noEntendi = spec.noEntendi.filter(function(w, i, a){ return a.indexOf(w) === i; });
+
+    if(!spec.reporte && !spec.animal && !F.length && !spec.orden.length && !spec.agrupar && !spec.contar && !spec.medida) spec.vacio = true;
+    if(hayVenta && !F.some(function(f){ return f.campo === 'estado'; })) {}
+    return spec;
+  }
+
+  /* ================= MODO IA (opcional) =================
+     Se le manda a Claude SOLO la pregunta y la descripción de los datos; Claude
+     devuelve una consulta en JSON que se ejecuta aquí mismo. */
+  var IA_K = 'hatos_asis_ia_v1';
+  function iaCfg(){ try{ return JSON.parse(localStorage.getItem(IA_K)) || {}; }catch(e){ return {}; } }
+  function iaGuardar(c){ try{ localStorage.setItem(IA_K, JSON.stringify(c)); }catch(e){} }
+  function iaActiva(){ var c = iaCfg(); return !!(c.key && c.on !== false); }
+  function catalogoTexto(){
+    return CAMPO_KEYS.map(function(k){ var C = CAMPOS[k]; return '- '+k+' ('+C.tipo+(C.u ? ', '+C.u : '')+'): '+C.t+(C.d ? ' — '+C.d : ''); }).join('\n');
+  }
+  function iaSistema(){
+    return 'Eres el intérprete de consultas del tablero ganadero "Hatos Datos" (ganado Brahman y Guzerá en Colombia, fincas OK, CACHO y TNJ). '+
+      'Recibes una pregunta en español (a veces dictada por voz, con errores) y devuelves SOLO un objeto JSON con la consulta. No inventas datos: el tablero ejecuta la consulta.\n\n'+
+      'Hoy es '+hoyIso()+'.\n\nDATOS DISPONIBLES POR ANIMAL (campo (tipo): descripción):\n'+catalogoTexto()+'\n\n'+
+      'FORMATO DE RESPUESTA (JSON, sin texto alrededor):\n'+
+      '{"reporte": null | "descarte" | "comercial" | "inventario" | "asocebu",\n'+
+      ' "animal": null | "<número de un animal puntual>",\n'+
+      ' "filtros": [{"campo": "<campo>", "op": "=|!=|>|>=|<|<=|entre|contiene|no_contiene|existe|no_existe|en", "valor": <valor>, "valor2": <solo para entre>}],\n'+
+      ' "orden": [{"campo": "<campo>", "dir": "asc|desc"}],\n'+
+      ' "limite": null | <entero>,\n'+
+      ' "agrupar": null | "<campo>",\n'+
+      ' "medida": null | {"fn": "promedio|suma|max|min|conteo", "campo": "<campo numérico>"},\n'+
+      ' "contar": true|false,\n'+
+      ' "todos": true|false   (true = incluir animales inactivos/vendidos/muertos; por defecto solo activos),\n'+
+      ' "referencia": true|false (true = incluir las fincas de referencia genealógica; por defecto solo OK, CACHO, TNJ),\n'+
+      ' "incluirObservacion": true|false (solo para reporte descarte: incluir vacas con 1 bandera),\n'+
+      ' "sinCalif": true|false (solo para reporte comercial: listar los machos sin calificación),\n'+
+      ' "titulo": "<título corto en español>",\n'+
+      ' "noEntendi": ["<partes de la pregunta que no se pueden responder con estos datos>"]}\n\n'+
+      'REGLAS:\n'+
+      '- Por defecto solo animales ACTIVOS de las fincas productivas; no pongas esos filtros, el tablero los agrega. Si la pregunta es de salidas (vendidos, muertos), filtra salida y el tablero incluye inactivos.\n'+
+      '- "toros" sin edad = categoria en ["torete","toro"]; "toros mayores de 16 meses" = sexo M + edad > 16. "vacas" = categoria vaca. "novillas" = categoria novilla. "terneros"/"crías" = categoria en ["ternero","ternera"].\n'+
+      '- Edad siempre en meses (años × 12). Fechas como "AAAA-MM-DD". Raza con su nombre: "Brahman", "Guzerá". Sexo "M" o "H". palp: "preñada","vacía","posible","parió","sin dato".\n'+
+      '- "para la venta" = filtro reserva = false. "reproductores" = reproductor = true.\n'+
+      '- Índice lechero = arla. Fertilidad = iep (menor es mejor) o ara (mayor es mejor). "mejores" sin indicador: calif para machos, ara para vacas.\n'+
+      '- "las 5 mejores" → limite 5 con orden. Superlativo singular ("la vaca más vieja") → limite 1. Ranking sin número → limite 20.\n'+
+      '- Promedios por grupo: agrupar + medida. "cuántos" → contar true (y agrupar finca si lo piden por finca).\n'+
+      '- Descarte por rendimiento/fertilidad → reporte "descarte". Machos de baja calificación / venta comercial / ceba → reporte "comercial". Resumen de visita ASOCEBU → reporte "asocebu". Inventario o resumen del hato → reporte "inventario". Los reportes aceptan filtros extra (finca, raza, edad).\n'+
+      '- Hijos de un toro: filtro padre = número del toro (y todos=true si no dice activos). Hijos de una vaca: madre.\n'+
+      '- Si algo de la pregunta no se puede expresar con estos campos, ponlo en noEntendi en vez de inventar.';
+  }
+  function iaPedir(texto){
+    var c = iaCfg();
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var tm = setTimeout(function(){ if(ctrl) ctrl.abort(); }, 25000);
+    return fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', signal:ctrl ? ctrl.signal : undefined,
+      headers:{ 'content-type':'application/json', 'x-api-key':c.key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      body:JSON.stringify({ model:c.modelo || 'claude-haiku-5-5', max_tokens:900, system:iaSistema(), messages:[{ role:'user', content:texto }] })
+    }).then(function(r){ clearTimeout(tm); return r.json().then(function(j){ if(!r.ok) throw new Error((j && j.error && j.error.message) || ('Error '+r.status)); return j; }); })
+      .then(function(j){
+        var txt = (j.content || []).map(function(b){ return b.text || ''; }).join('');
+        var a = txt.indexOf('{'), b = txt.lastIndexOf('}');
+        if(a < 0 || b < a) throw new Error('La IA no devolvió una consulta.');
+        return validar(JSON.parse(txt.slice(a, b+1)));
+      });
+  }
+  function validar(s){
+    var out = { filtros:[], orden:[], noEntendi:[].concat(s.noEntendi || []).filter(Boolean), ia:true };
+    ['reporte','animal','limite','agrupar','contar','todos','referencia','incluirObservacion','sinCalif','titulo'].forEach(function(k){ if(s[k] != null && s[k] !== '') out[k] = s[k]; });
+    if(out.reporte && !PRESETS[out.reporte]) delete out.reporte;
+    if(out.agrupar && !CAMPOS[out.agrupar]) delete out.agrupar;
+    if(out.limite) out.limite = Math.max(1, Math.min(500, parseInt(out.limite, 10) || 20));
+    (s.filtros || []).forEach(function(f){ if(f && CAMPOS[f.campo] && OPS[f.op]) out.filtros.push({ campo:f.campo, op:f.op, valor:f.valor, valor2:f.valor2 }); else if(f) out.noEntendi.push('filtro '+(f.campo || '?')); });
+    (s.orden || []).forEach(function(o){ if(o && CAMPOS[o.campo]) out.orden.push({ campo:o.campo, dir:o.dir === 'asc' ? 'asc' : 'desc' }); });
+    if(s.medida && CAMPOS[s.medida.campo] && MEDIDA[s.medida.fn]) out.medida = { fn:s.medida.fn, campo:s.medida.campo };
+    return out;
+  }
+
+  /* ---------------- pantalla ---------------- */
+  var EJEMPLOS = [
+    'Toros guzerá para la venta mayores de 16 meses',
+    'Mis 5 vacas más altas en índice lechero',
+    'Vacas con más de 4 partos e IEP menor a 14 meses',
+    'Hijas del toro 20/0',
+    'Vacas próximas a parir',
+    'Promedio de peso al destete por finca',
+    'Animales vendidos este año',
+    'Inventario del hato'
+  ];
+  var ICO_AS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="12" cy="3.2" r="1"/><circle cx="9" cy="12.5" r="1.3" fill="currentColor"/><circle cx="15" cy="12.5" r="1.3" fill="currentColor"/><path d="M9.5 16h5"/><path d="M2 12v3M22 12v3"/></svg>';
+  var ICO_MIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>';
+
+  var ultimo = [];
+  var hablarOn = true; try{ hablarOn = localStorage.getItem('hatos_asis_voz') !== '0'; }catch(e){}
+
+  function montar(){
+    if($('asisFab')) return;
+    var fab = document.createElement('div'); fab.id = 'asisFab';
+    fab.innerHTML = '<button type="button" id="asisToggle" title="Asistente: pídale listados y reportes" aria-label="Asistente de reportes">'+ICO_AS+'</button>';
+    document.body.appendChild(fab);
+    var p = document.createElement('div'); p.id = 'asisPanel'; p.setAttribute('role', 'dialog'); p.setAttribute('aria-label', 'Asistente de reportes');
+    p.innerHTML =
+      '<div class="as-head">'+ICO_AS.replace('<svg', '<svg width="24" height="24"')+'<b>Asistente<small id="asisSub">Pídale listados y reportes, escribiendo o por voz</small></b>'+
+        '<button type="button" id="asisCfgB" title="Configurar inteligencia artificial">⚙</button>'+
+        '<button type="button" id="asisVoz" title="Leer las respuestas en voz alta">🔊</button>'+
+        '<button type="button" id="asisLimpiar" title="Borrar la conversación">Limpiar</button>'+
+        '<button type="button" id="asisCerrar" aria-label="Cerrar">✕</button></div>'+
+      '<div id="asisCfg" class="as-cfg"></div>'+
+      '<div id="asisLog"></div>'+
+      '<div class="as-escucha" id="asisEsc"></div>'+
+      '<form class="as-in" id="asisForm" autocomplete="off" onsubmit="return false">'+
+        '<button type="button" id="asisMic" title="Dictar por voz" aria-label="Dictar por voz">'+ICO_MIC+'</button>'+
+        '<input type="text" id="asisTxt" placeholder="Pregunte lo que necesite del hato…" autocomplete="hatos-buscar" enterkeyhint="send">'+
+        '<button type="submit" id="asisGo">Pedir</button></form>';
+    document.body.appendChild(p);
+    $('asisToggle').addEventListener('click', function(){ abrir(!p.classList.contains('on')); });
+    $('asisCerrar').addEventListener('click', function(){ abrir(false); });
+    $('asisLimpiar').addEventListener('click', function(){ ultimo = []; $('asisLog').innerHTML = ''; bienvenida(); });
+    $('asisVoz').classList.toggle('off', !hablarOn);
+    $('asisVoz').addEventListener('click', function(){ hablarOn = !hablarOn; this.classList.toggle('off', !hablarOn); try{ localStorage.setItem('hatos_asis_voz', hablarOn ? '1' : '0'); }catch(e){} if(!hablarOn) callar(); });
+    $('asisCfgB').addEventListener('click', function(){ var c = $('asisCfg'); if(c.classList.contains('on')) c.classList.remove('on'); else pintarCfg(); });
+    $('asisForm').addEventListener('submit', function(e){ e.preventDefault(); enviar($('asisTxt').value, false); });
+    $('asisMic').addEventListener('click', alternarMic);
+    $('asisLog').addEventListener('click', function(e){
+      var a = e.target.closest('a.as-an'); if(a){ e.preventDefault(); verFicha(+a.getAttribute('data-id')); return; }
+      var s = e.target.closest('[data-q]'); if(s){ enviar(s.getAttribute('data-q'), false); return; }
+      var x = e.target.closest('[data-xls]'); if(x){ excel(+x.getAttribute('data-xls')); return; }
+      var c = e.target.closest('[data-copy]'); if(c){ copiar(+c.getAttribute('data-copy'), c); return; }
+      var ia = e.target.closest('[data-ia]'); if(ia){ var o = ultimo[+ia.getAttribute('data-ia')]; if(o) enviar(o.pregunta, false, true); return; }
+      var cf = e.target.closest('[data-cfg]'); if(cf){ pintarCfg(); }
+    });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && p.classList.contains('on')) abrir(false); });
+    subtitulo();
+    bienvenida();
+  }
+  function subtitulo(){ var s = $('asisSub'); if(s) s.textContent = iaActiva() ? 'Con inteligencia artificial · escribiendo o por voz' : 'Pídale listados y reportes, escribiendo o por voz'; }
+  function pintarCfg(){
+    var c = iaCfg(), box = $('asisCfg');
+    box.innerHTML = '<b>Inteligencia artificial (opcional)</b>'+
+      '<p>Sin IA, el asistente entiende preguntas sobre todos los datos del tablero, pero con un vocabulario fijo. Con IA entiende cualquier forma de preguntar. A la IA solo se le manda el texto de la pregunta, nunca los datos del hato.</p>'+
+      '<p>Necesita una llave de la API de Anthropic (console.anthropic.com → API keys). Cada pregunta cuesta una fracción de centavo de dólar; ponga un límite de gasto mensual en esa consola. La llave queda guardada solo en este equipo.</p>'+
+      '<label>Llave de API<input type="password" id="asisKey" placeholder="sk-ant-…" value="'+esc(c.key || '')+'" autocomplete="off" data-lpignore="true" data-1p-ignore="true"></label>'+
+      '<label>Modelo<select id="asisModelo"><option value="claude-haiku-5-5">Haiku (rápido y económico)</option><option value="claude-sonnet-5-5">Sonnet (más preciso)</option></select></label>'+
+      '<label class="as-chk"><input type="checkbox" id="asisOn"'+(c.on === false ? '' : ' checked')+'> Usar IA cuando haya llave e internet</label>'+
+      '<div class="as-acts"><button type="button" id="asisCfgOk">Guardar y probar</button><button type="button" id="asisCfgDel">Borrar llave</button><button type="button" id="asisCfgX">Cerrar</button></div><p id="asisCfgMsg" class="as-note"></p>';
+    $('asisModelo').value = c.modelo || 'claude-haiku-5-5';
+    box.classList.add('on');
+    $('asisCfgX').onclick = function(){ box.classList.remove('on'); };
+    $('asisCfgDel').onclick = function(){ iaGuardar({}); subtitulo(); $('asisKey').value = ''; $('asisCfgMsg').textContent = 'Llave borrada de este equipo.'; };
+    $('asisCfgOk').onclick = function(){
+      var k = $('asisKey').value.trim();
+      iaGuardar({ key:k, modelo:$('asisModelo').value, on:$('asisOn').checked }); subtitulo();
+      if(!k){ $('asisCfgMsg').textContent = 'Guardado sin llave: el asistente trabaja sin IA.'; return; }
+      $('asisCfgMsg').textContent = 'Probando…';
+      iaPedir('cuántas vacas guzerá hay en TNJ').then(function(s){ $('asisCfgMsg').textContent = '✓ Funciona. La IA entendió: '+s.filtros.map(describir).join(' · '); })
+        .catch(function(e){ $('asisCfgMsg').textContent = '✗ No funcionó: '+e.message; });
+    };
+  }
+  function abrir(on){
+    var p = $('asisPanel'); p.classList.toggle('on', on);
+    if(on){ var qp = $('quickJumpPanel'); if(qp) qp.style.display = 'none'; setTimeout(function(){ if(!/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) $('asisTxt').focus(); }, 50); }
+    else { pararMic(); callar(); }
+  }
+  function bienvenida(){
+    agregar('<div class="as-res as-help"><p><b>¿Qué necesita saber del hato?</b> Escríbalo o toque el micrófono y dígalo con sus palabras. Puede preguntar por cualquier dato: partos, IEP, ARA, leche, pesos, calificación, palpación, padre y madre, nacimientos, ventas y muertes, comentarios, lotes… y pedir promedios, conteos, rankings o agrupar por finca, raza o año.</p>'+
+      '<p class="as-note">Si alguna parte de la pregunta no la entiende, se lo dice en lugar de adivinar.</p>'+
+      '<div class="as-sug">'+EJEMPLOS.map(function(t){ return '<button type="button" data-q="'+esc(t)+'">'+esc(t)+'</button>'; }).join('')+'</div></div>');
+  }
+  function agregar(html){ var log = $('asisLog'); var d = document.createElement('div'); d.className = 'as-msg'; d.innerHTML = html; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; }
+
+  function enviar(texto, porVoz, forzarIA){
+    texto = String(texto || '').trim(); if(!texto) return;
+    $('asisTxt').value = '';
+    var yo = agregar('<div class="as-yo">'+(porVoz ? '<span class="as-mic">🎙</span>' : '')+esc(texto)+'</div>'); yo.style.alignSelf = 'flex-end';
+    limpiarCache();
+    var local = interpretar(texto);
+    var usarIA = iaActiva() && navigator.onLine !== false && (forzarIA || true);
+    if(usarIA){
+      var esp = agregar('<div class="as-res as-esp">Pensando…</div>');
+      iaPedir(texto).then(function(spec){ esp.remove(); spec.texto = texto; responderCon(spec, texto, porVoz); })
+        .catch(function(err){ esp.remove(); local.avisoIA = 'No se pudo usar la IA ('+esc(err.message)+'); respondí sin ella.'; responderCon(local, texto, porVoz); });
+      return;
+    }
+    responderCon(local, texto, porVoz);
+  }
+  function responderCon(spec, texto, porVoz){
+    if(spec.vacio && !spec.ia){
+      agregar('<div class="as-res as-help"><p>No entendí qué listado quiere'+(spec.noEntendi.length ? ' (no reconocí: «'+esc(spec.noEntendi.join(' '))+'»)' : '')+'. Dígame <b>qué animales</b> (toros, vacas, novillas, terneros…) y, si quiere, <b>raza, finca, edad, qué dato</b> ver o por cuál ordenar.</p>'+
+        (iaActiva() ? '' : '<p class="as-note">Para entender cualquier forma de preguntar puede activar la inteligencia artificial en <a href="#" data-cfg="1">⚙ Configurar</a>.</p>')+
+        '<div class="as-sug">'+EJEMPLOS.slice(0,6).map(function(t){ return '<button type="button" data-q="'+esc(t)+'">'+esc(t)+'</button>'; }).join('')+'</div></div>');
+      if(porVoz) hablar('No entendí bien. ¿Qué animales quiere ver?');
+      return;
+    }
+    var o;
+    try{ o = ejecutar(spec); }catch(err){ console.error(err); o = { titulo:'No pude armar el reporte', chips:[], resumen:'Algo falló al calcular: '+esc(err && err.message), rows:[], cols:[] }; }
+    o.pregunta = texto; o.spec = spec;
+    if(spec.notaOrden) (o.notas = o.notas || []).unshift(spec.notaOrden);
+    var i = ultimo.push(o) - 1;
+    agregar(pintar(o, i));
+    if(porVoz) hablar(o.voz || '');
+  }
+
+  function pintar(o, i){
+    var cols = o.cols || [];
+    var spec = o.spec || {};
+    var h = '<div class="as-res"><h4>'+esc(o.titulo)+'</h4>';
+    if(o.chips && o.chips.length) h += '<div class="as-chips"><span class="lbl">Entendí'+(spec.ia ? ' (IA)' : '')+':</span>'+o.chips.map(function(c){ return '<span class="as-chip">'+esc(c)+'</span>'; }).join('')+'</div>';
+    if(spec.noEntendi && spec.noEntendi.length){
+      h += '<div class="as-chips as-no"><span class="lbl">No entendí:</span>'+spec.noEntendi.map(function(c){ return '<span class="as-chip">'+esc(c)+'</span>'; }).join('')+'</div>'+
+        '<p class="as-note as-warn">El resultado no tiene en cuenta esas palabras.'+(iaActiva() && !spec.ia ? ' <a href="#" data-ia="'+i+'">Preguntarle a la IA</a>' : (!iaActiva() ? ' Puede decirlo de otra forma o activar la IA en <a href="#" data-cfg="1">⚙</a>.' : ''))+'</p>';
+    }
+    if(spec.avisoIA) h += '<p class="as-note as-warn">'+spec.avisoIA+'</p>';
+    h += '<p class="as-sum">'+(o.resumen || '')+'</p>';
+    if(o.rows && o.rows.length && cols.length){
+      h += '<div class="as-tw"><table class="as-t"><thead><tr>'+(o.grupo ? '' : '<th>#</th>')+cols.map(function(c){ return '<th>'+esc(c.t)+'</th>'; }).join('')+'</tr></thead><tbody>';
+      o.rows.forEach(function(r, k){
+        h += '<tr>'+(o.grupo ? '' : '<td class="n">'+(k+1)+'</td>')+cols.map(function(c){
+          var v = c.v(r);
+          if(c.an){ var id = c.rid ? c.rid(r) : r.id; return '<td>'+(id != null ? '<a class="as-an" data-id="'+id+'" title="Abrir ficha">'+esc(v)+'</a>' : esc(v))+'</td>'; }
+          if(c.h) return '<td>'+c.h(v)+'</td>';
+          if(c.f) return '<td>'+esc(c.f(v))+'</td>';
+          if(c.n != null) return '<td class="n">'+(v == null || v === '' ? '—' : n1(v, c.n))+'</td>';
+          return '<td'+(c.lg ? ' class="lg"' : '')+'>'+esc(v == null || v === '' ? '—' : v)+'</td>';
+        }).join('')+'</tr>';
+      });
+      h += '</tbody></table></div>';
+      h += '<div class="as-acts"><button type="button" data-xls="'+i+'">⬇ Excel</button>'+(o.grupo ? '' : '<button type="button" data-copy="'+i+'">Copiar números</button>')+'</div>';
+    }
+    (o.notas || []).forEach(function(n){ h += '<p class="as-note">'+n+'</p>'; });
+    return h+'</div>';
+  }
+  function verFicha(id){
+    if(id == null || isNaN(id)) return;
+    if(/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 640) abrir(false);
+    if(window.__abrirFicha) window.__abrirFicha(id);
+  }
+  function copiar(i, btn){
+    var o = ultimo[i]; if(!o) return;
+    var t = o.rows.map(function(r){ return o.cols[0].v(r); }).join('\n');
+    var ok = function(){ btn.textContent = '✓ Copiado'; setTimeout(function(){ btn.textContent = 'Copiar números'; }, 1800); };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, function(){ prompt('Copie la lista:', t); });
+    else prompt('Copie la lista:', t);
+  }
+  function excel(i){
+    var o = ultimo[i]; if(!o) return;
+    var cols = o.cols;
+    var head = cols.map(function(c){ return c.t; });
+    var rows = [head].concat(o.rows.map(function(r){ return cols.map(function(c){ var v = c.v(r); if(c.f) v = c.f(v); return v == null ? '' : v; }); }));
+    var nombre = ('Asistente_'+o.titulo).replace(/[^\wÁÉÍÓÚáéíóúÑñ]+/g, '_').slice(0, 60)+'_'+hoyIso();
+    if(!window.XLSX){
+      var csv = rows.map(function(r){ return r.map(function(x){ x = String(x); return /[;"\n]/.test(x) ? '"'+x.replace(/"/g,'""')+'"' : x; }).join(';'); }).join('\r\n');
+      bajar(nombre+'.csv', new Blob(['﻿'+csv], { type:'text/csv;charset=utf-8' })); return;
+    }
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = head.map(function(h, k){ return { wch: k === 0 ? 16 : Math.max(10, Math.min(40, h.length + 2)) }; });
+    if(rows.length > 1) ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s:{ r:0, c:0 }, e:{ r:rows.length-1, c:head.length-1 } }) };
+    ws['!freeze'] = { xSplit:0, ySplit:1 };
+    ws['!rows'] = [{ hpt:38 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'REPORTE');
+    var tmp = document.createElement('div'); tmp.innerHTML = o.resumen || '';
+    var guia = [['GUIA — '+o.titulo], ['Pedido', o.pregunta || ''], ['Generado', hoyIso()+' por el Asistente del tablero Hatos Datos'],
+      ['Criterios', (o.chips || []).join(' · ')], ['Resumen', tmp.textContent || '']];
+    if(o.spec && o.spec.noEntendi && o.spec.noEntendi.length) guia.push(['No entendido', o.spec.noEntendi.join(', ')]);
+    (o.notas || []).forEach(function(n){ var d = document.createElement('div'); d.innerHTML = n; guia.push(['Nota', d.textContent]); });
+    var wg = XLSX.utils.aoa_to_sheet(guia); wg['!cols'] = [{ wch:14 }, { wch:110 }];
+    XLSX.utils.book_append_sheet(wb, wg, 'GUIA');
+    XLSX.writeFile(wb, nombre+'.xlsx');
+  }
+  function bajar(n, b){ var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+
+  /* ---------------- voz: dictado y respuesta hablada ---------------- */
+  var rec = null, grabando = false, finalTxt = '';
+  function esIOS(){ return /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+  function esPWA(){ return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
+  function avisoMic(motivo){
+    var e = $('asisEsc');
+    var local = location.protocol === 'file:' || location.protocol === 'blob:' || location.protocol === 'data:';
+    var enMarco = (function(){ try{ return window.top !== window.self; }catch(x){ return true; } })();
+    var m;
+    if(local || enMarco) m = 'El micrófono solo funciona en la página publicada (danieljaramillow.github.io/HATOS-DATOS). Aquí, abierto desde '+(enMarco ? 'una vista previa' : 'un archivo')+', el navegador lo bloquea. Mientras tanto use el micrófono del teclado 🎤 en el cuadro de texto.';
+    else if(motivo === 'no-api') m = esIOS() && esPWA() ? 'En el iPhone, la app instalada no permite dictar. Toque el cuadro de texto y use el micrófono del teclado 🎤, o abra el tablero en Safari.' : 'Este navegador no permite dictar aquí. Toque el cuadro de texto y use el micrófono del teclado 🎤.';
+    else if(motivo === 'not-allowed' || motivo === 'service-not-allowed') m = esIOS() ? 'Safari no tiene permiso: Ajustes → Safari → Micrófono → Permitir (y Ajustes → General → Teclado → Dictado activado). O use el micrófono del teclado 🎤.' : 'El navegador bloqueó el micrófono. Toque el candado 🔒 junto a la dirección → Micrófono → Permitir, y vuelva a tocar 🎙. O use el micrófono del teclado 🎤.';
+    else if(motivo === 'audio-capture') m = 'No se encontró micrófono en este equipo, o lo está usando otra aplicación.';
+    else if(motivo === 'network') m = 'El dictado necesita internet. Puede escribir el pedido.';
+    else if(motivo === 'no-speech') m = 'No le escuché. Toque 🎙 y hable apenas se ponga rojo.';
+    else m = 'No se pudo usar el micrófono ('+motivo+'). Use el micrófono del teclado 🎤.';
+    e.textContent = m;
+    if(motivo !== 'no-speech' && motivo !== 'network') setTimeout(function(){ try{ $('asisTxt').focus(); }catch(x){} }, 50);
+  }
+  function alternarMic(){ if(grabando) pararMic(); else empezarMic(); }
+  function empezarMic(){
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR || (esIOS() && esPWA())){ avisoMic('no-api'); return; }
+    callar();
+    try{ rec = new SR(); rec.lang = 'es-CO'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1; }
+    catch(e){ avisoMic('no-api'); return; }
+    finalTxt = '';
+    rec.onstart = function(){ grabando = true; $('asisMic').classList.add('rec'); $('asisEsc').textContent = 'Escuchando… diga su pedido.'; };
+    rec.onresult = function(ev){
+      var inter = '';
+      for(var k = ev.resultIndex; k < ev.results.length; k++){ var r = ev.results[k]; if(r.isFinal) finalTxt += r[0].transcript; else inter += r[0].transcript; }
+      $('asisTxt').value = (finalTxt + ' ' + inter).trim();
+    };
+    rec.onerror = function(ev){ rec.__err = ev.error; avisoMic(ev.error); };
+    rec.onend = function(){
+      grabando = false; $('asisMic').classList.remove('rec');
+      var t = ($('asisTxt').value || '').trim();
+      if(finalTxt.trim() || (t && !rec.__err)){ $('asisEsc').textContent = ''; enviar(finalTxt.trim() || t, true); }
+      else if(/Escuchando/.test($('asisEsc').textContent)) $('asisEsc').textContent = '';
+    };
+    try{ rec.start(); }catch(e){ avisoMic('start'); }
+  }
+  function pararMic(){ if(rec && grabando){ try{ rec.stop(); }catch(e){} } }
+  function hablar(t){
+    if(!hablarOn || !window.speechSynthesis || !t) return;
+    try{
+      callar();
+      var u = new SpeechSynthesisUtterance(String(t).replace(/<[^>]+>/g, ''));
+      u.lang = 'es-CO'; u.rate = 1.02;
+      var vs = speechSynthesis.getVoices().filter(function(v){ return /^es/i.test(v.lang); });
+      var pref = vs.filter(function(v){ return /CO|MX|US|419/.test(v.lang); })[0] || vs[0];
+      if(pref) u.voice = pref;
+      speechSynthesis.speak(u);
+    }catch(e){}
+  }
+  function callar(){ try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){} }
+
+  window.__asistente = { abrir:function(t){ montar(); abrir(true); if(t) enviar(t, false); }, interpretar:interpretar, ejecutar:ejecutar,
+    responder:function(spec){ limpiarCache(); return ejecutar(spec); }, campos:CAMPOS, validar:validar, sistemaIA:iaSistema };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();
+})();
+</script>
 </body>
 </html>

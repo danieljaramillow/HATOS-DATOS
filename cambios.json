@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-09T20:17:24.006Z",
+ "actualizado": "2026-10-18T14:47:43.258Z",
  "edits": [],
  "updates": [
   {
@@ -45,18 +45,6 @@
    },
    "detalle_texto": "2026-09-30 · VENTA · Alvaro charcos",
    "fecha": "2026-09-30"
-  },
-  {
-   "id": 179157318932105,
-   "tipo": "correccion",
-   "numero": "328/2",
-   "detalle": {
-    "campo": "FECHA NAC",
-    "valor": "14/05/2026",
-    "obs": ""
-   },
-   "detalle_texto": "FECHA NAC → 14/05/2026",
-   "fecha": "2026-10-09"
   }
  ],
  "visita": null,
@@ -114,5 +102,6 @@
   }
  ],
  "muertes": null,
- "qa": null
+ "qa": null,
+ "visitas": null
 }

@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-18T14:47:43.258Z",
+ "actualizado": "2026-10-18T14:47:48.323Z",
  "edits": [],
  "updates": [
   {
@@ -33,18 +33,6 @@
    },
    "detalle_texto": "2026-09-29 · Aborto de 6 meses · aborto",
    "fecha": "2026-10-07"
-  },
-  {
-   "id": 1,
-   "tipo": "salida",
-   "numero": "152/2",
-   "detalle": {
-    "fecha": "2026-09-30",
-    "causa": "VENTA",
-    "obs": "Alvaro charcos"
-   },
-   "detalle_texto": "2026-09-30 · VENTA · Alvaro charcos",
-   "fecha": "2026-09-30"
   }
  ],
  "visita": null,

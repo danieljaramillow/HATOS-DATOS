@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-18T14:47:48.323Z",
+ "actualizado": "2026-10-18T14:48:52.670Z",
  "edits": [],
  "updates": [
   {
@@ -21,18 +21,6 @@
    },
    "detalle_texto": "Hembra · 2026-09-29 · 30 kg · Madre: 04/1C · Padre: 963/1C",
    "fecha": "2026-09-29"
-  },
-  {
-   "id": 179140429291035,
-   "tipo": "aborto",
-   "numero": "768/1C",
-   "detalle": {
-    "fecha": "2026-09-29",
-    "meses": "6",
-    "obs": "aborto"
-   },
-   "detalle_texto": "2026-09-29 · Aborto de 6 meses · aborto",
-   "fecha": "2026-10-07"
   }
  ],
  "visita": null,

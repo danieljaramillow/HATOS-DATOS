@@ -1,28 +1,9 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-18T14:48:52.670Z",
+ "actualizado": "2026-10-18T14:49:06.257Z",
  "edits": [],
- "updates": [
-  {
-   "id": 1,
-   "tipo": "cria",
-   "numero": "52C",
-   "detalle": {
-    "nombre": "",
-    "fecha": "2026-09-29",
-    "sexo": "H",
-    "raza": "BR",
-    "finca": "CACHO",
-    "lote": "",
-    "padre": "963/1C",
-    "madre": "04/1C",
-    "peso_nac": "30"
-   },
-   "detalle_texto": "Hembra · 2026-09-29 · 30 kg · Madre: 04/1C · Padre: 963/1C",
-   "fecha": "2026-09-29"
-  }
- ],
+ "updates": [],
  "visita": null,
  "cortes": null,
  "notas": [

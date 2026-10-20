@@ -16,14 +16,14 @@
    de que el tablero lea sus datos.
    ===================================================================== */
 (function(){
-  var K = { edits:'hatosDJW_edits_v1', updates:'hatosDJW_updates_v1', visita:'hatos_visita_asocebu_v1', cortes:'hatos_cortes_letras_v1', notas:'hatos_notas_v1', historial:'hatosDJW_historial_v1', muertes:'hatos_muertes_v1', qa:'hatos_qa_resp_v1', visitas:'hatos_visitas_v1' };
+  var K = { edits:'hatosDJW_edits_v1', updates:'hatosDJW_updates_v1', visita:'hatos_visita_asocebu_v1', cortes:'hatos_cortes_letras_v1', notas:'hatos_notas_v1', historial:'hatosDJW_historial_v1', muertes:'hatos_muertes_v1', qa:'hatos_qa_resp_v1', visitas:'hatos_visitas_v1', sobres:'hatos_sobres_v1' };
   var BASE_KEY = 'hatosSync_base_v1', REM_KEY = 'hatosSync_remoto_v1', CFG_KEY = 'hatosSync_cfg_v1';
 
   function get(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
   function set(k, v){ try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
   function J(x){ return x === undefined ? undefined : JSON.stringify(x); }
 
-  function leerLocal(){ return { edits:get(K.edits), updates:get(K.updates), visita:get(K.visita), cortes:get(K.cortes), notas:get(K.notas), historial:get(K.historial), muertes:get(K.muertes), qa:get(K.qa), visitas:get(K.visitas) }; }
+  function leerLocal(){ return { edits:get(K.edits), updates:get(K.updates), visita:get(K.visita), cortes:get(K.cortes), notas:get(K.notas), historial:get(K.historial), muertes:get(K.muertes), qa:get(K.qa), visitas:get(K.visitas), sobres:get(K.sobres) }; }
   /* Historial de lo ingresado o modificado: cada entrada se identifica por su hora y su registro. */
   function hKey(h){ return (h.ts || 0) + '|' + (h.ref || h.numero || ''); }
 
@@ -47,6 +47,7 @@
     (Array.isArray(st.historial) ? st.historial : []).forEach(function(h){ if(h && h.ts) p['h:' + hKey(h)] = h; });
     var mu = st.muertes; if(mu && typeof mu === 'object') Object.keys(mu).forEach(function(k){ if(mu[k]) p['m:' + k] = mu[k]; });
     var qa = st.qa; if(qa && typeof qa === 'object') Object.keys(qa).forEach(function(k){ if(qa[k]) p['q:' + k] = qa[k]; });
+    var so = st.sobres; if(so && typeof so === 'object') Object.keys(so).forEach(function(k){ if(so[k]) p['S:' + k] = so[k]; });
     var vs = st.visitas; if(vs && typeof vs === 'object'){
       Object.keys(vs.visitas || {}).forEach(function(k){ p['W:v:' + k] = vs.visitas[k]; });
       Object.keys(vs.regs || {}).forEach(function(k){ p['W:r:' + k] = vs.regs[k]; });
@@ -61,7 +62,7 @@
     var vistas = {}, orden = [];
     Object.keys(aPlano(local)).forEach(function(k){ if(k in p){ orden.push(k); vistas[k] = 1; } });
     Object.keys(p).forEach(function(k){ if(!vistas[k]) orden.push(k); });
-    var edits = [], updates = [], regs = {}, hist = [], cab = null, hayVisita = false, cortes = null, notas = [], historial = [], muertes = null, qa = null, visitas = null;
+    var edits = [], updates = [], regs = {}, hist = [], cab = null, hayVisita = false, cortes = null, notas = [], historial = [], muertes = null, qa = null, visitas = null, sobres = null;
     orden.forEach(function(k){
       var x = p[k];
       if(k.indexOf('e:') === 0) edits.push(x);
@@ -74,6 +75,7 @@
       else if(k.indexOf('h:') === 0) historial.push(x);
       else if(k.indexOf('m:') === 0){ muertes = muertes || {}; muertes[k.slice(2)] = x; }
       else if(k.indexOf('q:') === 0){ qa = qa || {}; qa[k.slice(2)] = x; }
+      else if(k.indexOf('S:') === 0){ sobres = sobres || {}; sobres[k.slice(2)] = x; }
       else if(k.indexOf('W:v:') === 0){ visitas = visitas || {visitas:{}, regs:{}}; visitas.visitas[k.slice(4)] = x; }
       else if(k.indexOf('W:r:') === 0){ visitas = visitas || {visitas:{}, regs:{}}; visitas.regs[k.slice(4)] = x; }
     });
@@ -87,14 +89,14 @@
         open: !!lv.open, min: !!lv.min, tab: lv.tab || 'reg'
       };
     }
-    return { edits:edits, updates:updates, visita:visita, cortes:cortes, notas:notas, historial:historial, muertes:muertes, qa:qa, visitas:visitas };
+    return { edits:edits, updates:updates, visita:visita, cortes:cortes, notas:notas, historial:historial, muertes:muertes, qa:qa, visitas:visitas, sobres:sobres };
   }
   /* Para el archivo cambios.json: sin lo que es solo de pantalla. */
   function paraArchivo(p){
     var st = dePlano(p, {});
     if(st.visita){ delete st.visita.open; delete st.visita.min; delete st.visita.tab; }
     return { version:1, tablero:'Hatos Datos', actualizado:new Date().toISOString(),
-             edits:st.edits, updates:st.updates, visita:st.visita, cortes:st.cortes, notas:st.notas, historial:st.historial, muertes:st.muertes, qa:st.qa, visitas:st.visitas };
+             edits:st.edits, updates:st.updates, visita:st.visita, cortes:st.cortes, notas:st.notas, historial:st.historial, muertes:st.muertes, qa:st.qa, visitas:st.visitas, sobres:st.sobres };
   }
 
   function marca(x){ return x ? (x.ts || x.updatedAt || 0) : 0; }
@@ -134,6 +136,8 @@
     else if(antes.qa != null) set(K.qa, null);
     if(st.visitas) set(K.visitas, st.visitas);
     else if(antes.visitas != null) set(K.visitas, null);
+    if(st.sobres) set(K.sobres, st.sobres);
+    else if(antes.sobres != null) set(K.sobres, null);
   }
 
   /* Al abrir: aplicar lo que llegó de otros dispositivos la vez anterior. */
@@ -2240,6 +2244,7 @@ window.__renderReproHead = function(o){
           <p class="fh-parents" id="fh-parents"></p>
           <div class="fh-tags" id="fh-tags"></div>
           <div id="fh-media"></div>
+          <div id="fh-sobre"></div>
         </div>
         <div class="fh-right">
           <div class="big-stat" id="fh-edad">—<small>años de edad</small></div>
@@ -6172,6 +6177,7 @@ window.__renderReproHead = function(o){
     // ---- Pedigrí (4 generaciones) ----
     renderFichaPedigree(r);
     if(window.HMedia) window.HMedia.ficha(r);
+    if(window.HSobre) window.HSobre.ficha(r);
     var printBtn = document.getElementById('fh-print-btn');
     printBtn.onclick = function(){ printPedigree(r); };
     var downloadHtmlBtn = document.getElementById('fh-download-html-btn');
@@ -13187,6 +13193,8 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       ['Notas y descartes de la ficha', Array.isArray(st.notas) ? st.notas.length : 0],
       ['Historial de datos ingresados o modificados', Array.isArray(st.historial) ? st.historial.length : 0],
       ['Visitas registradas', st.visitas && st.visitas.visitas ? Object.keys(st.visitas.visitas).filter(function(k){ return !st.visitas.visitas[k].deleted; }).length : 0]
+    ,
+      ['Marcas de sobresaliente (⭐)', st.sobres ? Object.keys(st.sobres).length : 0]
     ];
   }
   function pintar(){
@@ -16570,6 +16578,48 @@ window.__irAFicha = function(id, soloSiHayVentana){
   }
   document.addEventListener('click',function(e){ var i=e.target.closest&&e.target.closest('.hm-ico'); if(i && !e.target.closest('#fh-pedigree')){ e.stopPropagation(); abrir(i.getAttribute('data-k')); } }, true);
   window.HMedia = { icono:icono, abrir:abrir, ficha:ficha, datos:M };
+})();
+</script>
+
+<style>
+  #fh-sobre{ margin-top:10px; }
+  #fh-sobre:empty{ display:none; }
+  .hs-star{ display:inline-flex; align-items:center; gap:8px; border-radius:20px; padding:6px 14px 6px 10px; cursor:pointer;
+    font:600 13px 'IBM Plex Sans',sans-serif; border:2px solid #FFE28C; background:transparent; color:#FFE28C; }
+  .hs-star .st{ font-size:20px; line-height:1; }
+  .hs-star.on{ background:#FFE28C; color:#1E3626; }
+  .hs-star small{ font-weight:400; opacity:.85; font-size:11.5px; }
+</style>
+<script>
+(function(){
+  var KEY = 'hatos_sobres_v1';
+  var SEM = {};
+  try{ SEM = JSON.parse(document.getElementById('semen-source').textContent) || {}; }catch(e){}
+  function N(x){ return String(x||'').trim().toUpperCase(); }
+  function leer(){ try{ return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }catch(e){ return {}; } }
+  function guardar(m){ try{ localStorage.setItem(KEY, JSON.stringify(m)); }catch(e){} }
+  var semN = {}; Object.keys(SEM).forEach(function(k){ semN[N(k)] = 1; });
+  /* Estado: marca suya (si existe) manda; si no, toros con semen en inventario = sobresalientes. */
+  function estado(numero){
+    var k = N(numero), m = leer()[k];
+    if(m && typeof m.v === 'boolean') return { on:m.v, porque: m.v ? 'marcado por usted' : 'desmarcado por usted' };
+    if(semN[k]) return { on:true, porque:'por inventario de semen' };
+    return { on:false, porque:'' };
+  }
+  function marcar(numero, v){
+    var m = leer(), k = N(numero);
+    m[k] = { v:!!v, ts:Date.now() };
+    guardar(m);
+  }
+  function ficha(r){
+    var el = document.getElementById('fh-sobre'); if(!el || !r) return;
+    var e = estado(r.numero);
+    el.innerHTML = '<button type="button" class="hs-star'+(e.on?' on':'')+'" title="Tocar para '+(e.on?'quitar':'marcar')+' como sobresaliente">'+
+      '<span class="st">'+(e.on?'★':'☆')+'</span>'+(e.on?'Sobresaliente':'Marcar sobresaliente')+
+      (e.porque?' <small>· '+e.porque+'</small>':'')+'</button>';
+    el.firstChild.onclick = function(){ marcar(r.numero, !estado(r.numero).on); ficha(r); };
+  }
+  window.HSobre = { estado:estado, marcar:marcar, ficha:ficha, lista:function(){ return leer(); } };
 })();
 </script>
 </body>

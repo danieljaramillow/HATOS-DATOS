@@ -209,7 +209,7 @@ window.fechaAIso = function(v){
      comparando el peso ajustado a 8 meses.
    ⚑ Aborto: cría registrada como aborto, pesaje "ABORTO MADRE …", registro
      de aborto en Actualizar Datos, o comentario/nota/visita que lo mencione.
-   ⚑ Cría muerta por la madre: murió antes del destete por golero/chulo, falta de
+   ⚑ Cría muerta por la madre: murió antes del destete porque no la defendió, falta de
      leche, abandono, mala madre o pisada. Si fue ajena a la madre (ahogada,
      accidente, culebra, enfermedad…) se muestra pero NO es bandera; si nació
      muerta o no hay causa clara queda "por revisar" y la clasifica el usuario.
@@ -236,8 +236,8 @@ window.__BN = (function(){
   /* Cría que murió antes del destete: cuándo y por qué, y si la causa es
      atribuible a la madre (eso sí es bandera negra) o ajena a ella. */
   var RX_MUERTE = /MUER|MURI|NACI[OÓ]\s+MUERT|NACE\s+MUERT|AHOG|GOLERO|CHULO|PICAD[OA]\s+(POR\s+)?(GOLERO|CHULO)/;
-  var RX_MADRE  = /GOLERO|CHULO|NO\s+(LA\s+|LO\s+)?DEFENDI|NO\s+DI[OÓ]\s+LECHE|SIN\s+LECHE|POCA\s+LECHE|ABANDON|MALA\s+MADRE|NO\s+(LA\s+|LO\s+)?CRI[OÓ]|NO\s+(LA\s+|LO\s+)?QUISO|RECHAZ[OÓ]\s+(LA\s+)?CR|PIS[OÓ]|PISAD|APLAST/;
-  var RX_AJENA  = /AHOG|CHARCO|ACCIDENT|FRACTUR|RAYO|CULEBR|CULE\b|SERPIENT|MORDEDURA|ROB[OA]|TRIPANOSOM|CARB[OÓ]N|RABIA|ENFERM|RESPIRAT|NEUMON|DIARRE|TIMPANI|PATAS\s+TORCID|MALFORM|DEFORM|BRONCOASP|HEMORRAG|VIRUS|BACTER|INFECC|CAUSA\s+DESCONOC/;
+  var RX_MADRE  = /NO\s+(LA\s+|LO\s+)?DEFENDI|NO\s+DI[OÓ]\s+LECHE|SIN\s+LECHE|POCA\s+LECHE|ABANDON|MALA\s+MADRE|NO\s+(LA\s+|LO\s+)?CRI[OÓ]|NO\s+(LA\s+|LO\s+)?QUISO|RECHAZ[OÓ]\s+(LA\s+)?CR|PIS[OÓ]|PISAD|APLAST/;
+  var RX_AJENA  = /GOLERO|CHULO|AHOG|CHARCO|ACCIDENT|FRACTUR|RAYO|CULEBR|CULE\b|SERPIENT|MORDEDURA|ROB[OA]|TRIPANOSOM|CARB[OÓ]N|RABIA|ENFERM|RESPIRAT|NEUMON|DIARRE|TIMPANI|PATAS\s+TORCID|MALFORM|DEFORM|BRONCOASP|HEMORRAG|VIRUS|BACTER|INFECC|CAUSA\s+DESCONOC/;
   var RX_PARTO  = /NACI[OÓ]\s+MUERT|NACE\s+MUERT|PARTO\s+COMPLIC|DISTOC|AVENTAD|MAL\s+PARTO/;
   function muerteCria(c){
     var causa = N(c.causa_salida), t = [c.causa_salida, c.obs_salida, c.comentario].filter(Boolean).map(N).join(' · ');
@@ -503,7 +503,7 @@ window.__BN = (function(){
     var madre = c.madre ? byNum[N(c.madre)] : null, items = [];
     if(m.culpa === 'madre') items.push({ k:'bandera', texto:'La cría '+c.numero+' murió ('+m.etapa.toLowerCase()+') por causa atribuible a la madre: «'+m.causa+'». La madre suma una bandera negra ⚑.' });
     else if(m.culpa === 'ajena') items.push({ k:'aviso', texto:'La cría '+c.numero+' murió ('+m.etapa.toLowerCase()+'): «'+m.causa+'». Causa ajena a la madre: sin bandera.' });
-    else items.push({ k:'aviso', texto:'La cría '+c.numero+' murió ('+m.etapa.toLowerCase()+'): «'+m.causa+'». Clasifique en la ficha de la madre si fue culpa de ella (golero, no dio leche, abandono, la pisó) para saber si es bandera negra.' });
+    else items.push({ k:'aviso', texto:'La cría '+c.numero+' murió ('+m.etapa.toLowerCase()+'): «'+m.causa+'». Clasifique en la ficha de la madre si fue culpa de ella (no la defendió, no dio leche, abandono, la pisó) para saber si es bandera negra.' });
     return { r:madre, items:items };
   }
   return { analizar:analizar, candidatas:candidatas, destacadas:destacadas, novedadParto:novedadParto, novedadDestete:novedadDestete, novedadAborto:novedadAborto, novedadMuerte:novedadMuerte, EST:EST, araP75:function(){ init(); return araP75; }, umbral:umbral,
@@ -1794,7 +1794,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 20 oct 2026 · 10:45 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 20 oct 2026 · 10:50 a.m.</b>
     </div>
   </header>
 
@@ -2623,7 +2623,7 @@ window.__renderReproHead = function(o){
       <b>⚑ parto muy abierto</b> (más de 20 meses entre partos, o más de 20 meses desde el último parto sin preñez confirmada),
       <b>⚑ destete bajo</b> (cría por debajo del % elegido del promedio de sus contemporáneas — misma finca, año de nacimiento y sexo — en peso ajustado a 8 meses),
       <b>⚑ aborto</b> (registro en BD, pesaje «ABORTO MADRE…», registro en Actualizar Datos, o mención en comentarios, notas o visita ASOCEBU) y
-      <b>⚑ cría muerta por la madre</b> (antes del destete por golero o chulo, falta de leche, abandono o pisada — las muertes ajenas a la madre, como ahogada o accidente, no cuentan),
+      <b>⚑ cría muerta por la madre</b> (antes del destete porque no la defendió, falta de leche, abandono o pisada — las muertes ajenas a la madre, como goleros o chulos, ahogada o accidente, no cuentan),
       <b>⚑ descarte sugerido</b> (nota de la ficha marcada para descarte, visita ASOCEBU rechazada o comentario que lo pida). La lista se recalcula sola con las notas, comentarios y la visita ASOCEBU. Es una guía para decidir, no una orden.</p>
     <div class="bn-ctrl">
       <label>Finca <select id="bnFinca"><option value="prod">Productivas (OK, CACHO, TNJ)</option><option value="OK">OK</option><option value="CACHO">CACHO</option><option value="TNJ">TNJ</option><option value="">Todas</option></select></label>
@@ -6389,7 +6389,7 @@ window.__renderReproHead = function(o){
             '<button type="button" data-num="'+escT(m.numero)+'" data-c="madre" class="'+(m.culpa==='madre'?'on':'')+'">Sí</button>'+
             '<button type="button" data-num="'+escT(m.numero)+'" data-c="ajena" class="'+(m.culpa==='ajena'?'on':'')+'">No</button>'+
             (m.manual?'<button type="button" data-num="'+escT(m.numero)+'" data-c="" class="ghost">Volver a automático</button>':'')+'</div></div>';
-      }).join('')+'<p class="hint" style="margin:6px 0 0;">Atribuible a la madre: golero o chulo (no la defendió), no dio leche, abandonó la cría, mala madre o la pisó. Ajena: ahogada, accidente, culebra, enfermedad, malformación. Tu clasificación se guarda y se comparte con el otro equipo.</p></div>' : '';
+      }).join('')+'<p class="hint" style="margin:6px 0 0;">Atribuible a la madre: no la defendió, no dio leche, abandonó la cría, mala madre o la pisó. Ajena: goleros o chulos, ahogada, accidente, culebra, enfermedad, malformación. Tu clasificación se guarda y se comparte con el otro equipo.</p></div>' : '';
       var provs = [];
       if(r.__prov) Object.keys(r.__prov).forEach(function(k){ provs.push(r.numero+': '+k+' '+(r.__prov[k]||'(vacío)')+' → '+r[k]); });
       P.forEach(function(p){ p.crias.forEach(function(c){ if(c.__prov) Object.keys(c.__prov).forEach(function(k){ provs.push(c.numero+': '+(k==='fecha_nac'?'fecha de nacimiento':k)+' '+(k==='fecha_nac'?fmtDate(c.__prov[k]):c.__prov[k])+' → '+(k==='fecha_nac'?fmtDate(c[k]):c[k])); }); }); });

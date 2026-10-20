@@ -219,8 +219,8 @@ window.fechaAIso = function(v){
 window.__BN = (function(){
   var MESES_ABIERTA = 20, MIN_GRUPO = 5;
   /* ESTRELLAS ⭐ (lo bueno, igual que las banderas pero bonificando):
-     Por parto, máximo 2: IEP de 12 meses o menos y destete de 115 % o más del
-     promedio de sus contemporáneas (cada una solo si es sobresaliente) · crías
+     Por parto, máximo 2: IEP de 12 meses o menos, y destete de 115 % o más del
+     promedio de sus contemporáneas CON la cría calificada en 90/100 o más · crías
      calificadas con promedio de 90/100 o más (2 o más crías) · primer parto
      a los 30 meses o antes. Vaca activa con 2 o más estrellas = destacada. */
   var EST = { IEP_MAX:12, IEP_MIN:9, DESTETE_PCT:115, CALIF:4.5, CALIF_MIN_N:2, PRIMER_PARTO_MESES:30 };
@@ -353,7 +353,8 @@ window.__BN = (function(){
       var stars = [];
       if(iep != null && iep >= EST.IEP_MIN && iep <= EST.IEP_MAX) stars.push({ tipo:'iep', texto:'IEP de '+iep.toFixed(1)+' meses desde el parto anterior ('+EST.IEP_MAX+' o menos).' });
       if(!u.gemelar && crs[0]){ var c2 = crs[0], p2 = pesoCria(c2), g2 = p2 != null ? promGrupo(c2) : null;
-        if(g2){ var pct2 = p2 / g2.prom * 100; if(pct2 >= EST.DESTETE_PCT) stars.push({ tipo:'destete', texto:'La cría '+c2.numero+' destetó '+Math.round(p2)+' kg (ajustado 8 m) = '+pct2.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g2.prom)+' kg, '+g2.grupo+').' }); } }
+        if(g2){ var pct2 = p2 / g2.prom * 100, cf2 = c2.calif_conf_justa;
+          if(pct2 >= EST.DESTETE_PCT && cf2 != null && cf2 >= EST.CALIF) stars.push({ tipo:'destete', texto:'La cría '+c2.numero+' destetó '+Math.round(p2)+' kg (ajustado 8 m) = '+pct2.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g2.prom)+' kg, '+g2.grupo+') y tiene calificación de '+(cf2*20).toFixed(1)+'/100.' }); } }
       /* Máximo 2 estrellas por parto: una por IEP y otra por peso al destete, cada una solo si es sobresaliente.
          El ARA no da estrella aparte porque sale de esos mismos dos datos (se contarían dos veces). */
       return { n:i+1, fecha:u.fecha_nac, crias:crs, gemelar:u.gemelar, peso_destete:peso, iep_meses:iep, kg_ano:kg, anomalia:anom, flags:flags, stars:stars, provisional:prov, muertes:muertes };
@@ -472,7 +473,10 @@ window.__BN = (function(){
 
     out.push({ k:'info', texto:'Peso ajustado a 8 meses: '+Math.round(aj)+' kg ('+p+' kg a los '+Math.round(d/30.4375*10)/10+' meses).' });
     if(g){ var pct = aj / g.prom * 100;
-      if(pct >= EST.DESTETE_PCT) out.push({ k:'estrella', texto:'¡Muy buen destete! '+pct.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g.prom)+' kg, '+g.grupo+'). La madre gana una estrella ⭐.' });
+      var cf = c.calif_conf_justa;
+      if(pct >= EST.DESTETE_PCT && cf != null && cf >= EST.CALIF) out.push({ k:'estrella', texto:'¡Muy buen destete! '+pct.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g.prom)+' kg, '+g.grupo+') y la cría tiene buena calificación ('+(cf*20).toFixed(1)+'/100). La madre gana una estrella ⭐.' });
+      else if(pct >= EST.DESTETE_PCT && cf == null) out.push({ k:'aviso', texto:'Destete sobresaliente: '+pct.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g.prom)+' kg, '+g.grupo+'). La estrella se da cuando la cría tenga calificación de '+(EST.CALIF*20)+'/100 o más: falta calificarla.' });
+      else if(pct >= EST.DESTETE_PCT) out.push({ k:'info', texto:'Buen peso: '+pct.toFixed(1)+' % del promedio de sus contemporáneas, pero la calificación de la cría ('+(cf*20).toFixed(1)+'/100) no llega a '+(EST.CALIF*20)+': sin estrella.' });
       else if(pct < U) out.push({ k:'bandera', texto:'Destete bajo: '+pct.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g.prom)+' kg, '+g.grupo+'). La madre suma una bandera negra ⚑.' });
       else out.push({ k:'info', texto:pct.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g.prom)+' kg, '+g.grupo+').' }); }
     var m = c.madre ? byNum[N(c.madre)] : null, a = null;
@@ -1771,7 +1775,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 20 oct 2026 · 10:15 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 20 oct 2026 · 10:25 a.m.</b>
     </div>
   </header>
 
@@ -1825,7 +1829,7 @@ window.__renderReproHead = function(o){
       <div class="section-head" style="margin-top:4px"><h2>Vacas destacadas — estrellas ⭐</h2><div class="rail"></div></div>
       <p class="hint" style="margin:-6px 0 12px;">Lo contrario de las banderas negras: cada <b>⭐ estrella</b> es un buen resultado.
         <b>⭐ IEP corto</b> (12 meses o menos entre un parto y el siguiente),
-        <b>⭐ destete alto</b> (la cría destetó 115 % o más del promedio de sus contemporáneas — misma finca, año de nacimiento y sexo — en peso ajustado a 8 meses),
+        <b>⭐ destete alto</b> (la cría destetó 115 % o más del promedio de sus contemporáneas — misma finca, año de nacimiento y sexo — en peso ajustado a 8 meses <b>y</b> tiene calificación de 90/100 o más),
         <b>⭐ crías bien calificadas</b> (2 o más crías con promedio de 90/100 o más en conformación) y
         <b>⭐ primer parto precoz</b> (a los 30 meses de edad o antes). Cada parto da como máximo <b>2 estrellas</b> (una por IEP y otra por destete), y solo si cada dato es sobresaliente. Una vaca activa con 2 o más estrellas es <b>destacada</b>. Si también tiene banderas negras, se muestran al lado para decidir con todo a la vista.</p>
       <div class="bn-ctrl">
@@ -6374,7 +6378,7 @@ window.__renderReproHead = function(o){
         '<div class="stat-strip">'+strip+'</div>'+
         (provs.length ? '<p class="hint bn-prov-nota">✎ Incluye correcciones pendientes de pasar al Excel (provisionales): '+provs.map(escT).join(' · ')+'</p>' : '')+
         '<div class="panel"><h3>Resumen de partos</h3>'+
-        '<p class="hint" style="margin:0 0 8px;">IEP de cada parto = meses desde el parto anterior (<span style="color:rgb(30,54,38);font-weight:700;">verde</span> = más corto, <span style="color:rgb(169,72,26);font-weight:700;">rojo</span> = más largo). IEP promedio = suma de los IEP ÷ cantidad de IEP. ⚑ = bandera negra: parto con más de '+window.__BN.MESES_ABIERTA+' meses de intervalo, cría destetada por debajo del '+BNa.umbral+' % del promedio de sus contemporáneas, o aborto. Toca ⚑ para ver el motivo. ⭐ = estrella por buen resultado: máximo 2 por parto, una por IEP de 12 meses o menos y otra por destete de 115 % o más del promedio de sus contemporáneas (toca ⭐ para ver el detalle).</p>'+
+        '<p class="hint" style="margin:0 0 8px;">IEP de cada parto = meses desde el parto anterior (<span style="color:rgb(30,54,38);font-weight:700;">verde</span> = más corto, <span style="color:rgb(169,72,26);font-weight:700;">rojo</span> = más largo). IEP promedio = suma de los IEP ÷ cantidad de IEP. ⚑ = bandera negra: parto con más de '+window.__BN.MESES_ABIERTA+' meses de intervalo, cría destetada por debajo del '+BNa.umbral+' % del promedio de sus contemporáneas, o aborto. Toca ⚑ para ver el motivo. ⭐ = estrella por buen resultado: máximo 2 por parto, una por IEP de 12 meses o menos y otra por destete de 115 % o más del promedio de sus contemporáneas con la cría calificada en 90/100 o más (toca ⭐ para ver el detalle).</p>'+
         '<div style="overflow-x:auto;"><table class="mini-table bn-table"><thead><tr><th>#</th><th>Fecha parto</th><th>Cría</th><th>IEP (m)</th><th>⚑</th><th>⭐</th><th>Destete</th><th>ARA</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
         (listaBan ? '<div class="bn-lista"><div class="bn-lista-tit">⚑ '+nBan+' bandera'+(nBan===1?'':'s')+' negra'+(nBan===1?'':'s')+(nBan>=2?' — <b>candidata a descarte</b>':'')+'</div><ul>'+listaBan+'</ul></div>' : '')+
         (listaEst ? '<div class="st-lista"><div class="bn-lista-tit">⭐ '+nEst+' estrella'+(nEst===1?'':'s')+' por buenos resultados'+(nEst>=2?' — <b>vaca destacada</b>':'')+'</div><ul>'+listaEst+'</ul></div>' : '')+

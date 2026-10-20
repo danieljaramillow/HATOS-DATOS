@@ -1668,7 +1668,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 20 oct 2026 · 8:56 a.m. (2)</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 20 oct 2026 · 9:10 a.m.</b>
     </div>
   </header>
 
@@ -14399,6 +14399,15 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     background:#FBF8F1; border:1px solid var(--line); border-radius:14px; box-shadow:0 14px 40px rgba(0,0,0,.32); z-index:10080;
     flex-direction:column; overflow:hidden; font-family:'IBM Plex Sans',sans-serif; color:var(--ink); }
   #asisPanel.on{ display:flex; }
+  .as-fil{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:4px 0 8px; padding:8px; background:var(--paper-light,#F7F3E9); border:1px solid var(--line); border-radius:8px; }
+  .as-fil-t{ font-size:12px; font-weight:600; color:var(--green-deep); margin-right:2px; }
+  .as-fil select, .as-fil input{ font:13px 'IBM Plex Sans',sans-serif; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); max-width:100%; }
+  .as-fil input[type=search]{ flex:1 1 170px; min-width:140px; }
+  .as-fil input[type=number]{ width:84px; }
+  .as-fil-num{ display:inline-flex; gap:4px; flex-wrap:wrap; }
+  .as-fil-n{ font-size:12.5px; color:var(--ink-soft); margin-left:auto; }
+  .as-fil button{ font-size:12.5px; border:1px solid var(--rust); color:var(--rust); background:#fff; border-radius:6px; padding:5px 9px; cursor:pointer; }
+  @media (max-width:640px){ .as-fil select{ flex:1 1 45%; } .as-fil-n{ margin-left:0; } }
   .as-head{ display:flex; align-items:center; gap:10px; padding:12px 14px; background:var(--green-deep); color:#F2EDE0; }
   .as-head b{ font-family:'Fraunces',serif; font-size:19px; font-weight:600; flex:1; }
   .as-head small{ display:block; font-family:'IBM Plex Sans',sans-serif; font-size:12px; font-weight:400; opacity:.8; }
@@ -15679,9 +15688,80 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
   function bienvenida(){
     agregar('<div class="as-res as-help"><p><b>¿Qué necesita saber del hato?</b> Escríbalo o toque el micrófono y dígalo con sus palabras. Puede preguntar por cualquier dato: partos, IEP, ARA, leche, pesos, calificación, palpación, padre y madre, nacimientos, ventas y muertes, comentarios, lotes… y pedir promedios, conteos, rankings o agrupar por finca, raza o año.</p>'+
       '<p class="as-note">Si alguna parte de la pregunta no la entiende, se lo dice en lugar de adivinar.</p>'+
-      '<div class="as-sug">'+EJEMPLOS.map(function(t){ return '<button type="button" data-q="'+esc(t)+'">'+esc(t)+'</button>'; }).join('')+'</div></div>');
+      '</div>');
   }
   function agregar(html){ var log = $('asisLog'); var d = document.createElement('div'); d.className = 'as-msg'; d.innerHTML = html; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; }
+
+  /* ---------- Filtros sobre el resultado: finca, raza, sexo, edad y personalizados ---------- */
+  var TRAMOS_ED = [[1,'Menos de 1 año'],[2,'1 a 2 años'],[3,'2 a 3 años'],[5,'3 a 5 años'],[8,'5 a 8 años'],[999,'Más de 8 años']];
+  function recDe(o, row){
+    var BD = window.__BD__ || [];
+    if(row && (row.numero !== undefined || row.finca !== undefined || row.raza !== undefined)) return row;
+    var c = (o.cols || []).filter(function(c){ return c.rid; })[0];
+    if(c){ var id = c.rid(row); if(id != null && BD[id]) return BD[id]; }
+    return row && (row.r || row.animal) || null;
+  }
+  function edadDe(r){ if(!r) return null; if(r.edad_actual != null) return r.edad_actual; if(r.fecha_nac) return (Date.now() - new Date(r.fecha_nac+'T00:00:00'))/(365*864e5); return null; }
+  function tramo(e){ if(e == null || isNaN(e)) return 'Sin fecha'; for(var k = 0; k < TRAMOS_ED.length; k++) if(e < TRAMOS_ED[k][0]) return TRAMOS_ED[k][1]; return 'Sin fecha'; }
+  function sexoTxt(s){ s = String(s||'').toUpperCase(); return s === 'H' ? 'Hembras' : (s === 'M' ? 'Machos' : 'Sin dato'); }
+  var FACETAS = [['finca','Finca', function(r){ return r.finca || 'Sin dato'; }], ['raza','Raza', function(r){ return r.raza || 'Sin dato'; }],
+                 ['sexo','Sexo', function(r){ return sexoTxt(r.sexo); }], ['edad','Edad', function(r){ return tramo(edadDe(r)); }]];
+  function aplicarFiltros(o){
+    var F = o.fil || {}, cols = o.cols || [];
+    o.rows = o.rowsAll.filter(function(row){
+      var r = recDe(o, row) || {};
+      for(var k = 0; k < FACETAS.length; k++){ var f = FACETAS[k]; if(F[f[0]] && f[2](r) !== F[f[0]]) return false; }
+      if(F.q){ var t = cols.map(function(c){ var v = c.v(row); if(c.f) v = c.f(v); return v == null ? '' : String(v); }).join(' ').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+        var qs = F.q.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').split(/\s+/).filter(Boolean);
+        for(var j = 0; j < qs.length; j++){ var neg = qs[j].charAt(0) === '-', w = neg ? qs[j].slice(1) : qs[j]; if(!w) continue; var has = t.indexOf(w) >= 0; if(neg ? has : !has) return false; } }
+      if(F.col != null && F.col !== '' && F.val !== '' && F.val != null && !isNaN(+F.val)){
+        var c = cols[+F.col]; if(c){ var v = c.v(row); v = (v == null || v === '' || isNaN(+v)) ? null : +v; if(v == null) return false;
+          var x = +F.val; if(F.op === '>=' && !(v >= x)) return false; if(F.op === '<=' && !(v <= x)) return false; if(F.op === '=' && Math.abs(v - x) > 1e-9) return false; } }
+      return true;
+    });
+  }
+  function barraFiltros(o, i){
+    var all = o.rowsAll || [], F = o.fil || {};
+    if(all.length < 2) return '';
+    var recs = all.map(function(row){ return recDe(o, row); });
+    var h = '<div class="as-fil" data-fil="'+i+'"><span class="as-fil-t">Filtrar resultado:</span>';
+    FACETAS.forEach(function(f){
+      if(!recs.some(function(r){ return r && (f[0] === 'edad' ? edadDe(r) != null : r[f[0]] != null && r[f[0]] !== ''); })) return;
+      var cnt = {}, ord = [];
+      recs.forEach(function(r){ if(!r) return; var k = f[2](r); if(!(k in cnt)){ cnt[k] = 0; ord.push(k); } cnt[k]++; });
+      if(f[0] === 'edad') ord.sort(function(a,b){ var A = TRAMOS_ED.map(function(t){ return t[1]; }).concat(['Sin fecha']); return A.indexOf(a) - A.indexOf(b); }); else ord.sort();
+      if(ord.length < 2 && !F[f[0]]) return;
+      h += '<select data-k="'+f[0]+'" aria-label="'+f[1]+'"><option value="">'+f[1]+': todas</option>'+ord.map(function(k){ return '<option value="'+esc(k)+'"'+(F[f[0]] === k ? ' selected' : '')+'>'+f[1]+': '+esc(k)+' ('+cnt[k]+')</option>'; }).join('')+'</select>';
+    });
+    var num = (o.cols || []).map(function(c, k){ return [c, k]; }).filter(function(x){ return x[0].n != null; });
+    h += '<input type="search" data-k="q" placeholder="Contiene… (use - para excluir)" value="'+esc(F.q || '')+'">';
+    if(num.length) h += '<span class="as-fil-num"><select data-k="col"><option value="">Columna…</option>'+num.map(function(x){ return '<option value="'+x[1]+'"'+(String(F.col) === String(x[1]) ? ' selected' : '')+'>'+esc(x[0].t)+'</option>'; }).join('')+'</select>'+
+      '<select data-k="op">'+[['>=','≥'],['<=','≤'],['=','=']].map(function(x){ return '<option value="'+x[0]+'"'+((F.op || '>=') === x[0] ? ' selected' : '')+'>'+x[1]+'</option>'; }).join('')+'</select>'+
+      '<input type="number" data-k="val" step="any" placeholder="valor" value="'+esc(F.val == null ? '' : F.val)+'"></span>';
+    var activos = Object.keys(F).filter(function(k){ return F[k] !== '' && F[k] != null && k !== 'op' && !(k === 'col' && (F.val === '' || F.val == null)) && !(k === 'val' && (F.col === '' || F.col == null)); }).length;
+    h += '<span class="as-fil-n">'+(activos ? 'Mostrando <b>'+o.rows.length+'</b> de '+all.length : all.length+' en total')+'</span>'+(activos ? '<button type="button" data-k="reset">Quitar filtros</button>' : '')+'</div>';
+    return h;
+  }
+  function mostrar(o, i){
+    if(!o.rowsAll) o.rowsAll = (o.rows || []).slice();
+    o.fil = o.fil || {};
+    var d = agregar('');
+    function pintarYa(foco){
+      var html = pintar(o, i), bar = barraFiltros(o, i);
+      if(bar){ var p = html.indexOf('<div class="as-tw">'); if(p < 0) p = html.lastIndexOf('</div>'); html = html.slice(0, p)+bar+html.slice(p); }
+      if(!o.rows.length && o.rowsAll.length) html = html.replace('<p class="as-sum">', '<p class="as-note as-warn">Ningún animal cumple los filtros elegidos.</p><p class="as-sum">');
+      d.innerHTML = html;
+      var b = d.querySelector('.as-fil'); if(!b) return;
+      [].forEach.call(b.querySelectorAll('select,input'), function(el){
+        var ev = el.tagName === 'INPUT' ? 'input' : 'change';
+        el.addEventListener(ev, function(){ o.fil[el.getAttribute('data-k')] = el.value; aplicarFiltros(o); pintarYa(el.getAttribute('data-k')); });
+      });
+      var rs = b.querySelector('[data-k="reset"]'); if(rs) rs.onclick = function(){ o.fil = {}; o.rows = o.rowsAll.slice(); pintarYa(); };
+      if(foco){ var f = b.querySelector('[data-k="'+foco+'"]'); if(f && f.tagName === 'INPUT'){ f.focus(); try{ var L = f.value.length; f.setSelectionRange(L, L); }catch(e){} } }
+    }
+    pintarYa();
+    var log = $('asisLog'); log.scrollTop = log.scrollHeight;
+  }
 
   function enviar(texto, porVoz, forzarIA){
     texto = String(texto || '').trim(); if(!texto) return;
@@ -15690,7 +15770,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     limpiarCache();
     if(window.__semenAsis && window.__semenAsis.esPregunta(texto)){
       var so = window.__semenAsis.responder(texto); so.pregunta = texto; so.spec = {};
-      var si = ultimo.push(so) - 1; agregar(pintar(so, si)); if(porVoz) hablar(so.voz || ''); return;
+      var si = ultimo.push(so) - 1; mostrar(so, si); if(porVoz) hablar(so.voz || ''); return;
     }
     var local = interpretar(texto);
     var usarIA = iaActiva() && navigator.onLine !== false && (forzarIA || true);
@@ -15706,7 +15786,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     if(spec.vacio && !spec.ia){
       agregar('<div class="as-res as-help"><p>No entendí qué listado quiere'+(spec.noEntendi.length ? ' (no reconocí: «'+esc(spec.noEntendi.join(' '))+'»)' : '')+'. Dígame <b>qué animales</b> (toros, vacas, novillas, terneros…) y, si quiere, <b>raza, finca, edad, qué dato</b> ver o por cuál ordenar.</p>'+
         (iaActiva() ? '' : '<p class="as-note">Para entender cualquier forma de preguntar puede activar la inteligencia artificial en <a href="#" data-cfg="1">⚙ Configurar</a>.</p>')+
-        '<div class="as-sug">'+EJEMPLOS.slice(0,6).map(function(t){ return '<button type="button" data-q="'+esc(t)+'">'+esc(t)+'</button>'; }).join('')+'</div></div>');
+        '</div>');
       if(porVoz) hablar('No entendí bien. ¿Qué animales quiere ver?');
       return;
     }
@@ -15715,7 +15795,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     o.pregunta = texto; o.spec = spec;
     if(spec.notaOrden) (o.notas = o.notas || []).unshift(spec.notaOrden);
     var i = ultimo.push(o) - 1;
-    agregar(pintar(o, i));
+    mostrar(o, i);
     if(porVoz) hablar(o.voz || '');
   }
 

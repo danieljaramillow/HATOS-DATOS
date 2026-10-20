@@ -1,9 +1,31 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-18T14:49:06.257Z",
+ "actualizado": "2026-10-20T13:32:10.699Z",
  "edits": [],
- "updates": [],
+ "updates": [
+  {
+   "id": 179250312784080,
+   "tipo": "cria",
+   "numero": "371/2",
+   "detalle": {
+    "nombre": "",
+    "fecha": "2026-10-13",
+    "sexo": "H",
+    "raza": "GZ",
+    "finca": "OK",
+    "lote": "",
+    "padre": "7009/2",
+    "madre": "824/1",
+    "peso_nac": "18",
+    "tipo_parto": "NORMAL",
+    "receptora": "",
+    "gemelo_de": ""
+   },
+   "detalle_texto": "Parto normal · Hembra · 2026-10-13 · 18 kg · Madre: 824/1 · Padre: 7009/2",
+   "fecha": "2026-10-20"
+  }
+ ],
  "visita": null,
  "cortes": null,
  "notas": [
@@ -56,6 +78,16 @@
    "finca": "OK",
    "ts": 1791573189323,
    "equipo": "Celular"
+  },
+  {
+   "tipo": "cria",
+   "numero": "371/2",
+   "texto": "Parto normal · Hembra · 2026-10-13 · 18 kg · Madre: 824/1 · Padre: 7009/2",
+   "origen": "Modo guiado",
+   "ref": "u:179250312784080",
+   "finca": "OK",
+   "ts": 1792503127841,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,

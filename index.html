@@ -218,7 +218,13 @@ window.fechaAIso = function(v){
    Una vaca activa con 2 o más banderas entra a "Animales para descarte". */
 window.__BN = (function(){
   var MESES_ABIERTA = 20, MIN_GRUPO = 5;
-  var ini = false, BD, byId, byNum, PESOS, PALP, grupos, abortosPorMadre;
+  /* ESTRELLAS ⭐ (lo bueno, igual que las banderas pero bonificando):
+     IEP de 12 meses o menos · destete de 115 % o más del promedio de sus
+     contemporáneas · ARA del parto entre el 25 % mejor del hato · crías
+     calificadas con promedio de 90/100 o más (2 o más crías) · primer parto
+     a los 30 meses o antes. Vaca activa con 2 o más estrellas = destacada. */
+  var EST = { IEP_MAX:12, IEP_MIN:9, DESTETE_PCT:115, CALIF:4.5, CALIF_MIN_N:2, PRIMER_PARTO_MESES:30 };
+  var ini = false, BD, byId, byNum, PESOS, PALP, grupos, abortosPorMadre, araP75 = null;
   function N(x){ return String(x == null ? '' : x).trim().toUpperCase(); }
   function J(id){ try{ return JSON.parse(document.getElementById(id).textContent); }catch(e){ return {}; } }
   function ls(k, d){ try{ var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; }catch(e){ return d; } }
@@ -261,6 +267,10 @@ window.__BN = (function(){
       [k1, k2].forEach(function(k){ g[k] = g[k] || {s:0, n:0}; g[k].s += p; g[k].n++; });
     });
     grupos = g;
+    // ARA del 25 % mejor del hato (percentil 75 de los partos con destete)
+    try{ var FE = J('fert-source'), va = [];
+      Object.keys(FE).forEach(function(k){ (FE[k].partos || []).forEach(function(p){ if(p.kg_ano != null && p.iep_meses && !p.anomalia) va.push(p.kg_ano); }); });
+      va.sort(function(a,b){ return a-b; }); araP75 = va.length >= 20 ? va[Math.floor(va.length*0.75)] : null; }catch(e){ araP75 = null; }
     // Pesajes con nota "ABORTO MADRE xxx"
     abortosPorMadre = {};
     Object.keys(PESOS).forEach(function(num){
@@ -271,10 +281,17 @@ window.__BN = (function(){
       });
     });
   }
-  function promGrupo(c){
+  function promGrupo0(c){
     var y = (c.fecha_nac||'').slice(0,4), a = grupos[c.finca+'|'+y+'|'+c.sexo], b = grupos[c.finca+'|'+y];
     var x = (a && a.n >= MIN_GRUPO) ? a : ((b && b.n >= MIN_GRUPO) ? b : null);
     return x ? { prom:x.s/x.n, n:x.n, grupo:(x===a ? c.finca+' '+y+' '+(c.sexo==='H'?'hembras':'machos') : c.finca+' '+y) } : null;
+  }
+  /* Si su año todavía no tiene suficientes destetes (crías del año en curso), se compara con el año anterior. */
+  function promGrupo(c){
+    var g = promGrupo0(c); if(g || !c.fecha_nac) return g;
+    var y0 = +String(c.fecha_nac).slice(0,4);
+    for(var dy = 1; dy <= 2; dy++){ g = promGrupo0({ finca:c.finca, fecha_nac:(y0-dy)+String(c.fecha_nac).slice(4), sexo:c.sexo }); if(g){ g.grupo += ' (año anterior: aún no hay destetes suficientes de '+y0+')'; return g; } }
+    return null;
   }
   function fmt(iso){ if(!iso) return '—'; var p = String(iso).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : iso; }
 
@@ -333,7 +350,12 @@ window.__BN = (function(){
       muertes.forEach(function(m){
         if(m.culpa === 'madre') flags.push({ tipo:'muerte', texto:'La cría '+m.numero+' murió ('+m.etapa.toLowerCase()+') por causa atribuible a la madre: «'+m.causa+'»'+(m.manual?' — clasificado a mano':'')+'.' });
       });
-      return { n:i+1, fecha:u.fecha_nac, crias:crs, gemelar:u.gemelar, peso_destete:peso, iep_meses:iep, kg_ano:kg, anomalia:anom, flags:flags, provisional:prov, muertes:muertes };
+      var stars = [];
+      if(iep != null && iep >= EST.IEP_MIN && iep <= EST.IEP_MAX) stars.push({ tipo:'iep', texto:'IEP de '+iep.toFixed(1)+' meses desde el parto anterior ('+EST.IEP_MAX+' o menos).' });
+      if(!u.gemelar && crs[0]){ var c2 = crs[0], p2 = pesoCria(c2), g2 = p2 != null ? promGrupo(c2) : null;
+        if(g2){ var pct2 = p2 / g2.prom * 100; if(pct2 >= EST.DESTETE_PCT) stars.push({ tipo:'destete', texto:'La cría '+c2.numero+' destetó '+Math.round(p2)+' kg (ajustado 8 m) = '+pct2.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g2.prom)+' kg, '+g2.grupo+').' }); } }
+      if(kg != null && araP75 != null && iep && kg >= araP75) stars.push({ tipo:'ara', texto:'ARA de este parto: '+kg.toFixed(1)+' kg/año, entre el 25 % mejor del hato ('+Math.round(araP75)+' kg/año o más).' });
+      return { n:i+1, fecha:u.fecha_nac, crias:crs, gemelar:u.gemelar, peso_destete:peso, iep_meses:iep, kg_ano:kg, anomalia:anom, flags:flags, stars:stars, provisional:prov, muertes:muertes };
     });
 
     // ---- Abortos ----
@@ -378,7 +400,15 @@ window.__BN = (function(){
     abortos.forEach(function(a){ todas.push(a); });
     extra.forEach(function(e){ todas.push(e); });
     var iv = partos.map(function(p){ return p.iep_meses; }).filter(function(v){ return v != null; });
+    var estrellas = [];
+    partos.forEach(function(p){ p.stars.forEach(function(s){ estrellas.push({ tipo:s.tipo, fecha:p.fecha, texto:s.texto, parto:p.n }); }); });
+    var cal = vivas.filter(function(c){ return c.calif_conf_justa != null; });
+    if(cal.length >= EST.CALIF_MIN_N){ var pc = cal.reduce(function(a,c){ return a + c.calif_conf_justa; }, 0) / cal.length;
+      if(pc >= EST.CALIF) estrellas.push({ tipo:'calif', fecha:null, texto:'Sus '+cal.length+' crías calificadas promedian '+(pc*20).toFixed(1)+'/100 en conformación ('+pc.toFixed(2)+' / 5).' }); }
+    if(partos.length && r.fecha_nac){ var epp = meses(r.fecha_nac, partos[0].fecha);
+      if(epp > 18 && epp <= EST.PRIMER_PARTO_MESES) estrellas.push({ tipo:'precoz', fecha:partos[0].fecha, texto:'Primer parto a los '+epp.toFixed(1)+' meses de edad ('+EST.PRIMER_PARTO_MESES+' o menos).', parto:1 }); }
     return {
+      estrellas:estrellas,
       partos:partos, abortos:abortos, extra:extra, banderas:todas, comentarios:coms,
       muertes:[].concat.apply([], partos.map(function(p){ return p.muertes.map(function(m){ m.parto = p.n; return m; }); })),
       iep_prom: iv.length ? Math.round(iv.reduce(function(a,b){ return a+b; },0)/iv.length*100)/100 : null, iep_lista:iv,
@@ -398,7 +428,60 @@ window.__BN = (function(){
     out.sort(function(x,y){ return y.a.banderas.length - x.a.banderas.length || String(x.r.numero).localeCompare(String(y.r.numero), 'es', {numeric:true}); });
     return out;
   }
-  return { analizar:analizar, candidatas:candidatas, umbral:umbral,
+  function destacadas(opts){
+    init(); opts = opts || {};
+    var min = opts.min || 2, out = [];
+    BD.forEach(function(r){
+      if(r.sexo !== 'H' || r.activo !== 'ACTIVO' || !r.numero) return;
+      if(opts.fincas && opts.fincas.indexOf(r.finca) < 0) return;
+      if(!(r.crias_ids && r.crias_ids.length)) return;
+      var a = analizar(r);
+      if(a.estrellas.length >= min) out.push({ r:r, a:a });
+    });
+    out.sort(function(x,y){ return (y.a.estrellas.length - y.a.banderas.length) - (x.a.estrellas.length - x.a.banderas.length) || y.a.estrellas.length - x.a.estrellas.length || String(x.r.numero).localeCompare(String(y.r.numero), 'es', {numeric:true}); });
+    return out;
+  }
+  /* Novedades al registrar un parto o un destete: lo bueno (⭐) y lo malo (⚑ / ⚠). */
+  function novedadParto(madreNum, fecha, pesoNac){
+    init(); var r = byNum[N(madreNum)], out = [];
+    if(!r){ out.push({ k:'aviso', texto:'La madre '+madreNum+' no está en la base: no se pudo calcular el IEP.' }); return { r:null, items:out }; }
+    var a = analizar(r), prev = a.partos.filter(function(p){ return p.fecha && p.fecha < fecha; }), ult = prev.length ? prev[prev.length-1] : null;
+    if(a.partos.some(function(p){ return p.fecha === fecha; })) ult = prev.length ? prev[prev.length-1] : null;
+    if(ult){ var iep = meses(ult.fecha, fecha);
+      if(iep < EST.IEP_MIN) out.push({ k:'aviso', texto:'IEP de '+iep.toFixed(1)+' meses desde el parto anterior ('+fmt(ult.fecha)+'): es biológicamente imposible. Revise la fecha o si la madre es correcta.' });
+      else if(iep <= EST.IEP_MAX) out.push({ k:'estrella', texto:'¡Excelente intervalo entre partos! IEP de '+iep.toFixed(1)+' meses ('+EST.IEP_MAX+' o menos). La vaca gana una estrella ⭐.' });
+      else if(iep > MESES_ABIERTA) out.push({ k:'bandera', texto:'Parto muy abierto: '+iep.toFixed(1)+' meses desde el parto anterior (más de '+MESES_ABIERTA+'). Suma una bandera negra ⚑.' });
+      else out.push({ k:'info', texto:'IEP de '+iep.toFixed(1)+' meses desde el parto anterior ('+fmt(ult.fecha)+').' });
+    } else if(r.fecha_nac){ var epp = meses(r.fecha_nac, fecha);
+      if(epp > 18 && epp <= EST.PRIMER_PARTO_MESES) out.push({ k:'estrella', texto:'Primer parto a los '+epp.toFixed(1)+' meses de edad: novilla precoz. Gana una estrella ⭐.' });
+      else out.push({ k:'info', texto:'Primer parto, a los '+epp.toFixed(1)+' meses de edad.' }); }
+    var pn = parseFloat(String(pesoNac == null ? '' : pesoNac).replace(',','.'));
+    if(!isNaN(pn) && pn > 0){ var vs = BD.filter(function(x){ return x.peso_nacimiento; }).map(function(x){ return x.peso_nacimiento; });
+      if(vs.length >= 20){ var m = vs.reduce(function(s,v){ return s+v; },0)/vs.length;
+        if(pn < m*0.75) out.push({ k:'aviso', texto:'Cría liviana: '+pn+' kg al nacer, muy por debajo del promedio del hato ('+m.toFixed(1)+' kg). Vigílela de cerca.' });
+        else if(pn > m*1.25) out.push({ k:'aviso', texto:'Cría pesada: '+pn+' kg al nacer (promedio del hato '+m.toFixed(1)+' kg). Revise que el parto no haya sido difícil.' }); } }
+    return { r:r, a:a, items:out };
+  }
+  function novedadDestete(criaNum, peso, fecha){
+    init(); var c = byNum[N(criaNum)], out = [];
+    if(!c || !c.fecha_nac){ return { r:null, items:[{ k:'aviso', texto:'No se encontró la cría '+criaNum+' (o no tiene fecha de nacimiento) para comparar el destete.' }] }; }
+    var p = parseFloat(String(peso).replace(',','.')), d = (new Date(fecha) - new Date(c.fecha_nac))/86400000;
+    if(isNaN(p) || !(d > 60)) return { r:null, items:[{ k:'aviso', texto:'Revise el peso o la fecha del destete.' }] };
+    var aj = p / d * 235, tmp = { finca:c.finca, fecha_nac:c.fecha_nac, sexo:c.sexo }, g = promGrupo(tmp), U = umbral(), conAnterior = false;
+
+    out.push({ k:'info', texto:'Peso ajustado a 8 meses: '+Math.round(aj)+' kg ('+p+' kg a los '+Math.round(d/30.4375*10)/10+' meses).' });
+    if(g){ var pct = aj / g.prom * 100;
+      if(pct >= EST.DESTETE_PCT) out.push({ k:'estrella', texto:'¡Muy buen destete! '+pct.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g.prom)+' kg, '+g.grupo+'). La madre gana una estrella ⭐.' });
+      else if(pct < U) out.push({ k:'bandera', texto:'Destete bajo: '+pct.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g.prom)+' kg, '+g.grupo+'). La madre suma una bandera negra ⚑.' });
+      else out.push({ k:'info', texto:pct.toFixed(1)+' % del promedio de sus contemporáneas ('+Math.round(g.prom)+' kg, '+g.grupo+').' }); }
+    var m = c.madre ? byNum[N(c.madre)] : null, a = null;
+    if(m){ a = analizar(m); var pp = a.partos.filter(function(x){ return x.crias.indexOf(c) >= 0; })[0];
+      if(pp && pp.iep_meses && !pp.anomalia){ var ara = p / (pp.iep_meses/12);
+        if(araP75 != null && ara >= araP75) out.push({ k:'estrella', texto:'ARA de este parto: '+ara.toFixed(1)+' kg/año, entre el 25 % mejor del hato. Otra estrella ⭐ para la madre '+m.numero+'.' });
+        else out.push({ k:'info', texto:'ARA de este parto para la madre '+m.numero+': '+ara.toFixed(1)+' kg/año.' }); } }
+    return { r:m, a:a, cria:c, items:out };
+  }
+  return { analizar:analizar, candidatas:candidatas, destacadas:destacadas, novedadParto:novedadParto, novedadDestete:novedadDestete, EST:EST, araP75:function(){ init(); return araP75; }, umbral:umbral,
     setUmbral:function(v){ try{ localStorage.setItem('hatos_bn_umbral_v1', JSON.stringify(+v)); }catch(e){} },
     reset:function(){ ini = false; hijosPorMadre = null; }, MESES_ABIERTA:MESES_ABIERTA,
     setCulpa:function(numero, culpa){
@@ -406,7 +489,8 @@ window.__BN = (function(){
       if(culpa) m[k] = { culpa:culpa, ts:Date.now() }; else delete m[k];
       try{ localStorage.setItem('hatos_muertes_v1', JSON.stringify(m)); }catch(e){}
     },
-    ICON:{ abierta:'Parto muy abierto', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sugerido', muerte:'Cría muerta por la madre' } };
+    ICON:{ abierta:'Parto muy abierto', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sugerido', muerte:'Cría muerta por la madre' },
+    ICON_EST:{ iep:'IEP corto', destete:'Destete alto', ara:'ARA alto', calif:'Crías bien calificadas', precoz:'Primer parto precoz' } };
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -1136,6 +1220,23 @@ window.__BN = (function(){
   /* ---------- Banderas negras ⚑ ---------- */
   .bn-flag{ display:inline-block; color:#111; font-size:15px; line-height:1; margin-right:2px; cursor:help; }
   .bn-flags{ color:#111; letter-spacing:1px; }
+  .st-star{ display:inline-block; font-size:14px; line-height:1; margin-right:1px; cursor:help; }
+  .st-stars{ letter-spacing:1px; }
+  .stat-chip.st-chip-ok{ background:#FBF3D9; border-color:#D9B44A; }
+  .st-lista{ margin-top:10px; padding:10px 12px; background:#FBF3D9; border:1px solid #E5CF85; border-radius:8px; }
+  .st-lista ul{ margin:6px 0 0; padding-left:0; list-style:none; } .st-lista li{ margin:6px 0; font-size:13.5px; line-height:1.4; }
+  .nv-modal{ position:fixed; inset:0; background:rgba(36,29,20,.5); z-index:10090; display:none; align-items:flex-start; justify-content:center; padding:24px 14px; overflow-y:auto; }
+  .nv-modal.on{ display:flex; }
+  .nv-box{ background:var(--paper-light,#F7F3E9); border-radius:14px; width:100%; max-width:520px; padding:18px 18px 14px; box-shadow:0 18px 50px rgba(0,0,0,.3); font-family:'IBM Plex Sans',sans-serif; color:var(--ink); }
+  .nv-box h3{ margin:0 0 2px; font-family:'Fraunces',serif; color:var(--green-deep); font-size:21px; }
+  .nv-sub{ margin:0 0 10px; font-size:13.5px; color:var(--ink-soft); }
+  .nv-it{ display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:9px; margin:7px 0; font-size:15px; line-height:1.4; border:1px solid var(--line); background:#fff; }
+  .nv-it .ic{ font-size:20px; line-height:1.1; flex:none; }
+  .nv-it.estrella{ background:#FBF3D9; border-color:#D9B44A; } .nv-it.bandera{ background:#F3E3DC; border-color:#C98B70; } .nv-it.aviso{ background:#FFF4E5; border-color:#E2A65B; }
+  .nv-tot{ margin:10px 0 4px; font-size:14px; }
+  .nv-acts{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; margin-top:12px; }
+  .nv-acts button{ font:600 14px 'IBM Plex Sans',sans-serif; padding:10px 14px; border-radius:9px; cursor:pointer; border:1px solid var(--green-deep); background:#fff; color:var(--green-deep); }
+  .nv-acts button.p{ background:var(--green-deep); color:#fff; }
   .stat-chip.bn-chip-alerta{ border-color:var(--rust-deep); background:#7E341312; }
   .bn-table td{ vertical-align:top; }
   @media (max-width:640px){ .bn-table th, .bn-table td{ padding:6px 5px; font-size:12px; } }
@@ -1668,7 +1769,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 20 oct 2026 · 9:30 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 20 oct 2026 · 10:00 a.m.</b>
     </div>
   </header>
 
@@ -1699,6 +1800,7 @@ window.__renderReproHead = function(o){
     <div class="rep-menu" id="rpMenu">
       <button type="button" data-p="revision"><b>🐄 Vacas para revisión <span class="rep-n" id="rpNRev">·</span></b><span>Ojo fertilidad, si no P+ descarte, ojo leche, posible descarte y vacías, con partos, palpación y decisión sugerida</span></button>
       <button type="button" data-p="descarte"><b>⚑ Animales para descarte <span class="rep-n" id="rpNDesc">·</span></b><span>Vacas activas con 2 o más banderas negras</span></button>
+      <button type="button" data-p="destacadas"><b>⭐ Vacas destacadas <span class="rep-n" id="rpNDest">·</span></b><span>Vacas activas con 2 o más estrellas por buenos resultados</span></button>
       <button type="button" data-p="visitas"><b>🏅 Visitas ASOCEBU <span class="rep-n" id="rpNVis">·</span></b><span>Visitas guardadas en este equipo, con su Excel</span></button>
       <button type="button" data-p="palpacion"><b>🩺 Planilla de palpación <span class="rep-n" id="rpNPalp">·</span></b><span>Para imprimir y anotar: último parto, destete, palpación anterior y banderas</span></button>
     </div>
@@ -1717,6 +1819,22 @@ window.__renderReproHead = function(o){
       <p class="hint" style="margin-top:14px;">Toma el comentario de la BD, las notas de la ficha y los comentarios de las visitas. El parto probable se calcula con unos 290 días de gestación. La decisión es una sugerencia para revisar, no una orden.</p>
     </div>
     <div class="rep-panel" id="rpP-descarte"></div>
+    <div class="rep-panel" id="rpP-destacadas">
+      <div class="section-head" style="margin-top:4px"><h2>Vacas destacadas — estrellas ⭐</h2><div class="rail"></div></div>
+      <p class="hint" style="margin:-6px 0 12px;">Lo contrario de las banderas negras: cada <b>⭐ estrella</b> es un buen resultado.
+        <b>⭐ IEP corto</b> (12 meses o menos entre un parto y el siguiente),
+        <b>⭐ destete alto</b> (la cría destetó 115 % o más del promedio de sus contemporáneas — misma finca, año de nacimiento y sexo — en peso ajustado a 8 meses),
+        <b>⭐ ARA alto</b> (el kilo de ternero por año de ese parto quedó entre el 25 % mejor del hato),
+        <b>⭐ crías bien calificadas</b> (2 o más crías con promedio de 90/100 o más en conformación) y
+        <b>⭐ primer parto precoz</b> (a los 30 meses de edad o antes). Una vaca activa con 2 o más estrellas es <b>destacada</b>. Si también tiene banderas negras, se muestran al lado para decidir con todo a la vista.</p>
+      <div class="bn-ctrl">
+        <label>Finca <select id="stFinca"><option value="prod">Productivas (OK, CACHO, TNJ)</option><option value="OK">OK</option><option value="CACHO">CACHO</option><option value="TNJ">TNJ</option><option value="">Todas</option></select></label>
+        <label class="bn-chk"><input type="checkbox" id="stUna"> Ver también las de 1 estrella</label>
+        <button type="button" class="btn-pdf-prominent" id="stDescargar" style="padding:8px 14px; font-size:12.5px;">⬇ Descargar lista (Excel)</button>
+      </div>
+      <div id="stResumen" class="hint" style="margin:0 0 8px;"></div>
+      <div id="stLista" class="bn-desc-lista"></div>
+    </div>
     <div class="rep-panel" id="rpP-visitas"><div id="rpVisLista"></div></div>
     <div class="rep-panel" id="rpP-palpacion">
       <div class="rep-ctrl">
@@ -2767,14 +2885,14 @@ window.__renderReproHead = function(o){
   (function(){
     function N(x){ return String(x == null ? '' : x).trim().toUpperCase().replace(/-/g,'/'); }
     var U; try{ U = JSON.parse(localStorage.getItem('hatosDJW_updates_v1') || '[]'); }catch(e){ U = []; }
-    if(!Array.isArray(U) || !U.length) return;
+    if(!Array.isArray(U)) U = [];
     var porNum = {};
     RAW.forEach(function(r){ if(r && r.numero){ var k = N(r.numero); if(!porNum[k] || (porNum[k].activo !== 'ACTIVO' && r.activo === 'ACTIVO')) porNum[k] = r; } });
     var PROD = {OK:1, CACHO:1, TNJ:1}, hoy = new Date(), nuevas = [], salidas = [];
     function iso(v){ v = String(v || '').trim(); if(!v) return null; if(/^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0,10); return window.fechaAIso ? window.fechaAIso(v) : null; }
-    U.slice().sort(function(a,b){ return (a.id||0) - (b.id||0); }).forEach(function(u){
-      if(!u || u.tipo !== 'cria' || !u.numero) return;
-      var k = N(u.numero); if(porNum[k]) return;
+    function crearCria(u){
+      if(!u || u.tipo !== 'cria' || !u.numero) return null;
+      var k = N(u.numero); if(porNum[k]) return null;
       var d = u.detalle || {}, fn = iso(d.fecha), fin = String(d.finca || '').trim().toUpperCase() || null;
       var te = String(d.tipo_parto || '').toUpperCase() === 'TE';
       var madreTxt = te && d.receptora ? d.madre : d.madre;
@@ -2792,8 +2910,10 @@ window.__renderReproHead = function(o){
         __provCria: true, __prov: {} };
       RAW.push(r); porNum[k] = r; nuevas.push(r);
       [r.madre, r.padre].forEach(function(p){ var q = p ? porNum[N(p)] : null; if(q){ q.crias_ids = q.crias_ids || []; if(q.crias_ids.indexOf(r.id) < 0) q.crias_ids.push(r.id); } });
-    });
-    U.slice().sort(function(a,b){ return (a.id||0) - (b.id||0); }).forEach(function(u){
+      return r;
+    }
+    U.slice().sort(function(a,b){ return (a.id||0) - (b.id||0); }).forEach(crearCria);
+    function aplicarSalida(u){
       if(!u || u.tipo !== 'salida' || !u.numero) return;
       var r = porNum[N(u.numero)], d = u.detalle || {}; if(!r) return;
       var f = iso(d.fecha), causa = String(d.causa || '').trim().toUpperCase() || null, obs = String(d.obs || '').trim() || null;
@@ -2803,8 +2923,24 @@ window.__renderReproHead = function(o){
       r.activo = 'INACTIVO'; r.fecha_salida = f; r.causa_salida = causa; r.obs_salida = obs;
       if(causa && /VENT/.test(causa) && obs) r.vendido_a = obs;
       salidas.push(r);
-    });
+    }
+    U.slice().sort(function(a,b){ return (a.id||0) - (b.id||0); }).forEach(aplicarSalida);
+    /* Destete pendiente (pesaje con motivo DESTETE de una cría sin peso al destete):
+       se usa de una vez como peso al destete provisional, con su ajuste a 8 meses. */
+    function aplicarDestete(u){
+      if(!u || u.tipo !== 'peso' || !u.numero) return;
+      var d = u.detalle || {}; if(!/DESTET/i.test(String(d.nota || ''))) return;
+      var r = porNum[N(u.numero)]; if(!r || r.peso_dest != null || !r.fecha_nac) return;
+      var f = iso(d.fecha || u.fecha), p = parseFloat(String(d.peso).replace(',','.')); if(!f || isNaN(p)) return;
+      var dias = (new Date(f) - new Date(r.fecha_nac)) / 86400000; if(!(dias > 60)) return;
+      r.__prov = r.__prov || {};
+      ['peso_dest','fecha_dest','edad_dest','peso_aj_8m'].forEach(function(c){ if(!(c in r.__prov)) r.__prov[c] = r[c]; });
+      r.peso_dest = p; r.fecha_dest = f; r.edad_dest = dias / 30; r.peso_aj_8m = p / dias * 235;
+    }
+    U.slice().sort(function(a,b){ return (a.id||0) - (b.id||0); }).forEach(aplicarDestete);
     window.__criasProvisionales = nuevas; window.__salidasProvisionales = salidas;
+    /* Para aplicar en caliente lo que se acaba de registrar (sin recargar). */
+    window.__aplicarPendiente = function(u){ try{ crearCria(u); aplicarSalida(u); aplicarDestete(u); if(window.__BN) window.__BN.reset(); }catch(e){ console.warn(e); } };
   })();
   /* Correcciones pendientes (Actualizar Datos → Corrección de datos, o modo
      guiado): se aplican de una vez en la app como PROVISIONALES, para que la
@@ -6172,15 +6308,16 @@ window.__renderReproHead = function(o){
       araProm = concluidos.length ? concluidos.reduce(function(a,p){return a+p.kg_ano;},0)/concluidos.length : null;
       var L = BNa.iep_lista;
       var iepExpl = L.length>1 ? '('+L.map(function(v){ return v.toFixed(1); }).join(' + ')+') ÷ '+L.length : (L.length===1 ? 'un solo intervalo' : 'necesita 2 partos');
-      var nBan = BNa.banderas.length;
+      var nBan = BNa.banderas.length, nEst = (BNa.estrellas || []).length;
       var strip = [
         ['ARA promedio', araProm!==null ? araProm.toFixed(1)+' kg/año' : '—'],
         ['Partos', P.length + (pendientes>0 ? ' <small>('+pendientes+' sin destete)</small>' : '')],
         ['Edad primer parto', fert.edad_primer_parto!==null ? fert.edad_primer_parto.toFixed(1)+' años' : '—'],
         ['IEP promedio', (fert.x_iep!==null ? fert.x_iep.toFixed(1)+' meses' : '—')+'<small style="display:block;font-size:10.5px;font-weight:400;opacity:.75;">'+iepExpl+'</small>'],
         ['Prom. destete real', fert.prom_dest_real!==null ? fert.prom_dest_real.toFixed(0)+' kg' : '—'],
-        ['Banderas negras', nBan ? '<span class="bn-flags">'+'⚑'.repeat(Math.min(nBan,6))+'</span> '+nBan+(nBan>=2?'<small style="display:block;font-size:10.5px;font-weight:600;color:var(--rust-deep);">Candidata a descarte</small>':'') : '0']
-      ].map(function(s){ return '<div class="stat-chip'+(s[0]==='Banderas negras'&&nBan>=2?' bn-chip-alerta':'')+'"><div class="k">'+s[0]+'</div><div class="v">'+s[1]+'</div></div>'; }).join('');
+        ['Banderas negras', nBan ? '<span class="bn-flags">'+'⚑'.repeat(Math.min(nBan,6))+'</span> '+nBan+(nBan>=2?'<small style="display:block;font-size:10.5px;font-weight:600;color:var(--rust-deep);">Candidata a descarte</small>':'') : '0'],
+        ['Estrellas', nEst ? '<span class="st-stars">'+'⭐'.repeat(Math.min(nEst,6))+'</span> '+nEst+(nEst>=2?'<small style="display:block;font-size:10.5px;font-weight:600;color:#7A5C12;">Vaca destacada</small>':'') : '0']
+      ].map(function(s){ return '<div class="stat-chip'+(s[0]==='Banderas negras'&&nBan>=2?' bn-chip-alerta':'')+(s[0]==='Estrellas'&&nEst>=2?' st-chip-ok':'')+'"><div class="k">'+s[0]+'</div><div class="v">'+s[1]+'</div></div>'; }).join('');
       var iepVals = P.map(function(p){ return p.iep_meses; }).filter(function(v){ return v!==null && v!==undefined; });
       var iepMin = iepVals.length ? Math.min.apply(null, iepVals) : null;
       var iepMax = iepVals.length ? Math.max.apply(null, iepVals) : null;
@@ -6192,11 +6329,12 @@ window.__renderReproHead = function(o){
       }
       function escT(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
       function banderasCelda(fl){ return fl.length ? fl.map(function(f){ return '<span class="bn-flag" title="'+escT(f.texto)+'">⚑</span>'; }).join('') : ''; }
+      function estrellasCelda(sl){ return (sl && sl.length) ? sl.map(function(s){ return '<span class="st-star" title="'+escT(s.texto)+'">⭐</span>'; }).join('') : ''; }
       var filas = P.map(function(p){ return { fecha:p.fecha, p:p }; }).concat(BNa.abortos.map(function(a){ return { fecha:a.fecha||'', a:a }; }));
       filas.sort(function(x,y){ return (x.fecha||'9999').localeCompare(y.fecha||'9999'); });
       var rows = filas.map(function(f){
         if(f.a){
-          return '<tr class="bn-row-aborto"><td>—</td><td>'+(f.a.fecha?fmtDate(f.a.fecha):'—')+'</td><td colspan="2"><b>Aborto</b> <span class="hint" style="margin:0;">'+escT(f.a.fuente)+'</span></td><td>'+banderasCelda([f.a])+'</td><td colspan="2"></td></tr>';
+          return '<tr class="bn-row-aborto"><td>—</td><td>'+(f.a.fecha?fmtDate(f.a.fecha):'—')+'</td><td colspan="2"><b>Aborto</b> <span class="hint" style="margin:0;">'+escT(f.a.fuente)+'</span></td><td>'+banderasCelda([f.a])+'</td><td></td><td colspan="2"></td></tr>';
         }
         var p = f.p, sinPeso = (p.peso_destete===null), anomalia = !!p.anomalia;
         var enCurso = sinPeso && p.fecha && (Date.now() - new Date(p.fecha)) / 86400000 < 300;
@@ -6208,11 +6346,15 @@ window.__renderReproHead = function(o){
           p.muertes.map(function(m){ return '<div class="bn-muerte '+m.culpa+'">✝ '+escT(m.etapa)+'</div>'; }).join('');
         return '<tr'+(p.flags.length?' class="bn-row-flag"':'')+'><td>'+p.n+'</td><td>'+fmtDate(p.fecha)+'</td><td>'+criasTxt+'</td>'+
           '<td'+iepStyle+'>'+(p.iep_meses!==null?p.iep_meses.toFixed(1):'<span class="hint" style="margin:0;">1.er</span>')+'</td>'+
-          '<td>'+banderasCelda(p.flags)+'</td><td>'+pesoCell+'</td><td>'+araCell+'</td></tr>';
+          '<td>'+banderasCelda(p.flags)+'</td><td>'+estrellasCelda(p.stars)+'</td><td>'+pesoCell+'</td><td>'+araCell+'</td></tr>';
       }).join('');
       var listaBan = BNa.banderas.map(function(b){
         var donde = b.parto ? 'Parto '+b.parto : (b.tipo==='aborto' ? 'Aborto'+(b.fecha?' · '+fmtDate(b.fecha):'') : (b.fecha?fmtDate(b.fecha):''));
         return '<li><span class="bn-flag">⚑</span><b>'+window.__BN.ICON[b.tipo]+'</b>'+(donde?' <span class="hint" style="margin:0;">· '+donde+'</span>':'')+'<br>'+escT(b.texto)+'</li>';
+      }).join('');
+      var listaEst = (BNa.estrellas || []).map(function(b){
+        var donde = b.parto ? 'Parto '+b.parto : '';
+        return '<li><span class="st-star">⭐</span><b>'+window.__BN.ICON_EST[b.tipo]+'</b>'+(donde?' <span class="hint" style="margin:0;">· '+donde+'</span>':'')+'<br>'+escT(b.texto)+'</li>';
       }).join('');
       var CULPA_TXT = { madre:'Atribuible a la madre — bandera negra', ajena:'Ajena a la madre — sin bandera', revisar:'Por revisar — sin bandera hasta que la clasifiques' };
       var muertesHtml = BNa.muertes.length ? '<div class="bn-muertes"><div class="bn-lista-tit">✝ Crías muertas antes del destete</div>'+BNa.muertes.map(function(m){
@@ -6231,11 +6373,13 @@ window.__renderReproHead = function(o){
         '<div class="stat-strip">'+strip+'</div>'+
         (provs.length ? '<p class="hint bn-prov-nota">✎ Incluye correcciones pendientes de pasar al Excel (provisionales): '+provs.map(escT).join(' · ')+'</p>' : '')+
         '<div class="panel"><h3>Resumen de partos</h3>'+
-        '<p class="hint" style="margin:0 0 8px;">IEP de cada parto = meses desde el parto anterior (<span style="color:rgb(30,54,38);font-weight:700;">verde</span> = más corto, <span style="color:rgb(169,72,26);font-weight:700;">rojo</span> = más largo). IEP promedio = suma de los IEP ÷ cantidad de IEP. ⚑ = bandera negra: parto con más de '+window.__BN.MESES_ABIERTA+' meses de intervalo, cría destetada por debajo del '+BNa.umbral+' % del promedio de sus contemporáneas, o aborto. Toca ⚑ para ver el motivo.</p>'+
-        '<div style="overflow-x:auto;"><table class="mini-table bn-table"><thead><tr><th>#</th><th>Fecha parto</th><th>Cría</th><th>IEP (m)</th><th>⚑</th><th>Destete</th><th>ARA</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+        '<p class="hint" style="margin:0 0 8px;">IEP de cada parto = meses desde el parto anterior (<span style="color:rgb(30,54,38);font-weight:700;">verde</span> = más corto, <span style="color:rgb(169,72,26);font-weight:700;">rojo</span> = más largo). IEP promedio = suma de los IEP ÷ cantidad de IEP. ⚑ = bandera negra: parto con más de '+window.__BN.MESES_ABIERTA+' meses de intervalo, cría destetada por debajo del '+BNa.umbral+' % del promedio de sus contemporáneas, o aborto. Toca ⚑ para ver el motivo. ⭐ = estrella por buen resultado: IEP de 12 meses o menos, destete de 115 % o más del promedio de sus contemporáneas o ARA del parto entre el 25 % mejor del hato (toca ⭐ para ver el detalle).</p>'+
+        '<div style="overflow-x:auto;"><table class="mini-table bn-table"><thead><tr><th>#</th><th>Fecha parto</th><th>Cría</th><th>IEP (m)</th><th>⚑</th><th>⭐</th><th>Destete</th><th>ARA</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
         (listaBan ? '<div class="bn-lista"><div class="bn-lista-tit">⚑ '+nBan+' bandera'+(nBan===1?'':'s')+' negra'+(nBan===1?'':'s')+(nBan>=2?' — <b>candidata a descarte</b>':'')+'</div><ul>'+listaBan+'</ul></div>' : '')+
+        (listaEst ? '<div class="st-lista"><div class="bn-lista-tit">⭐ '+nEst+' estrella'+(nEst===1?'':'s')+' por buenos resultados'+(nEst>=2?' — <b>vaca destacada</b>':'')+'</div><ul>'+listaEst+'</ul></div>' : '')+
         muertesHtml+
         '</div>';
+      fertEl.querySelectorAll('.bn-table .st-star').forEach(function(el){ el.addEventListener('click', function(){ alert(el.getAttribute('title')); }); });
       fertEl.querySelectorAll('.bn-table .bn-flag').forEach(function(el){ el.addEventListener('click', function(){ alert(el.getAttribute('title')); }); });
       fertEl.querySelectorAll('.bn-m-btns button').forEach(function(bt){ bt.addEventListener('click', function(){
         window.__BN.setCulpa(bt.getAttribute('data-num'), bt.getAttribute('data-c'));
@@ -7796,6 +7940,8 @@ window.__renderReproHead = function(o){
     histAdd({ tipo:tipo, numero:numero, texto:detalleTexto, origen: origen||'Formulario', ref:'u:'+u.id,
       finca: (detalleObj && detalleObj.finca) || (rec && rec.finca) || '' });
     renderUpdTable();
+    try{ if(window.__aplicarPendiente) window.__aplicarPendiente(u); }catch(e){}
+    try{ if(window.__novedadesTras) window.__novedadesTras(u); }catch(e){ console.warn(e); }
     return u;
   }
 
@@ -13760,7 +13906,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
   .tab-btn.tab-rep{ font-weight:700; }
   .rep-h{ font-family:'Fraunces',serif; font-size:28px; margin:4px 0 6px; color:var(--green-deep); }
   .rep-intro{ margin:0 0 14px; color:var(--ink-soft); font-size:14px; max-width:860px; }
-  .rep-menu{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; margin:0 0 22px; }
+  .rep-menu{ display:grid; grid-template-columns:repeat(auto-fit, minmax(190px,1fr)); gap:12px; margin:0 0 22px; }
   .rep-menu button{ text-align:left; vertical-align:top; align-self:stretch; background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:14px 16px; cursor:pointer; font-family:'IBM Plex Sans',sans-serif; color:var(--ink); transition:border-color .15s, box-shadow .15s; }
   .rep-menu button:hover{ border-color:var(--green-mid); }
   .rep-menu button.on{ border-color:var(--green-deep); box-shadow:inset 0 0 0 1.5px var(--green-deep); background:#fff; }
@@ -16081,6 +16227,99 @@ window.__irAFicha = function(id, soloSiHayVentana){
       voz:'Hay '+fmt(tot)+' pajillas de '+lista.length+' toros'+(raza ? ' '+raza[2] : '')+'.', notas:['Fuente: hoja INVENTARIO SEMEN del Excel.'] };
   }
   window.__semenAsis = { esPregunta:function(q){ return RX.test(q); }, responder:responder };
+})();
+</script>
+<script>
+/* ⭐ Vacas destacadas (Reportes) y aviso de novedades al registrar un parto o un destete */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function fmt(iso){ if(!iso) return ''; var p=String(iso).split('-'); return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso; }
+  var ultima = [];
+  function fincas(){ var v = $('stFinca') ? $('stFinca').value : 'prod'; return v==='prod' ? ['OK','CACHO','TNJ'] : (v ? [v] : null); }
+  function pintar(){
+    var box = $('stLista'); if(!box || !window.__BN) return;
+    window.__BN.reset();
+    var una = $('stUna') && $('stUna').checked;
+    var L = window.__BN.destacadas({ min: una ? 1 : 2, fincas: fincas() }); ultima = L;
+    var n2 = L.filter(function(x){ return x.a.estrellas.length >= 2; }).length;
+    var nb = $('rpNDest'); if(nb && !una) nb.textContent = n2;
+    $('stResumen').innerHTML = '<b>'+n2+'</b> vaca'+(n2===1?'':'s')+' destacada'+(n2===1?'':'s')+' (2 o más ⭐)'+(una?' · '+(L.length-n2)+' con 1 ⭐':'');
+    if(!L.length){ box.innerHTML = '<p class="empty-note">Ninguna vaca activa reúne 2 estrellas con este filtro.</p>'; return; }
+    box.innerHTML = L.map(function(x){
+      var r = x.a && x.r, a = x.a, n = a.estrellas.length, nb = a.banderas.length;
+      return '<div class="bn-card st-card'+(n<2?' una':'')+'"><div class="bn-card-h"><a data-id="'+r.id+'">'+esc(r.numero)+'</a><span class="st-stars" title="'+n+' estrellas">'+'⭐'.repeat(Math.min(n,8))+'</span>'+(nb?'<span class="bn-flags" title="'+nb+' banderas negras" style="margin-left:6px">'+'⚑'.repeat(Math.min(nb,6))+'</span>':'')+'</div>'+
+        '<div class="bn-card-sub">'+[r.finca, r.raza, (r.edad_actual!=null?r.edad_actual.toFixed(1)+' años':''), a.partos.length+' parto'+(a.partos.length===1?'':'s'), (a.iep_prom!=null?'IEP '+a.iep_prom.toFixed(1)+' m':'')].filter(Boolean).map(esc).join(' · ')+'</div>'+
+        '<ul>'+a.estrellas.map(function(b){ return '<li><span class="st-star">⭐</span><b>'+window.__BN.ICON_EST[b.tipo]+'</b>'+(b.parto?' · parto '+b.parto:'')+' — '+esc(b.texto)+'</li>'; }).join('')+
+        a.banderas.map(function(b){ return '<li><span class="bn-flag">⚑</span><b>'+window.__BN.ICON[b.tipo]+'</b>'+(b.parto?' · parto '+b.parto:'')+' — '+esc(b.texto)+'</li>'; }).join('')+'</ul></div>';
+    }).join('');
+    box.querySelectorAll('a[data-id]').forEach(function(el){ el.onclick = function(){ if(window.__abrirFicha) window.__abrirFicha(parseInt(el.getAttribute('data-id'),10)); }; });
+  }
+  function descargar(){
+    if(!ultima.length){ alert('La lista está vacía.'); return; }
+    function c(v){ v = v==null?'':String(v); return /[";\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+    var H = ['Numero','Finca','Raza','Edad_anos','Partos','IEP_promedio_meses','Estrellas','Detalle_estrellas','Banderas_negras','Detalle_banderas'];
+    var rows = ultima.map(function(x){ var r=x.r, a=x.a;
+      return [r.numero, r.finca, r.raza, r.edad_actual!=null?r.edad_actual.toFixed(1):'', a.partos.length, a.iep_prom!=null?a.iep_prom.toFixed(1):'', a.estrellas.length,
+        a.estrellas.map(function(b){ return window.__BN.ICON_EST[b.tipo]+(b.parto?' (parto '+b.parto+')':'')+': '+b.texto; }).join(' | '), a.banderas.length,
+        a.banderas.map(function(b){ return window.__BN.ICON[b.tipo]+(b.parto?' (parto '+b.parto+')':'')+': '+b.texto; }).join(' | ')].map(c).join(';'); });
+    var blob = new Blob(['﻿'+H.join(';')+'\r\n'+rows.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+    var u = URL.createObjectURL(blob), el = document.createElement('a');
+    el.href = u; el.download = 'vacas_destacadas_'+new Date().toISOString().slice(0,10)+'.csv';
+    document.body.appendChild(el); el.click(); el.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 1000);
+  }
+  function init(){
+    if(!$('stLista')) return;
+    $('stFinca').onchange = pintar; $('stUna').onchange = pintar; $('stDescargar').onclick = descargar;
+    document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('#rpMenu [data-p="destacadas"]'); if(b) setTimeout(pintar, 0); });
+    setTimeout(function(){ try{ window.__BN.reset(); var n = window.__BN.destacadas({min:2, fincas:['OK','CACHO','TNJ']}).length; var nb = $('rpNDest'); if(nb) nb.textContent = n; }catch(e){} }, 1500);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else setTimeout(init, 0);
+
+  /* ---------- Aviso de novedades ---------- */
+  var cola = [], tmr = null;
+  function modal(){
+    var m = $('nvModal'); if(m) return m;
+    m = document.createElement('div'); m.id = 'nvModal'; m.className = 'nv-modal'; m.setAttribute('role','dialog'); m.setAttribute('aria-modal','true');
+    m.innerHTML = '<div class="nv-box"><h3>Novedades de lo que registró</h3><p class="nv-sub" id="nvSub"></p><div id="nvItems"></div><div class="nv-acts" id="nvActs"></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click', function(e){ if(e.target === m) m.classList.remove('on'); });
+    return m;
+  }
+  var ICO = { estrella:'⭐', bandera:'⚑', aviso:'⚠', info:'ℹ' };
+  function mostrar(){
+    var bloques = cola.splice(0); if(!bloques.length) return;
+    var hayImportante = bloques.some(function(b){ return b.items.some(function(i){ return i.k !== 'info'; }); });
+    if(!hayImportante) return;   // solo datos de rutina: no interrumpe
+    var m = modal(), html = '', vaca = null;
+    bloques.forEach(function(b){
+      html += '<p class="nv-tot" style="margin-top:4px"><b>'+esc(b.titulo)+'</b></p>';
+      html += b.items.map(function(i){ return '<div class="nv-it '+i.k+'"><span class="ic">'+ICO[i.k]+'</span><div>'+esc(i.texto)+'</div></div>'; }).join('');
+      if(b.r){ vaca = b.r; try{ window.__BN.reset(); var a = window.__BN.analizar(b.r), ne = a.estrellas.length, nb = a.banderas.length;
+        html += '<p class="nv-tot">La vaca <b>'+esc(b.r.numero)+'</b> queda con <b>'+ne+' ⭐</b> y <b>'+nb+' ⚑</b>'+(ne>=2?' — <b>vaca destacada</b>':'')+(nb>=2?' — <b>candidata a descarte</b>':'')+'.</p>'; }catch(e){} }
+    });
+    $('nvSub').textContent = 'Lo bueno (⭐) y lo que hay que revisar (⚑ ⚠). Las estrellas y banderas se ven en la ficha, en el resumen de partos.';
+    $('nvItems').innerHTML = html;
+    $('nvActs').innerHTML = (vaca ? '<button type="button" id="nvFicha">Ver ficha de '+esc(vaca.numero)+'</button>' : '')+'<button type="button" class="p" id="nvOk">Entendido</button>';
+    $('nvOk').onclick = function(){ m.classList.remove('on'); };
+    var bf = $('nvFicha'); if(bf) bf.onclick = function(){ m.classList.remove('on'); if(window.__irAFicha && window.__irAFicha(vaca.id, true)) return; if(window.__abrirFicha) window.__abrirFicha(vaca.id); };
+    m.classList.add('on');
+  }
+  window.__novedadesTras = function(u){
+    if(!u || !window.__BN) return;
+    var d = u.detalle || {}, res = null, titulo = '';
+    if(u.tipo === 'cria' && d.madre && String(d.tipo_parto||'').toUpperCase() !== 'TE'){
+      res = window.__BN.novedadParto(d.madre, window.fechaAIso ? window.fechaAIso(d.fecha) || d.fecha : d.fecha, d.peso_nac);
+      titulo = 'Parto de '+d.madre+' · cría '+u.numero;
+      if(cola.some(function(b){ return b.titulo.indexOf('Parto de '+d.madre+' ') === 0; })){ return; }   // gemelar: un solo aviso
+    } else if(u.tipo === 'peso' && /DESTET/i.test(String(d.nota||''))){
+      res = window.__BN.novedadDestete(u.numero, d.peso, window.fechaAIso ? window.fechaAIso(d.fecha) || d.fecha : d.fecha);
+      titulo = 'Destete de '+u.numero+(res && res.r ? ' (madre '+res.r.numero+')' : '');
+    } else return;
+    if(!res || !res.items.length) return;
+    cola.push({ titulo:titulo, items:res.items, r:res.r });
+    clearTimeout(tmr); tmr = setTimeout(mostrar, 600);
+  };
 })();
 </script>
 </body>

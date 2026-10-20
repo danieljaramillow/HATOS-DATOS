@@ -1668,7 +1668,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 20 oct 2026 · 9:10 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 20 oct 2026 · 9:25 a.m.</b>
     </div>
   </header>
 
@@ -15692,6 +15692,56 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
   }
   function agregar(html){ var log = $('asisLog'); var d = document.createElement('div'); d.className = 'as-msg'; d.innerHTML = html; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; }
 
+  /* ---------- Preguntas relacionadas cuando no entiende algo ----------
+     Arma candidatas (generales y con los datos que sí reconoció: número de
+     animal, finca, raza), deja solo las que el asistente entiende completas y
+     las ordena por parecido con lo que se preguntó. */
+  var BANCO = ['Inventario del hato','Vacas activas','Vacas activas por finca','Novillas de vientre','Novillas de levante','Terneros sin destetar','Toros reproductores',
+    'Toros para la venta mayores de 16 meses','Vacas próximas a parir','Vacas preñadas','Vacas vacías','Vacas con más de 4 partos','Vacas con IEP mayor a 18 meses',
+    'Vacas con IEP menor a 14 meses','Mejores vacas por ARA','Peores vacas por ARA','Promedio de IEP por finca','Promedio de peso al destete por finca','Promedio de peso al destete por raza',
+    'Promedio de peso al nacer por año','Nacimientos de este año','Nacimientos por mes','Animales vendidos este año','Animales muertos este año','Crías muertas antes del destete',
+    'Mejores vacas por índice lechero','Mis 5 vacas más altas en índice lechero','Vacas con calificación de conformación mayor a 4','Hijas del toro 20/0','Crías del toro 34/2',
+    'Animales sin padre registrado','Animales con comentarios','Último peso de las vacas','Vacas sin palpación este año','Machos de menos de 1 año','Hembras guzerá activas','Vacas brahman en OK',
+    'Abortos registrados','Partos gemelares','Crías de transferencia de embriones'];
+  var SINON = { PARIR:'PARTO PARTOS PARIR PROXIMAS', PRENADA:'PRENADAS PRENEZ PALPACION', VACIA:'VACIAS PALPACION', VENDID:'VENTA VENDIDOS VENTAS', VENTA:'VENDIDOS VENTA', MUERT:'MUERTOS MUERTE MURIO', MURIO:'MUERTOS MUERTE',
+    LECHE:'LECHERO INDICE', DESTETE:'DESTETE PESO', PESO:'PESO PESOS NACER DESTETE', NACIM:'NACIMIENTOS NACER CRIAS', CRIA:'CRIAS TERNEROS NACIMIENTOS', HIJA:'HIJAS CRIAS TORO', TORO:'TOROS REPRODUCTORES', NOVILL:'NOVILLAS',
+    TERNER:'TERNEROS CRIAS', IEP:'IEP INTERVALO PARTOS', ARA:'ARA', CALIF:'CALIFICACION CONFORMACION', CONFORM:'CONFORMACION CALIFICACION', ABORT:'ABORTOS', GEMEL:'GEMELARES', EMBRI:'EMBRIONES TRANSFERENCIA', TE:'TRANSFERENCIA EMBRIONES' };
+  function Nq(s){ return String(s||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+  function palabras(s){ return Nq(s).replace(/[^A-Z0-9\/ ]/g,' ').split(/\s+/).filter(function(w){ return w.length >= 3 || /\d/.test(w); }); }
+  function sugerencias(texto, max){
+    max = max || 6;
+    var q = palabras(texto), qx = q.slice();
+    q.forEach(function(w){ Object.keys(SINON).forEach(function(k){ if(w.indexOf(k) === 0) qx = qx.concat(SINON[k].split(' ')); }); });
+    var cand = BANCO.slice();
+    var BD = window.__BD__ || [], porNum = {}; BD.forEach(function(r){ if(r.numero){ var k = Nq(r.numero).trim(); if(!porNum[k]) porNum[k] = r; } });
+    var T = Nq(texto), fin = (T.match(/\b(OK|CACHO|TNJ)\b/) || [])[1], raza = /GUZER/.test(T) ? 'guzerá' : (/BRAHM/.test(T) ? 'brahman' : (/GIROL/.test(T) ? 'girolando' : null));
+    q.forEach(function(w){ var r = porNum[w]; if(!r) return;
+      if(r.sexo === 'M') cand.push('Hijas del toro '+r.numero, 'Crías del toro '+r.numero);
+      else cand.push('Crías de la vaca '+r.numero, 'Hijas de la vaca '+r.numero);
+      cand.push('Ficha del '+r.numero); });
+    if(fin) ['Vacas activas en '+fin, 'Vacas próximas a parir en '+fin, 'Promedio de IEP en '+fin, 'Nacimientos de este año en '+fin, 'Toros para la venta en '+fin].forEach(function(x){ cand.push(x); });
+    if(raza) ['Vacas '+raza+' activas', 'Toros '+raza+' para la venta', 'Novillas '+raza, 'Promedio de peso al destete de '+raza].forEach(function(x){ cand.push(x); });
+    var vistas = {}, out = [];
+    cand.forEach(function(c){
+      if(vistas[c]) return; vistas[c] = 1;
+      var cw = palabras(c), s = 0;
+      cw.forEach(function(w){ qx.forEach(function(x){ if(w === x) s += 2; else if(w.length >= 4 && x.length >= 4 && (w.indexOf(x.slice(0,5)) === 0 || x.indexOf(w.slice(0,5)) === 0)) s += 1; }); });
+      if(fin && Nq(c).indexOf(fin) >= 0) s += 2; if(raza && Nq(c).indexOf(Nq(raza)) >= 0) s += 2;
+      out.push({c:c, s:s});
+    });
+    out.sort(function(a,b){ return b.s - a.s; });
+    var res = [];
+    for(var i = 0; i < out.length && res.length < max; i++){
+      if(res.length >= 3 && out[i].s === 0) break;
+      try{ var sp = interpretar(out[i].c); if(sp && !sp.vacio && !(sp.noEntendi && sp.noEntendi.length)) res.push(out[i].c); }catch(e){}
+    }
+    return res;
+  }
+  function htmlSug(texto, titulo){
+    var l = sugerencias(texto); if(!l.length) return '';
+    return '<p class="as-note" style="margin-top:8px"><b>'+(titulo || '¿Quiso preguntar algo de esto?')+'</b> Toque una:</p><div class="as-sug">'+l.map(function(t){ return '<button type="button" data-q="'+esc(t)+'">'+esc(t)+'</button>'; }).join('')+'</div>';
+  }
+
   /* ---------- Filtros sobre el resultado: finca, raza, sexo, edad y personalizados ---------- */
   var TRAMOS_ED = [[1,'Menos de 1 año'],[2,'1 a 2 años'],[3,'2 a 3 años'],[5,'3 a 5 años'],[8,'5 a 8 años'],[999,'Más de 8 años']];
   function recDe(o, row){
@@ -15786,7 +15836,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     if(spec.vacio && !spec.ia){
       agregar('<div class="as-res as-help"><p>No entendí qué listado quiere'+(spec.noEntendi.length ? ' (no reconocí: «'+esc(spec.noEntendi.join(' '))+'»)' : '')+'. Dígame <b>qué animales</b> (toros, vacas, novillas, terneros…) y, si quiere, <b>raza, finca, edad, qué dato</b> ver o por cuál ordenar.</p>'+
         (iaActiva() ? '' : '<p class="as-note">Para entender cualquier forma de preguntar puede activar la inteligencia artificial en <a href="#" data-cfg="1">⚙ Configurar</a>.</p>')+
-        '</div>');
+        htmlSug(texto, 'Preguntas relacionadas que sí sé responder:')+'</div>');
       if(porVoz) hablar('No entendí bien. ¿Qué animales quiere ver?');
       return;
     }
@@ -15807,6 +15857,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     if(spec.noEntendi && spec.noEntendi.length){
       h += '<div class="as-chips as-no"><span class="lbl">No entendí:</span>'+spec.noEntendi.map(function(c){ return '<span class="as-chip">'+esc(c)+'</span>'; }).join('')+'</div>'+
         '<p class="as-note as-warn">El resultado no tiene en cuenta esas palabras.'+(iaActiva() && !spec.ia ? ' <a href="#" data-ia="'+i+'">Preguntarle a la IA</a>' : (!iaActiva() ? ' Puede decirlo de otra forma o activar la IA en <a href="#" data-cfg="1">⚙</a>.' : ''))+'</p>';
+      h += htmlSug((o.pregunta || ''), '¿Quiso decir alguna de estas?');
     }
     if(spec.avisoIA) h += '<p class="as-note as-warn">'+spec.avisoIA+'</p>';
     h += '<p class="as-sum">'+(o.resumen || '')+'</p>';

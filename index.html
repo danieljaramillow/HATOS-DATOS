@@ -743,8 +743,63 @@ window.__BN = (function(){
   #guia .g-tono-verde{ border-left:6px solid #33513B; }
   #guia .g-tono-oro{ border-left:6px solid #AD8A3C; }
   #guia .g-opts-home .g-opt{ padding:22px 18px; min-height:88px; }
-  #guia .g-opts-home .g-ico{ font-size:34px; width:48px; }
-  #guia .g-opts-home .g-txt b{ font-size:20px; }
+  /* Inicio sin scroll: las opciones van en cuadrícula de mosaicos (3 columnas en PC, 2 en celular)
+     y el pie queda en una sola franja; en pantallas bajas se encoge todo un poco más. */
+  #guia .g-body.g-home-fit{ max-width:980px; padding-top:14px; padding-bottom:12px; }
+  #guia .g-home-fit .g-q{ font-size:26px; margin-bottom:2px; }
+  #guia .g-home-fit .g-hint{ margin-bottom:12px; font-size:14px; }
+  #guia .g-opts-home{ grid-template-columns:repeat(3,1fr); gap:10px; }
+  #guia .g-opts-home .g-opt{ position:relative; flex-direction:column; justify-content:center; text-align:center; gap:6px; padding:16px 12px; min-height:0; }
+  #guia .g-opts-home .g-tono-rust, #guia .g-opts-home .g-tono-verde, #guia .g-opts-home .g-tono-oro{ border-left-width:2px; }
+  #guia .g-opts-home .g-tono-rust{ border-top:5px solid #A9481A; }
+  #guia .g-opts-home .g-tono-verde{ border-top:5px solid #33513B; }
+  #guia .g-opts-home .g-tono-oro{ border-top:5px solid #AD8A3C; }
+  #guia .g-opts-home .g-ico{ font-size:32px; width:auto; }
+  #guia .g-opts-home .g-txt{ flex:none; width:100%; }
+  #guia .g-opts-home .g-txt b{ font-size:17px; line-height:1.2; }
+  #guia .g-opts-home .g-txt small{ font-size:12.5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  #guia .g-opts-home .g-arrow{ display:none; }
+  #guia .g-opts-home .g-badge{ position:absolute; top:8px; right:8px; }
+  #guia .g-home-fit .g-pie{ margin-top:12px; gap:8px 10px; justify-content:flex-start; }
+  #guia .g-home-fit .g-pie .g-ver{ margin:0 0 0 auto; }
+  @media (max-width:700px){
+    #guia .g-body.g-home-fit{ padding:10px 10px 10px; }
+    #guia .g-home-fit .g-q{ font-size:22px; }
+    #guia .g-home-fit .g-hint{ font-size:13px; margin-bottom:8px; }
+    #guia .g-opts-home{ grid-template-columns:1fr 1fr; gap:8px; }
+    #guia .g-opts-home .g-opt{ padding:10px 8px; gap:3px; border-radius:12px; }
+    #guia .g-opts-home .g-ico{ font-size:26px; }
+    #guia .g-opts-home .g-txt b{ font-size:15px; }
+    #guia .g-opts-home .g-txt small{ font-size:11.5px; margin-top:1px; }
+    #guia .g-home-fit .g-pie{ margin-top:8px; gap:6px; }
+    #guia .g-home-fit .g-mini{ padding:7px 11px; font-size:12.5px; }
+    #guia .g-home-fit .g-pref{ font-size:12px; }
+    #guia .g-home-fit .g-pie .g-ver{ margin:0; width:100%; font-size:10.5px; }
+  }
+  @media (max-width:700px) and (max-height:700px){
+    #guia .g-home-fit .g-hint{ display:none; }
+    #guia .g-opts-home .g-txt small{ -webkit-line-clamp:1; }
+    #guia .g-opts-home .g-ico{ font-size:22px; }
+  }
+  @media (min-width:701px) and (max-height:720px){
+    #guia .g-opts-home .g-opt{ padding:11px 10px; gap:3px; }
+    #guia .g-opts-home .g-ico{ font-size:26px; }
+    #guia .g-home-fit .g-q{ font-size:22px; }
+  }
+  /* En el inicio no hay botón «Atrás»: se oculta la barra de abajo para ganar espacio */
+  #guia.g-en-inicio .g-bottom{ display:none; }
+  @media (max-width:700px){ #guia .g-home-fit .g-pie{ padding-right:128px; } #guia .g-body.g-home-fit{ padding-bottom:16px; } }
+  /* Salida de varios animales */
+  #guia .g-ms-cab{ background:#fff; border:2px solid #E0D7C2; border-radius:12px; padding:8px 12px; font-size:14px; color:#4a4336; margin-bottom:10px; }
+  #guia .g-ms-lista{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+  #guia .g-ms-it{ display:flex; align-items:center; gap:10px; background:#fff; border:2px solid #E0D7C2; border-radius:12px; padding:8px 10px 8px 12px; }
+  #guia .g-ms-it .g-ms-n{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:#A9481A; font-weight:700; min-width:22px; }
+  #guia .g-ms-it .g-ms-t{ flex:1; min-width:0; font-size:15px; }
+  #guia .g-ms-it .g-ms-t small{ display:block; font-size:12.5px; color:#7a705c; }
+  #guia .g-ms-it button{ flex:none; border:1.5px solid #CFC4AA; background:#fff; color:#8a3a14; border-radius:10px; width:38px; height:38px; font-size:16px; cursor:pointer; }
+  #guia .g-ms-vacio{ font-size:14px; color:#7a705c; padding:10px 2px; }
+  #guia .g-ms-aviso{ font-size:13px; color:#A9481A; min-height:18px; margin:6px 2px 0; }
+  #guia .g-btn:disabled{ opacity:.45; cursor:default; }
   #guia .g-opts-xl .g-opt{ flex-direction:column; justify-content:center; min-height:130px; text-align:center; }
   #guia .g-opts-xl .g-ico{ font-size:44px; width:auto; }
   #guia .g-opts-xl .g-arrow{ display:none; }
@@ -1794,7 +1849,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 20 oct 2026 · 10:50 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 20 oct 2026 · 11:15 a.m.</b>
     </div>
   </header>
 
@@ -11049,6 +11104,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     trailEl.scrollLeft = trailEl.scrollWidth;
     backBtn.style.visibility = hist.length>1 ? 'visible' : 'hidden';
     bodyEl.innerHTML = '';
+    bodyEl.classList.remove('g-home-fit');
+    try{ document.getElementById('guia').classList.toggle('g-en-inicio', hist.length===1); }catch(e){}
     bodyEl.classList.remove('g-anim'); void bodyEl.offsetWidth; bodyEl.classList.add('g-anim');
     top.fn(bodyEl);
     var first = bodyEl.querySelector('input:not([type=date])');
@@ -11202,13 +11259,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   // ================= PANTALLAS =================
   function scrInicio(el){
+    el.classList.add('g-home-fit');
     var c = pregunta(el, '¿Qué quiere hacer hoy?', 'Toque una opción. Lo iremos guiando paso a paso.');
     var n = pendientes();
     opciones(c, [
-      {icon:'📝', label:'Registrar algo que pasó', sub:'Nacimiento, aborto, palpación, entore, pesaje, salida…', tono:'rust', onClick:function(){ go(scrRegistrar, 'Registrar', 'rama'); }},
+      {icon:'📝', label:'Registrar algo que pasó', sub:'Nacimiento, palpación, entore, pesaje, salidas…', tono:'rust', onClick:function(){ go(scrRegistrar, 'Registrar', 'rama'); }},
       {icon:'🔎', label:'Consultar información', sub:'Un animal, vacas por parir, vacías, resumen de la finca', tono:'verde', onClick:function(){ go(scrConsultar, 'Consultar', 'rama'); }},
       {icon:'📊', label:'Ver informes y análisis', sub:'Comparativos de toros y vacas, grupos, simulador', tono:'oro', onClick:function(){ go(scrInformes, 'Informes', 'rama'); }},
-      {icon:'📋', label:'Reportes de vacas', sub:'Vacas para revisión, animales para descarte y visitas ASOCEBU', tono:'verde', onClick:function(){ cerrar(); if(window.__reportes) window.__reportes.abrir(); }},
+      {icon:'📋', label:'Reportes de vacas', sub:'Revisión, descarte y visitas ASOCEBU', tono:'verde', onClick:function(){ cerrar(); if(window.__reportes) window.__reportes.abrir(); }},
       {icon:'🎧', label:'Pregúntele a la asistente', sub:'Pida cualquier listado o reporte, escribiendo o por voz', tono:'rust', onClick:function(){ cerrar(); if(window.__asistente) window.__asistente.abrir(); }},
       {icon:'📤', label:'Enviar lo registrado', sub: n ? n+' registro(s) pendientes por pasar al Excel' : 'No hay registros pendientes', badge: n||'', onClick:function(){ go(scrEnviar, 'Enviar', 'rama'); }}
     ], 'g-opts-home');
@@ -11233,6 +11291,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       {icon:'❤', label:'Serví una vaca', sub:'Entore: monta natural o inseminación', onClick:function(){ ctx={}; go(ent1, 'Entore', 'rama'); }},
       {icon:'⚖', label:'Pesé un animal', sub:'Control de peso o destete', onClick:function(){ ctx={}; go(pes1, 'Pesaje', 'rama'); }},
       {icon:'🚚', label:'Salió un animal', sub:'Venta, muerte o descarte', onClick:function(){ ctx={}; go(sal1, 'Salida', 'rama'); }},
+      {icon:'🚛', label:'Salieron varios animales', sub:'Venta de varios animales a un mismo cliente, el mismo día', onClick:function(){ ctx={lista:[]}; go(salM1, 'Venta múltiple', 'rama'); }},
       {icon:'✏', label:'Corregir un dato', sub:'Un dato equivocado de un animal', onClick:function(){ ctx={}; go(cor1, 'Corrección', 'rama'); }},
       {icon:'📋', label:'Registrar una visita', sub:'Varios animales: ASOCEBU, palpación, pesaje, cliente o inventario', onClick:function(){ if(window.__visitas) window.__visitas.abrir(); }}
     ]);
@@ -11557,6 +11616,69 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       guardar('salida', ctx.animal.numero, {fecha:ctx.fecha, causa:ctx.causa, obs:ctx.obs||''}, ctx.fecha+' · '+ctx.causa+(ctx.obs?' · '+ctx.obs:''), '¡Salida registrada!',
         {txt:'🚚  Registrar otra salida', fn:function(){ ctx={}; hist=hist.slice(0,3); go(sal1, 'Otro animal'); }});
     });
+  }
+
+  // ---------- SALIDA MÚLTIPLE (varios animales a un mismo cliente, el mismo día) ----------
+  function salM1(el){
+    var c = pregunta(el, '¿A quién le vendió los animales?', 'Escriba el nombre del cliente. Quedará igual para todos los animales.', 'Paso 1 de 4');
+    campo(c, 'text', ctx.cliente||'', 'Nombre del cliente', function(v){ ctx.cliente=v; go(salM2, v); });
+  }
+  function salM2(el){ elegirFecha(pregunta(el, '¿Qué día salieron?', '', 'Paso 2 de 4'), function(f){ ctx.fecha=f; ctx.lista=ctx.lista||[]; go(salM3, fechaBonita(f)); }); }
+  function salM3(el){
+    var c = pregunta(el, 'Agregue los animales vendidos', 'Busque cada animal por número o nombre y tóquelo. Se van sumando a la lista de abajo.', 'Paso 3 de 4');
+    var cab = document.createElement('div'); cab.className='g-ms-cab';
+    cab.innerHTML = '🚛 Venta a <b>'+esc(ctx.cliente)+'</b> · '+esc(fechaBonita(ctx.fecha)); c.appendChild(cab);
+    var inp = elegirAnimal(c, {
+      filtro:function(r){ return r.activo==='ACTIVO' && !ctx.lista.some(function(x){ return x.numero===r.numero; }); },
+      onPick:function(r){
+        if(r.activo!=='ACTIVO'){ aviso.textContent = r.numero+' ya está INACTIVO.'; return; }
+        ctx.lista.push(r); aviso.textContent = '✔ '+r.numero+' agregado';
+        inp.value=''; inp.dispatchEvent(new Event('input')); pintar();
+        if(window.innerWidth > 700) inp.focus();
+      }
+    });
+    var aviso = document.createElement('p'); aviso.className='g-ms-aviso'; c.appendChild(aviso);
+    var t = document.createElement('div'); t.className='g-subt'; c.appendChild(t);
+    var lista = document.createElement('div'); lista.className='g-ms-lista'; c.appendChild(lista);
+    var btn = botonGrande(c, '', function(){ if(ctx.lista.length) go(salMConf, ctx.lista.length+' animales'); });
+    function pintar(){
+      var n = ctx.lista.length;
+      t.textContent = 'Animales en esta venta: '+n;
+      lista.innerHTML = n ? '' : '<div class="g-ms-vacio">Todavía no ha agregado ningún animal.</div>';
+      ctx.lista.forEach(function(r, i){
+        var d = document.createElement('div'); d.className='g-ms-it';
+        d.innerHTML = '<span class="g-ms-n">'+(i+1)+'</span><span class="g-ms-t"><b>'+esc(r.numero)+'</b>'+(r.nombre?' · '+esc(r.nombre):'')+
+          '<small>'+[r.finca, r.raza, r.sexo==='H'?'Hembra':(r.sexo==='M'?'Macho':''), edadTxt(r.edad_actual)].filter(Boolean).map(esc).join(' · ')+'</small></span>'+
+          '<button type="button" aria-label="Quitar '+esc(r.numero)+'" title="Quitar de la lista">✕</button>';
+        d.querySelector('button').onclick = function(){ ctx.lista.splice(i,1); aviso.textContent = '✕ '+r.numero+' quitado'; pintar(); };
+        lista.appendChild(d);
+      });
+      btn.disabled = !n;
+      btn.innerHTML = n ? 'Continuar con '+n+' animal'+(n>1?'es':'')+'  →' : 'Agregue al menos un animal';
+    }
+    pintar();
+  }
+  function salMConf(el){
+    var n = ctx.lista.length;
+    var c = pregunta(el, '¿Está todo bien?', 'Los '+n+' animales quedarán como INACTIVOS (venta) cuando se aplique al Excel.', 'Paso 4 de 4');
+    var t = document.createElement('div'); t.className='g-resumen';
+    t.innerHTML = [['Registro','Venta de varios animales'],['Cliente',ctx.cliente],['Fecha',fechaBonita(ctx.fecha)],['Cantidad',n+' animal'+(n>1?'es':'')]].map(function(f){
+      return '<div class="g-rf"><span>'+esc(f[0])+'</span><b>'+esc(f[1])+'</b></div>'; }).join('')+
+      '<div class="g-rf"><span>Animales</span><b>'+ctx.lista.map(function(r){ return esc(r.numero); }).join(', ')+'</b></div>';
+    c.appendChild(t);
+    botonGrande(c, '✔  Sí, guardar las '+n+' salidas', function(){
+      ctx.lista.forEach(function(r){
+        if(window.__updAdd) window.__updAdd('salida', r.numero, {fecha:ctx.fecha, causa:'VENTA', obs:ctx.cliente||''}, ctx.fecha+' · VENTA · '+(ctx.cliente||''), 'Modo guiado (venta múltiple)');
+      });
+      var nums = ctx.lista.map(function(r){ return r.numero; });
+      go(function(el2){
+        el2.innerHTML = '<div class="g-listo"><div class="g-check">✔</div><h2 class="g-q">¡'+n+' salida'+(n>1?'s':'')+' registrada'+(n>1?'s':'')+'!</h2>'+
+          '<p class="g-hint">Venta a <b>'+esc(ctx.cliente)+'</b> el '+esc(fechaBonita(ctx.fecha))+': '+nums.map(esc).join(', ')+'.<br>Quedó guardado en este dispositivo, en la lista de pendientes ('+pendientes()+' en total). Cuando termine, entre a <b>“Enviar lo registrado”</b> para descargar el resumen y pasarlo al Excel.</p></div>';
+        botonGrande(el2, '🚛  Registrar otra venta múltiple', function(){ ctx={lista:[]}; hist=hist.slice(0,2); go(salM1, 'Venta múltiple', 'rama'); });
+        botonGrande(el2, '🏠  Volver al inicio', inicio, true);
+      }, 'Guardado ✔', 'fin');
+    });
+    botonGrande(c, '✏  Agregar o quitar animales', back, true);
   }
 
   // ---------- CORRECCIÓN ----------

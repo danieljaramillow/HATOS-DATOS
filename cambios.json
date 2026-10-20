@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-20T19:46:18.581Z",
+ "actualizado": "2026-10-20T19:46:33.901Z",
  "edits": [],
  "updates": [],
  "visita": null,
@@ -95,6 +95,10 @@
   "737/4 JDH MADISON MANSO": {
    "v": true,
    "ts": 1792525575714
+  },
+  "DESEJADA S": {
+   "v": true,
+   "ts": 1792525587877
   }
  }
 }

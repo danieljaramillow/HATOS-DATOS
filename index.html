@@ -2258,6 +2258,7 @@ window.__renderReproHead = function(o){
         </div>
       </div>
 
+      <div id="fh-consang" style="margin-top:14px;"></div>
       <div class="spec-strip" id="fh-spec-strip"></div>
       <div id="fh-qa-banner"></div>
 
@@ -6178,6 +6179,7 @@ window.__renderReproHead = function(o){
     renderFichaPedigree(r);
     if(window.HMedia) window.HMedia.ficha(r);
     if(window.HSobre) window.HSobre.ficha(r);
+    if(window.HConsang) window.HConsang.ficha(r);
     var printBtn = document.getElementById('fh-print-btn');
     printBtn.onclick = function(){ printPedigree(r); };
     var downloadHtmlBtn = document.getElementById('fh-download-html-btn');
@@ -16620,6 +16622,75 @@ window.__irAFicha = function(id, soloSiHayVentana){
     el.firstChild.onclick = function(){ marcar(r.numero, !estado(r.numero).on); ficha(r); };
   }
   window.HSobre = { estado:estado, marcar:marcar, ficha:ficha, lista:function(){ return leer(); } };
+})();
+</script>
+
+<style>
+  #fh-consang:empty{ display:none; }
+  .hc-alerta{ background:#FBE3DF; border:2px solid #B3261E; border-left-width:8px; border-radius:8px; padding:12px 16px; margin:0 0 18px; color:#5C1410; }
+  .hc-alerta h3{ margin:0 0 6px; font-size:15px; color:#B3261E; letter-spacing:.02em; }
+  .hc-alerta ul{ margin:6px 0 4px 18px; padding:0; font-size:13px; }
+  .hc-alerta li{ margin:2px 0; }
+  .hc-alerta p{ margin:4px 0 0; font-size:12px; color:#7A2A24; }
+</style>
+<script>
+(function(){
+  var D = [];
+  try{ D = JSON.parse(document.getElementById('data-source').textContent) || []; }catch(e){}
+  var P = {};
+  D.forEach(function(r){ var k = String(r.numero||'').trim().toUpperCase(); if(k && !P[k]) P[k] = r; });
+  function rec(label){
+    var k = String(label||'').trim().toUpperCase(); if(!k) return null;
+    return P[k] || (/\/.+C$/.test(k) ? P[k.slice(0,-1)] : null) || null;
+  }
+  var MAXG = 6;
+  function rol(g, sexo){
+    var m = sexo === 'M';
+    return g===1 ? (m?'padre':'madre') : g===2 ? (m?'abuelo':'abuela') : g===3 ? (m?'bisabuelo':'bisabuela') : g===4 ? (m?'tatarabuelo':'tatarabuela') : 'ancestro';
+  }
+  function lado(start){
+    var out = {}, st = [[start,1,'M']];
+    while(st.length){
+      var x = st.pop(), lab = x[0], g = x[1];
+      if(!lab || g > MAXG) continue;
+      var k = String(lab).trim().toUpperCase();
+      if(!out[k] || out[k].g > g) out[k] = { g:g, n:String(lab).trim(), sexo:x[2] };
+      var r = rec(lab);
+      if(r){ st.push([r.padre, g+1, 'M']); st.push([r.madre, g+1, 'H']); }
+    }
+    return out;
+  }
+  function alertas(r){
+    if(!r || !r.padre || !r.madre) return [];
+    var A = lado(r.padre), B = lado(r.madre);
+    A[String(r.padre).trim().toUpperCase()].sexo = 'M';
+    B[String(r.madre).trim().toUpperCase()].sexo = 'H';
+    var res = [];
+    Object.keys(A).forEach(function(k){
+      if(!B[k]) return;
+      var a = A[k], b = B[k];
+      if(Math.min(a.g, b.g) <= 2) res.push({ n:a.n, gp:a.g, gm:b.g, sexo:a.sexo });
+    });
+    /* quedarse con los repetidos más cercanos: si un ancestro solo se repite a través de otro ya listado, se omite */
+    res.sort(function(x,y){ return (x.gp+x.gm)-(y.gp+y.gm); });
+    var keep = [];
+    res.forEach(function(x){
+      var porOtro = keep.some(function(o){ var L = lado(o.n); var k = String(x.n).trim().toUpperCase(); return L[k] && L[k].g + o.gp - 1 === x.gp && L[k].g + o.gm - 1 === x.gm; });
+      if(!porOtro) keep.push(x);
+    });
+    return keep;
+  }
+  function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function ficha(r){
+    var el = document.getElementById('fh-consang'); if(!el) return;
+    var al = alertas(r);
+    if(!al.length){ el.innerHTML = ''; return; }
+    el.innerHTML = '<div class="hc-alerta" role="alert"><h3>⚠ ANIMAL DE ALTA CONSANGUINIDAD</h3>'+
+      '<div style="font-size:13px;">Se repiten ancestros antes de la 3.ª generación (como padre, madre, abuelo o abuela):</div><ul>'+
+      al.map(function(x){ return '<li><b>'+esc(x.n)+'</b> — por el lado del padre como '+rol(x.gp,x.sexo)+' ('+x.gp+'.ª gen.) y por el lado de la madre como '+rol(x.gm,x.sexo)+' ('+x.gm+'.ª gen.)</li>'; }).join('')+
+      '</ul><p>La repetición buscada (masa crítica) es de la 3.ª generación hacia atrás; más cerca que eso aumenta el riesgo de consanguinidad.</p></div>';
+  }
+  window.HConsang = { alertas:alertas, ficha:ficha };
 })();
 </script>
 </body>

@@ -15427,7 +15427,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
   var STOP = ('quiero quisiera necesito dame deme damelo muestrame mostrar muestre ver saber conocer dime digame diga sacar saca saque hacer haga genera generar busca buscar buscame encuentra encontrar listar lista listado listados reporte reportes informe relacion favor porfa por fa porfavor hola gracias ' +
     'cual cuales cuantos cuantas cuanto cuanta quien quienes como que donde cuando es son esta estan estas este esto hay tengo tenemos tiene tienen tener mis mi nuestros nuestras mios mias ' +
     'el la los las lo un una unos unas de del al a en con y o u por para que se le les me nos su sus ese esa esos esas aquel todo todos toda todas ' +
-    'resumen producen produce dan da dieron listas lista_ animales animal ganado hato hatos bovinos cabezas reses res datos dato informacion registros registro_ actual actuales hoy ahora favor solo solamente tambien ademas mas muy etc').split(' ');
+    'resumen producen produce dan da dieron listas lista_ animales animal ganado hato hatos bovinos cabezas reses res datos dato informacion registros registro_ actual actuales hoy ahora favor solo solamente tambien ademas mas muy etc he ha han hemos habia habian hayan hayas haya lo_que').split(' ');
   var STOPSET = {}; STOP.forEach(function(w){ STOPSET[w] = 1; });
 
   function interpretar(texto){
@@ -15511,9 +15511,16 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     if(mT){ add({ campo:'toro_prenez', op:'=', valor:mT[4].toUpperCase() }); add({ campo:'palp', op:'=', valor:'preñada' }); }
 
     /* ---- 3. salidas: vendidos / muertos ---- */
-    var mS = eat(/\b(que se )?(vendid[oa]s|vendi|vendimos|se vendieron|ventas|venta de|muert[oa]s|murieron|se murieron|se muri[oe]|muertes|salieron|salidas|dados de baja|que salieron|devuelt[oa]s|devoluciones|descartad[oa]s)\b/);
+    /* Comprador antes del verbo hablado: «qué me compró Carlos Ortega», «qué ha comprado Carlos Ortega» */
+    var mCompra = eat(/\b(?:que )?(?:se )?(?:me |nos |le |les )?(?:ha |han |habia |habian )?(compro|compraron|comprado|compradas?|comprados|compra|compran)\s+(?:el |la |don |dona |senor |senora |cliente )?([a-z]{3,}(?: [a-z]{3,})?)\b/);
+    var compradorHablado = null;
+    if(mCompra && !/finca|venta|ceba|cria|matadero|este|ano|mes/.test(mCompra[2]) && !STOPSET[mCompra[2].split(' ')[0]]) compradorHablado = mCompra[2];
+    else if(mCompra) resto += ' vendidos ' + mCompra[2];
+    /* Verbos como salen de la voz: «le he vendido», «hemos vendido», «se le vendieron», «vendió», «han muerto», «se murió»… */
+    var mS = eat(/\b(?:que )?(?:se )?(?:me |nos |le |les )?(?:he |ha |han |hemos |habia |habian )?(vendid[oa]s?|vendi|vendio|vendimos|vendieron|vendemos|venden|ventas|venta de|muert[oa]s?|murieron|muri[oe]|muertes|salieron|salidas?|salio|dad[oa]s? de baja|devuelt[oa]s?|devolvi(?:mos|eron|o)?|devoluciones|descartad[oa]s?|descartamos)\b/);
+    if(!mS && compradorHablado) mS = ['', '', 'vendidos'];
     if(mS){
-      var w = mS[2];
+      var w = mS[mS.length - 1];
       if(/vend|venta/.test(w)) add({ campo:'salida', op:'=', valor:'venta' });
       else if(/muer|muri/.test(w)) add({ campo:'salida', op:'=', valor:'muerte' });
       else if(/devuel|devol/.test(w)) add({ campo:'salida', op:'=', valor:'devolución' });
@@ -15521,8 +15528,9 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       else add({ campo:'estado', op:'=', valor:'INACTIVO' });
       var aS = eat(/\b(en |durante |del? )?(el )?(este ano|ano pasado|ano anterior|(?:en )?(?:el )?(?:ano )?(19|20)\d{2})\b/);
       if(aS) add({ campo:'anio_salida', op:'=', valor:anioDe(aS[0]) });
-      var mC = eat(/\b(a|al|a la|para) (cliente |comprador |senor |don )?([a-z]{3,}(?: [a-z]{3,})?)\b/);
-      if(mC && !/finca|venta|ceba|cria|matadero/.test(mC[3]) && !STOPSET[mC[3]]) add({ campo:'vendido_a', op:'contiene', valor:mC[3].toUpperCase() });
+      var mC = compradorHablado ? null : eat(/\b(a|al|a la|para) (cliente |comprador |senor |senora |don |dona )?([a-z]{3,}(?: [a-z]{3,})?)\b/);
+      if(compradorHablado) add({ campo:'vendido_a', op:'contiene', valor:compradorHablado.toUpperCase() });
+      else if(mC && !/finca|venta|ceba|cria|matadero/.test(mC[3]) && !STOPSET[mC[3]]) add({ campo:'vendido_a', op:'contiene', valor:mC[3].toUpperCase() });
       else if(mC) resto += ' '+mC[0];
     }
 
@@ -15536,7 +15544,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     }
     var mMesP = eat(/\b(paren|pariran|van a parir|parto probable|que paririan|deben parir|parir|paran)\s+(en|para|de|el mes de|en el mes de)?\s*(?:el mes de )?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\b/);
     if(mMesP){ var mi = MESES.indexOf(mMesP[3] === 'setiembre' ? 'septiembre' : mMesP[3]) + 1; add({ campo:'palp', op:'=', valor:'preñada' }); add({ campo:'mes_parto', op:'=', valor:mi }); spec.orden.push({ campo:'parto_probable', dir:'asc' }); }
-    var mPar = eat(/\b(parieron|paridas?|que parieron|con parto|partos?) (en |durante |el |este |del )*(este ano|ano pasado|(19|20)\d{2})\b/);
+    var mPar = eat(/\b(parieron|paridas?|que parieron|parido|pario|parimos|con parto|partos?) (en |durante |el |este |del )*(este ano|ano pasado|(19|20)\d{2})\b/);
     if(mPar) add({ campo:'anio_ult_parto', op:'=', valor:anioDe(mPar[0]), texto:'Último parto en '+anioDe(mPar[0]) });
 
     /* ---- 5. nacimientos ---- */

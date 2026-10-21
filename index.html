@@ -1854,7 +1854,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 12:15 p.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 12:20 p.m.</b>
     </div>
   </header>
 
@@ -6013,7 +6013,7 @@ window.__renderReproHead = function(o){
     if(id===null){ el.classList.add('an-shake'); setTimeout(function(){ el.classList.remove('an-shake'); }, 500); return; }
     try{ window.getSelection().removeAllRanges(); }catch(_){}
     selectAnimal(id);
-    window.scrollTo({top: Math.max(0, document.getElementById('fichaContent').getBoundingClientRect().top + window.scrollY - 70), behavior:'smooth'});
+    window.scrollTo({top: Math.max(0, document.getElementById('fichaContent').getBoundingClientRect().top + window.scrollY - 110), behavior:'smooth'});
   });
   // Tras abrir una ficha, se ignoran clics por un instante: así el segundo clic
   // de un doble clic (sobre una cría) no abre por accidente otro animal.
@@ -6487,7 +6487,7 @@ window.__renderReproHead = function(o){
 
     if(window.__renderReproHead){ try{ window.__renderReproHead({ r:r, palp:palp, ent:ent, crias:crias, fert:fert, araProm:(typeof araProm!=='undefined'?araProm:null) }); }catch(e){ console.error(e); } }
     currentId = id;
-    if(!silent){ document.getElementById('fichaContent').scrollIntoView({behavior:'smooth', block:'start'}); }
+    if(!silent){ var fc = document.getElementById('fichaContent'); var tb = document.querySelector('.tabs, .tab-bar, nav.tabs'); var off = 16; document.querySelectorAll('.tab-btn').length && (function(){ var b = document.querySelector('.tab-btn'); var p = b.closest('nav, .tabs, .tab-nav, div'); var cs = p ? getComputedStyle(p) : null; if(p && cs && (cs.position==='sticky' || cs.position==='fixed')) off += p.getBoundingClientRect().bottom; else off += 90; })(); window.scrollTo({ top: Math.max(0, fc.getBoundingClientRect().top + window.scrollY - off), behavior:'smooth' }); }
   }
 
   var currentId = null;

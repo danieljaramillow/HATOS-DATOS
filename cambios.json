@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T16:02:06.117Z",
+ "actualizado": "2026-10-21T16:05:12.555Z",
  "edits": [],
  "updates": [
   {
@@ -1337,6 +1337,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259870689231,
+   "tipo": "palpacion",
+   "numero": "126/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 120,
+    "parto_probable": "2027-04-02",
+    "hallazgo": "120",
+    "toro": "FENOL S"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: FENOL S",
    "fecha": "2026-10-21"
   }
  ],
@@ -3322,6 +3337,26 @@
    "finca": "OK",
    "ts": 1792598519843,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "126/2",
+   "texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: FENOL S",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259870689231",
+   "finca": "OK",
+   "ts": 1792598706893,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "126/2",
+   "texto": "Palpación (21/10/2026): Preñada 120 días · toro FENOL S · parto probable 02/04/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmviazikslvfh",
+   "finca": "OK",
+   "ts": 1792598706905,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -4979,6 +5014,26 @@
     "deleted": false,
     "updIds": [
      179259851983287
+    ]
+   },
+   "rmviazikslvfh": {
+    "id": "rmviazikslvfh",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1454,
+    "numero": "126/2",
+    "ts0": 1792598706892,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 120,
+     "toro": "FENOL S",
+     "parto": "2027-04-02"
+    },
+    "ts": 1792598706892,
+    "deleted": false,
+    "updIds": [
+     179259870689231
     ]
    }
   }

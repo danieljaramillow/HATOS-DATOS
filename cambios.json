@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T16:51:42.590Z",
+ "actualizado": "2026-10-21T16:52:27.608Z",
  "edits": [],
  "updates": [
   {
@@ -1535,21 +1535,6 @@
    "fecha": "2026-10-21"
   },
   {
-   "id": 179260145066131,
-   "tipo": "palpacion",
-   "numero": "988/1",
-   "detalle": {
-    "fecha": "2026-10-21",
-    "resultado": "PREÑADA",
-    "dias": "",
-    "parto_probable": "",
-    "hallazgo": "",
-    "toro": ""
-   },
-   "detalle_texto": "2026-10-21 · Preñada",
-   "fecha": "2026-10-21"
-  },
-  {
    "id": 179260149805587,
    "tipo": "palpacion",
    "numero": "653/1",
@@ -1562,6 +1547,21 @@
     "toro": "64/2"
    },
    "detalle_texto": "2026-10-21 · Preñada · Toro: 64/2",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179260154181027,
+   "tipo": "palpacion",
+   "numero": "988/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Preñada",
    "fecha": "2026-10-21"
   }
  ],
@@ -3867,6 +3867,26 @@
    "finca": "OK",
    "ts": 1792601498067,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "988/1",
+   "texto": "2026-10-21 · Preñada",
+   "origen": "Visita: Palpación",
+   "ref": "u:179260154181027",
+   "finca": "OK",
+   "ts": 1792601541810,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "988/1",
+   "texto": "Palpación (21/10/2026): Preñada",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvicmbolgc6f",
+   "finca": "OK",
+   "ts": 1792601541821,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -5773,10 +5793,10 @@
      "toro": "",
      "parto": ""
     },
-    "ts": 1792601450661,
+    "ts": 1792601541800,
     "deleted": false,
     "updIds": [
-     179260145066131
+     179260154181027
     ]
    },
    "rmvicnc93hdj5": {

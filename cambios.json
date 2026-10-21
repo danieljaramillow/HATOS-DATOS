@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T16:10:18.477Z",
+ "actualizado": "2026-10-21T16:14:24.751Z",
  "edits": [],
  "updates": [
   {
@@ -1352,6 +1352,36 @@
     "toro": "7141/3"
    },
    "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 7141/3",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259923648784,
+   "tipo": "palpacion",
+   "numero": "895/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "CLOD",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · CLOD",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259926011547,
+   "tipo": "palpacion",
+   "numero": "144/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "UCT",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · UCT",
    "fecha": "2026-10-21"
   }
  ],
@@ -3377,6 +3407,46 @@
    "finca": "OK",
    "ts": 1792599013304,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "895/1",
+   "texto": "2026-10-21 · Vacía · CLOD",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259923648784",
+   "finca": "OK",
+   "ts": 1792599236488,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "895/1",
+   "texto": "Palpación (21/10/2026): Vacía · CLOD",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvibav7rxukr",
+   "finca": "OK",
+   "ts": 1792599236501,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "144/2",
+   "texto": "2026-10-21 · Vacía · UCT",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259926011547",
+   "finca": "OK",
+   "ts": 1792599260115,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "144/2",
+   "texto": "Palpación (21/10/2026): Vacía · UCT",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvibbdg3g98v",
+   "finca": "OK",
+   "ts": 1792599260137,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -5054,6 +5124,40 @@
     "deleted": false,
     "updIds": [
      179259870689231
+    ]
+   },
+   "rmvibav7rxukr": {
+    "id": "rmvibav7rxukr",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1122,
+    "numero": "895/1",
+    "ts0": 1792599236487,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "CLOD"
+    },
+    "ts": 1792599236487,
+    "deleted": false,
+    "updIds": [
+     179259923648784
+    ]
+   },
+   "rmvibbdg3g98v": {
+    "id": "rmvibbdg3g98v",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1490,
+    "numero": "144/2",
+    "ts0": 1792599260115,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "UCT"
+    },
+    "ts": 1792599260115,
+    "deleted": false,
+    "updIds": [
+     179259926011547
     ]
    }
   }

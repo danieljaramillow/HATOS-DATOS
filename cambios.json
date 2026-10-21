@@ -1,9 +1,25 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T12:50:55.973Z",
+ "actualizado": "2026-10-21T12:54:38.136Z",
  "edits": [],
- "updates": [],
+ "updates": [
+  {
+   "id": 179258727493015,
+   "tipo": "palpacion",
+   "numero": "520/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 120,
+    "parto_probable": "2027-04-02",
+    "hallazgo": "120",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02",
+   "fecha": "2026-10-21"
+  }
+ ],
  "visita": null,
  "cortes": null,
  "notas": [
@@ -86,6 +102,26 @@
    "finca": "OK",
    "ts": 1792503249877,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "520/1",
+   "texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02",
+   "origen": "Visita: Palpación",
+   "ref": "u:179258727493015",
+   "finca": "OK",
+   "ts": 1792587274931,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "520/1",
+   "texto": "Palpación (21/10/2026): Preñada 120 días · parto probable 02/04/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi46hmae5d2",
+   "finca": "OK",
+   "ts": 1792587274934,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -106,7 +142,28 @@
     "equipo": "Computador"
    }
   },
-  "regs": {}
+  "regs": {
+   "rmvi46hmae5d2": {
+    "id": "rmvi46hmae5d2",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 754,
+    "numero": "520/1",
+    "ts0": 1792587274930,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 120,
+     "toro": "",
+     "parto": "2027-04-02"
+    },
+    "ts": 1792587274930,
+    "deleted": false,
+    "updIds": [
+     179258727493015
+    ]
+   }
+  }
  },
  "sobres": {
   "737/4 JDH MADISON MANSO": {

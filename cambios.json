@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T17:31:31.182Z",
+ "actualizado": "2026-10-21T17:33:40.582Z",
  "edits": [
   {
    "id": 1560,
@@ -1829,6 +1829,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179260401652198,
+   "tipo": "palpacion",
+   "numero": "190/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "INFANTIL",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · INFANTIL · DESCARTE FERTILIDAD Y DESARROLLO SEXUAL",
    "fecha": "2026-10-21"
   }
  ],
@@ -4504,6 +4519,26 @@
    "finca": "OK",
    "ts": 1792603886525,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "190/2",
+   "texto": "2026-10-21 · Vacía · INFANTIL · DESCARTE FERTILIDAD Y DESARROLLO SEXUAL",
+   "origen": "Visita: Palpación",
+   "ref": "u:179260401652198",
+   "finca": "OK",
+   "ts": 1792604016522,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "190/2",
+   "texto": "Palpación (21/10/2026): Vacía · INFANTIL · DESCARTE FERTILIDAD Y DESARROLLO SEXUAL",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvie5bihf5e9",
+   "finca": "OK",
+   "ts": 1792604016536,
+   "equipo": "Computador"
   }
  ],
  "muertes": {
@@ -6749,6 +6784,23 @@
     "deleted": false,
     "updIds": [
      179260388651142
+    ]
+   },
+   "rmvie5bihf5e9": {
+    "id": "rmvie5bihf5e9",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1547,
+    "numero": "190/2",
+    "ts0": 1792604016521,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "DESCARTE FERTILIDAD Y DESARROLLO SEXUAL",
+     "diag": "INFANTIL"
+    },
+    "ts": 1792604016521,
+    "deleted": false,
+    "updIds": [
+     179260401652198
     ]
    }
   }

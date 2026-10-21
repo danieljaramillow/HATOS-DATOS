@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T14:10:06.334Z",
+ "actualizado": "2026-10-21T14:10:24.342Z",
  "edits": [],
  "updates": [
   {
@@ -467,6 +467,21 @@
     "toro": "34/2"
    },
    "detalle_texto": "2026-10-21 · Preñada 65 días · parto probable 2027-05-27 · Toro: 34/2",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259182173866,
+   "tipo": "palpacion",
+   "numero": "752/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "CLOI",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · CLOI",
    "fecha": "2026-10-21"
   }
  ],
@@ -1172,6 +1187,26 @@
    "finca": "OK",
    "ts": 1792591801709,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "752/1",
+   "texto": "2026-10-21 · Vacía · CLOI",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259182173866",
+   "finca": "OK",
+   "ts": 1792591821739,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "752/1",
+   "texto": "Palpación (21/10/2026): Vacía · CLOI",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi6vxyi9vca",
+   "finca": "OK",
+   "ts": 1792591821749,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -1780,6 +1815,23 @@
     "deleted": false,
     "updIds": [
      179259180169817
+    ]
+   },
+   "rmvi6vxyi9vca": {
+    "id": "rmvi6vxyi9vca",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 988,
+    "numero": "752/1",
+    "ts0": 1792591821738,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "CLOI"
+    },
+    "ts": 1792591821738,
+    "deleted": false,
+    "updIds": [
+     179259182173866
     ]
    }
   }

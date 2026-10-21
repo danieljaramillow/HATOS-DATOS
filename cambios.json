@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T15:30:06.834Z",
+ "actualizado": "2026-10-21T15:38:39.883Z",
  "edits": [],
  "updates": [
   {
@@ -1073,6 +1073,36 @@
    "id": 179259660173410,
    "tipo": "palpacion",
    "numero": "62/24",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "ESTATICA",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259668391370,
+   "tipo": "palpacion",
+   "numero": "558/4",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "ESTATICA",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · ESTATICA · OJO FERTILIDAD",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259673183558,
+   "tipo": "palpacion",
+   "numero": "55/24",
    "detalle": {
     "fecha": "2026-10-21",
     "resultado": "VACIA",
@@ -2667,6 +2697,66 @@
    "finca": "OK",
    "ts": 1792596601746,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "558/4",
+   "texto": "2026-10-21 · Vacía · ESTATICA",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259663445188",
+   "finca": "OK",
+   "ts": 1792596634451,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "558/4",
+   "texto": "Palpación (21/10/2026): Vacía · ESTATICA",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi9r3gzfnw9",
+   "finca": "OK",
+   "ts": 1792596634464,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "558/4",
+   "texto": "2026-10-21 · Vacía · ESTATICA · OJO FERTILIDAD",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259668391370",
+   "finca": "OK",
+   "ts": 1792596683913,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "558/4",
+   "texto": "Palpación (21/10/2026): Vacía · ESTATICA · OJO FERTILIDAD",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi9r3gzfnw9",
+   "finca": "OK",
+   "ts": 1792596683925,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "55/24",
+   "texto": "2026-10-21 · Vacía · ESTATICA",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259673183558",
+   "finca": "OK",
+   "ts": 1792596731836,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "55/24",
+   "texto": "Palpación (21/10/2026): Vacía · ESTATICA",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi9t6m3ifi1",
+   "finca": "OK",
+   "ts": 1792596731848,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -4017,6 +4107,40 @@
     "deleted": false,
     "updIds": [
      179259660173410
+    ]
+   },
+   "rmvi9r3gzfnw9": {
+    "id": "rmvi9r3gzfnw9",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1418,
+    "numero": "558/4",
+    "ts0": 1792596634451,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "OJO FERTILIDAD",
+     "diag": "ESTATICA"
+    },
+    "ts": 1792596683901,
+    "deleted": false,
+    "updIds": [
+     179259668391370
+    ]
+   },
+   "rmvi9t6m3ifi1": {
+    "id": "rmvi9t6m3ifi1",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1460,
+    "numero": "55/24",
+    "ts0": 1792596731835,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "ESTATICA"
+    },
+    "ts": 1792596731835,
+    "deleted": false,
+    "updIds": [
+     179259673183558
     ]
    }
   }

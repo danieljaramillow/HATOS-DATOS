@@ -13816,7 +13816,36 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
           var dd = b.getAttribute('data-d'); if(dd && !$('vfTiempo').value){ $('vfTiempo').value = segVal('vfUnidad')==='meses' ? (dd/30.4).toFixed(1) : dd; } parto(); });
         function vis(){ var e = segVal('vfEstado'); $('vfPren').style.display = e==='PREÑADA' ? '' : 'none'; $('vfVacia').style.display = e==='VACIA' ? '' : 'none'; }
         function parto(){ var t = num($('vfTiempo').value), dias = t == null ? null : (segVal('vfUnidad')==='meses' ? Math.round(t*30.4) : Math.round(t));
-          $('vfParto').innerHTML = dias ? 'Equivale a <b>'+dias+' días</b> · parto probable <b>'+fmt(addDays(v.fecha, 283 - dias))+'</b>' : ''; }
+          $('vfParto').innerHTML = dias ? 'Equivale a <b>'+dias+' días</b> · parto probable <b>'+fmt(addDays(v.fecha, 283 - dias))+'</b>'+sugerirToro(dias) : ''; }
+        /* Fecha de concepción = fecha de palpación − días de preñez; se compara con los servicios desde el último parto. */
+        function sugerirToro(dias){
+          var TOL = 15, conc = addDays(v.fecha, -dias), k = String(r.numero||'').trim(), lim = ultimoParto(r) || '0000';
+          function dd(a, b){ return Math.round((new Date(a) - new Date(b)) / 864e5); }
+          var serv = [];
+          (ENT[k] || []).forEach(function(e){ if(!e.fecha || e.fecha < lim) return;
+            if(e.toro) serv.push({ tipo:'monta', toro:String(e.toro).trim(), desde:e.fecha, hasta:e.salida || v.fecha });
+            else if(e.ia) serv.push({ tipo:'IA', toro:String(e.ia).trim(), desde:e.fecha, hasta:e.fecha });
+            else if(e.te) serv.push({ tipo:'TE', toro:String(e.te).trim(), desde:e.fecha, hasta:e.fecha }); });
+          (PALP0[k] || []).forEach(function(p){ if(p.fecha && p.fecha >= lim && /insem/i.test(p.estado||'') && !serv.some(function(x){ return x.tipo==='IA' && x.desde===p.fecha; }))
+            serv.push({ tipo:'IA', toro:p.toro ? String(p.toro).trim() : '', desde:p.fecha, hasta:p.fecha }); });
+          var H = '<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.04)">Concepción calculada ≈ <b>'+fmt(conc)+'</b> <small>(±'+TOL+' días)</small>';
+          if(!serv.length) return H+'<br><span style="color:var(--rust-deep)">No hay servicios registrados desde el último parto para comparar.</span></div>';
+          serv.forEach(function(x){
+            var dentro = x.tipo==='monta' ? (conc >= addDays(x.desde, -TOL) && conc <= addDays(x.hasta, TOL)) : Math.abs(dd(conc, x.desde)) <= TOL;
+            x.ok = dentro; x.dist = x.tipo==='monta' ? (conc < x.desde ? dd(x.desde, conc) : (conc > x.hasta ? dd(conc, x.hasta) : 0)) : Math.abs(dd(conc, x.desde));
+          });
+          var ok = serv.filter(function(x){ return x.ok; }).sort(function(a,b){ return a.dist - b.dist || (a.tipo==='IA' ? -1 : 1); });
+          H += '<ul style="margin:6px 0 0 16px;padding:0">'+serv.map(function(x){
+            var sigue = !(ENT[k]||[]).some(function(e){ return e.toro && String(e.toro).trim()===x.toro && e.fecha===x.desde && e.salida; });
+            var desc = x.tipo==='monta' ? 'Monta con <b>'+esc(x.toro)+'</b> '+(sigue ? 'desde '+fmt(x.desde)+' (sigue en monta)' : 'del '+fmt(x.desde)+' al '+fmt(x.hasta))
+                                       : x.tipo+' del '+fmt(x.desde)+' · '+(x.toro ? 'toro <b>'+esc(x.toro)+'</b>' : '<span style="color:var(--rust-deep)">toro no registrado</span>');
+            return '<li>'+(x.ok ? '✅ ' : '❌ ')+desc+(x.ok ? '' : ' <small>(fuera por '+x.dist+' días)</small>')+'</li>'; }).join('')+'</ul>';
+          if(ok.length === 1) H += '<div style="margin-top:6px">Sugerido: <b>'+(ok[0].toro ? esc(ok[0].toro) : ok[0].tipo+' del '+fmt(ok[0].desde)+' (toro no registrado)')+'</b>'+(ok[0].toro ? ' <button type="button" class="vs-chip" id="vfUsarSug" data-t="'+esc(ok[0].toro)+'">Usar este toro</button>' : '')+'</div>';
+          else if(ok.length > 1) H += '<div style="margin-top:6px;color:var(--rust-deep)">⚠ La fecha cae en '+ok.length+' servicios: '+ok.map(function(x){ return x.toro || (x.tipo+' '+fmt(x.desde)); }).join(' o ')+'. Revise con el veterinario (la más cercana va primero).</div>';
+          else H += '<div style="margin-top:6px;color:var(--rust-deep)">⚠ La concepción no coincide con ningún servicio registrado.</div>';
+          setTimeout(function(){ var u = $('vfUsarSug'); if(u) u.onclick = function(){ $('vfToro').value = u.getAttribute('data-t'); }; }, 0);
+          return H+'</div>';
+        }
         wireSeg('vfEstado', vis); wireSeg('vfUnidad', parto); $('vfTiempo').oninput = parto; vis(); parto();
       }
       if(v.tipo === 'pesaje' && $('vfGan')){ var up2 = ultimoPeso(r, v.fecha); $('vfPeso').oninput = function(){ var p = num($('vfPeso').value); if(p == null){ $('vfGan').textContent=''; return; } var dias = Math.round((new Date(v.fecha) - new Date(up2.fecha))/864e5), dif = p - up2.peso;

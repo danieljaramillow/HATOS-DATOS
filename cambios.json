@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T17:00:24.759Z",
+ "actualizado": "2026-10-21T17:00:54.127Z",
  "edits": [],
  "updates": [
   {
@@ -4099,7 +4099,12 @@
    "equipo": "Computador"
   }
  ],
- "muertes": null,
+ "muertes": {
+  "172/2": {
+   "culpa": "madre",
+   "ts": 1792602049103
+  }
+ },
  "qa": null,
  "visitas": {
   "visitas": {

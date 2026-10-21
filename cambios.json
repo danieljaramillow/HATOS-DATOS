@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T15:38:39.883Z",
+ "actualizado": "2026-10-21T15:40:12.004Z",
  "edits": [],
  "updates": [
   {
@@ -4161,6 +4161,10 @@
   "ACARI RF": {
    "v": true,
    "ts": 1792525631018
+  },
+  "7141/3": {
+   "v": true,
+   "ts": 1792597208520
   }
  }
 }

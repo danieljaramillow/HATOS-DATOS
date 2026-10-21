@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T16:16:54.176Z",
+ "actualizado": "2026-10-21T16:17:39.623Z",
  "edits": [],
  "updates": [
   {
@@ -1412,6 +1412,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Vacía · CLOD",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259945610385,
+   "tipo": "palpacion",
+   "numero": "31/0",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía ·  · HACER PRUEBA DE FERTILIDAD",
    "fecha": "2026-10-21"
   }
  ],
@@ -3517,6 +3532,26 @@
    "finca": "TNJ",
    "ts": 1792599409935,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "31/0",
+   "texto": "2026-10-21 · Vacía ·  · HACER PRUEBA DE FERTILIDAD",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259945610385",
+   "finca": "OK",
+   "ts": 1792599456103,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "31/0",
+   "texto": "Palpación (21/10/2026): Vacía · HACER PRUEBA DE FERTILIDAD",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvibfko73an0",
+   "finca": "OK",
+   "ts": 1792599456116,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -5262,6 +5297,23 @@
     "deleted": false,
     "updIds": [
      179259940992276
+    ]
+   },
+   "rmvibfko73an0": {
+    "id": "rmvibfko73an0",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 930,
+    "numero": "31/0",
+    "ts0": 1792599456103,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "HACER PRUEBA DE FERTILIDAD",
+     "diag": ""
+    },
+    "ts": 1792599456103,
+    "deleted": false,
+    "updIds": [
+     179259945610385
     ]
    }
   }

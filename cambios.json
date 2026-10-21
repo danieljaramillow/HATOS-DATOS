@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T14:09:46.130Z",
+ "actualizado": "2026-10-21T14:10:06.334Z",
  "edits": [],
  "updates": [
   {
@@ -452,6 +452,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Preñada 130 días · parto probable 2027-03-23",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259180169817,
+   "tipo": "palpacion",
+   "numero": "950/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 65,
+    "parto_probable": "2027-05-27",
+    "hallazgo": "65",
+    "toro": "34/2"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 65 días · parto probable 2027-05-27 · Toro: 34/2",
    "fecha": "2026-10-21"
   }
  ],
@@ -1137,6 +1152,26 @@
    "finca": "OK",
    "ts": 1792591780320,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "950/1",
+   "texto": "2026-10-21 · Preñada 65 días · parto probable 2027-05-27 · Toro: 34/2",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259180169817",
+   "finca": "OK",
+   "ts": 1792591801698,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "950/1",
+   "texto": "Palpación (21/10/2026): Preñada 65 días · toro 34/2 · parto probable 27/05/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi6vihuti3b",
+   "finca": "OK",
+   "ts": 1792591801709,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -1725,6 +1760,26 @@
     "deleted": false,
     "updIds": [
      179259178029808
+    ]
+   },
+   "rmvi6vihuti3b": {
+    "id": "rmvi6vihuti3b",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1177,
+    "numero": "950/1",
+    "ts0": 1792591801698,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 65,
+     "toro": "34/2",
+     "parto": "2027-05-27"
+    },
+    "ts": 1792591801698,
+    "deleted": false,
+    "updIds": [
+     179259180169817
     ]
    }
   }

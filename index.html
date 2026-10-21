@@ -14549,6 +14549,29 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     return '';
   }
 
+  /* ---------- servicios (monta / IA / TE) desde el último parto ---------- */
+  var __ENT = null;
+  function entoresDe(num){
+    if(!__ENT){ try{ __ENT = JSON.parse(document.getElementById('entores-source').textContent) || {}; }catch(e){ __ENT = {}; } }
+    var k = String(num||'').trim(); return (__ENT[k] || __ENT[k.toUpperCase()] || []).slice();
+  }
+  function servicios(r, h){
+    var desde = h.ult || sumaDias(hoyIso(), -400);
+    var L = entoresDe(r.numero).filter(function(e){ return e.fecha && e.fecha >= desde; });
+    (window.__reportes ? window.__reportes.palpaciones(r) : []).forEach(function(p){
+      if(p.fecha && p.fecha >= desde && /insem/i.test(p.estado||'') && !L.some(function(e){ return e.ia && e.fecha===p.fecha; }))
+        L.push({ fecha:p.fecha, ia:p.toro || '', insemPalp:true });
+    });
+    L.sort(function(a,b){ return a.fecha < b.fecha ? -1 : 1; });
+    var txt = L.length ? L.map(function(e){
+      if(e.toro) return 'Monta con <b>'+esc(e.toro)+'</b> desde '+fmt(e.fecha)+(e.salida ? ' hasta '+fmt(e.salida) : ' <span class="pl-ok">(sigue en monta)</span>');
+      if(e.ia || e.insemPalp) return 'IA '+fmt(e.fecha)+' · '+(e.ia ? 'toro <b>'+esc(e.ia)+'</b>' : '<span class="pl-mal">toro no registrado</span>');
+      if(e.te) return 'TE '+fmt(e.fecha)+' · <b>'+esc(e.te)+'</b>';
+      return fmt(e.fecha);
+    }).join('<br>') : '<span class="pl-mal">Sin servicios registrados desde el último parto</span>';
+    return '<div style="grid-column:1/-1"><b>Servicios desde el último parto</b>'+txt+'</div>';
+  }
+
   /* ---------- panel para el formulario de palpación ---------- */
   window.__palpCtx = function(r){
     try{
@@ -14561,6 +14584,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
         '<div><b>Palpación anterior</b>'+esc(txtPalp(h.lp))+(h.lp&&h.lp.fecha?' ('+fmt(h.lp.fecha)+')':'')+
           (h.pren && h.diasHoy!=null ? '<br>'+(h.esperado<hoy ? '<span class="pl-mal">Debió parir ≈ '+fmt(h.esperado)+' y no hay parto registrado</span>' : '<span class="pl-ok">Hoy ≈ '+h.diasHoy+' días · parto ≈ '+fmt(h.esperado)+'</span>') : '')+
           (h.abortoDesp ? '<br><span class="pl-mal">Abortó después de esa palpación</span>' : '')+'</div>'+
+        servicios(r, h)+
       '</div>';
       if(h.banderas.length){
         H += '<ul>'+h.banderas.map(function(b){ return '<li><span class="pl-flag">⚑ '+esc(window.__BN.ICON[b.tipo])+'</span> — '+esc(b.texto)+'</li>'; }).join('')+'</ul>';

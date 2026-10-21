@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-20T19:47:20.234Z",
+ "actualizado": "2026-10-21T12:50:55.973Z",
  "edits": [],
  "updates": [],
  "visita": null,
@@ -90,7 +90,24 @@
  ],
  "muertes": null,
  "qa": null,
- "visitas": null,
+ "visitas": {
+  "visitas": {
+   "vmvi41oqdret3": {
+    "id": "vmvi41oqdret3",
+    "tipo": "palpacion",
+    "ts0": 1792587050869,
+    "fecha": "2026-10-21",
+    "finca": "OK",
+    "extra": {
+     "veterinario": "DR MARCO GONSALEZ"
+    },
+    "obs": "",
+    "ts": 1792587050869,
+    "equipo": "Computador"
+   }
+  },
+  "regs": {}
+ },
  "sobres": {
   "737/4 JDH MADISON MANSO": {
    "v": true,

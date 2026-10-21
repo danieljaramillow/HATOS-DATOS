@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T15:53:09.055Z",
+ "actualizado": "2026-10-21T15:55:35.985Z",
  "edits": [],
  "updates": [
   {
@@ -1247,6 +1247,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Vacía · CLOD",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259813239133,
+   "tipo": "palpacion",
+   "numero": "67/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 70,
+    "parto_probable": "2027-05-22",
+    "hallazgo": "70",
+    "toro": "7141/3"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 70 días · parto probable 2027-05-22 · Toro: 7141/3",
    "fecha": "2026-10-21"
   }
  ],
@@ -3092,6 +3107,26 @@
    "finca": "OK",
    "ts": 1792597984185,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "67/2",
+   "texto": "2026-10-21 · Preñada 70 días · parto probable 2027-05-22 · Toro: 7141/3",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259813239133",
+   "finca": "OK",
+   "ts": 1792598132391,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "67/2",
+   "texto": "Palpación (21/10/2026): Preñada 70 días · toro 7141/3 · parto probable 22/05/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvian7afyrkr",
+   "finca": "OK",
+   "ts": 1792598132404,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -4638,6 +4673,26 @@
     "deleted": false,
     "updIds": [
      179259798417315
+    ]
+   },
+   "rmvian7afyrkr": {
+    "id": "rmvian7afyrkr",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1345,
+    "numero": "67/2",
+    "ts0": 1792598132391,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 70,
+     "toro": "7141/3",
+     "parto": "2027-05-22"
+    },
+    "ts": 1792598132391,
+    "deleted": false,
+    "updIds": [
+     179259813239133
     ]
    }
   }

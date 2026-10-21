@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T15:47:42.077Z",
+ "actualizado": "2026-10-21T15:51:03.038Z",
  "edits": [],
  "updates": [
   {
@@ -1187,6 +1187,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Vacía · UCT",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259785919002,
+   "tipo": "palpacion",
+   "numero": "123/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 115,
+    "parto_probable": "2027-04-07",
+    "hallazgo": "115",
+    "toro": "IA"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 115 días · parto probable 2027-04-07 · Toro: IA",
    "fecha": "2026-10-21"
   }
  ],
@@ -2952,6 +2967,26 @@
    "finca": "OK",
    "ts": 1792597655784,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "123/2",
+   "texto": "2026-10-21 · Preñada 115 días · parto probable 2027-04-07 · Toro: IA",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259785919002",
+   "finca": "OK",
+   "ts": 1792597859191,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "123/2",
+   "texto": "Palpación (21/10/2026): Preñada 115 días · toro IA · parto probable 07/04/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmviahchioryf",
+   "finca": "OK",
+   "ts": 1792597859203,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -4424,6 +4459,26 @@
     "deleted": false,
     "updIds": [
      179259765577035
+    ]
+   },
+   "rmviahchioryf": {
+    "id": "rmviahchioryf",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1450,
+    "numero": "123/2",
+    "ts0": 1792597859190,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 115,
+     "toro": "IA",
+     "parto": "2027-04-07"
+    },
+    "ts": 1792597859190,
+    "deleted": false,
+    "updIds": [
+     179259785919002
     ]
    }
   }

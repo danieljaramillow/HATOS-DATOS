@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T13:30:50.115Z",
+ "actualizado": "2026-10-21T13:34:34.593Z",
  "edits": [],
  "updates": [
   {
@@ -392,6 +392,21 @@
     "toro": "112/2"
    },
    "detalle_texto": "2026-10-21 · Preñada 68 días · parto probable 2027-05-24 · Toro: 112/2",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179258966955053,
+   "tipo": "palpacion",
+   "numero": "938/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 120,
+    "parto_probable": "2027-04-02",
+    "hallazgo": "120",
+    "toro": "646"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 646",
    "fecha": "2026-10-21"
   }
  ],
@@ -997,6 +1012,26 @@
    "finca": "OK",
    "ts": 1792589446905,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "938/1",
+   "texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 646",
+   "origen": "Visita: Palpación",
+   "ref": "u:179258966955053",
+   "finca": "OK",
+   "ts": 1792589669550,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "938/1",
+   "texto": "Palpación (21/10/2026): Preñada 120 días · toro 646 · parto probable 02/04/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi5ltbicrhf",
+   "finca": "OK",
+   "ts": 1792589669562,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -1488,6 +1523,26 @@
     "deleted": false,
     "updIds": [
      179258944689599
+    ]
+   },
+   "rmvi5ltbicrhf": {
+    "id": "rmvi5ltbicrhf",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1162,
+    "numero": "938/1",
+    "ts0": 1792589669550,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 120,
+     "toro": "646",
+     "parto": "2027-04-02"
+    },
+    "ts": 1792589669550,
+    "deleted": false,
+    "updIds": [
+     179258966955053
     ]
    }
   }

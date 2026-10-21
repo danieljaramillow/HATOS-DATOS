@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T15:59:39.233Z",
+ "actualizado": "2026-10-21T16:02:06.117Z",
  "edits": [],
  "updates": [
   {
@@ -1322,6 +1322,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Vacía · CLOD",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259851983287,
+   "tipo": "palpacion",
+   "numero": "114/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "ESTATICA",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
    "fecha": "2026-10-21"
   }
  ],
@@ -3287,6 +3302,26 @@
    "finca": "OK",
    "ts": 1792598373691,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "114/2",
+   "texto": "2026-10-21 · Vacía · ESTATICA",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259851983287",
+   "finca": "OK",
+   "ts": 1792598519832,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "114/2",
+   "texto": "Palpación (21/10/2026): Vacía · ESTATICA",
+   "origen": "Visita Palpación",
+   "ref": "w:rmviavi8olhev",
+   "finca": "OK",
+   "ts": 1792598519843,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -4927,6 +4962,23 @@
     "deleted": false,
     "updIds": [
      179259837367872
+    ]
+   },
+   "rmviavi8olhev": {
+    "id": "rmviavi8olhev",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1439,
+    "numero": "114/2",
+    "ts0": 1792598519832,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "ESTATICA"
+    },
+    "ts": 1792598519832,
+    "deleted": false,
+    "updIds": [
+     179259851983287
     ]
    }
   }

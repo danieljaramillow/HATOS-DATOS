@@ -1,8 +1,20 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T17:01:09.128Z",
- "edits": [],
+ "actualizado": "2026-10-21T17:22:10.997Z",
+ "edits": [
+  {
+   "id": 1560,
+   "numero": "602/5",
+   "field": "activo",
+   "field_label": "Estado",
+   "col": "X",
+   "valor_anterior": "INACTIVO",
+   "valor_nuevo": "ACTIVO",
+   "fecha": "2026-10-21",
+   "ts": 1792603324959
+  }
+ ],
  "updates": [
   {
    "id": 179258727493015,
@@ -4131,6 +4143,16 @@
    "ref": "w:rmviczihjn5lh",
    "finca": "OK",
    "ts": 1792602066021,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "edicion",
+   "numero": "602/5",
+   "texto": "Estado: INACTIVO → ACTIVO",
+   "origen": "Ficha (✏ Editar datos)",
+   "ref": "e:1560:activo",
+   "finca": "OK",
+   "ts": 1792603324959,
    "equipo": "Computador"
   }
  ],

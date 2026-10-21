@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T16:17:39.623Z",
+ "actualizado": "2026-10-21T16:18:11.996Z",
  "edits": [],
  "updates": [
   {
@@ -1427,6 +1427,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Vacía ·  · HACER PRUEBA DE FERTILIDAD",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259948850706,
+   "tipo": "palpacion",
+   "numero": "86/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "CLOI",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · CLOI",
    "fecha": "2026-10-21"
   }
  ],
@@ -3552,6 +3567,26 @@
    "finca": "OK",
    "ts": 1792599456116,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "86/2",
+   "texto": "2026-10-21 · Vacía · CLOI",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259948850706",
+   "finca": "OK",
+   "ts": 1792599488508,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "86/2",
+   "texto": "Palpación (21/10/2026): Vacía · CLOI",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvibg9obclbk",
+   "finca": "OK",
+   "ts": 1792599488521,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -5314,6 +5349,23 @@
     "deleted": false,
     "updIds": [
      179259945610385
+    ]
+   },
+   "rmvibg9obclbk": {
+    "id": "rmvibg9obclbk",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1377,
+    "numero": "86/2",
+    "ts0": 1792599488507,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "CLOI"
+    },
+    "ts": 1792599488507,
+    "deleted": false,
+    "updIds": [
+     179259948850706
     ]
    }
   }

@@ -14549,6 +14549,15 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     return '';
   }
 
+  document.addEventListener('click', function(ev){
+    var bt = ev.target.closest && ev.target.closest('.pl-culpa button'); if(!bt || !window.__BN) return;
+    ev.preventDefault();
+    var box = bt.closest('.pl-culpa'), ctx = bt.closest('.pl-ctx'), num = box.getAttribute('data-vaca');
+    window.__BN.setCulpa(bt.getAttribute('data-num'), bt.getAttribute('data-c'));
+    if(window.__BN.reset) window.__BN.reset();
+    var r = (window.__BD__||[]).filter(function(x){ return String(x.numero).trim() === String(num).trim(); })[0];
+    if(r && ctx){ var d = document.createElement('div'); d.innerHTML = window.__palpCtx(r); if(d.firstChild) ctx.replaceWith(d.firstChild); }
+  });
   /* ---------- servicios (monta / IA / TE) desde el último parto ---------- */
   var __ENT = null;
   function entoresDe(num){
@@ -14590,6 +14599,11 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
         H += '<ul>'+h.banderas.map(function(b){ return '<li><span class="pl-flag">⚑ '+esc(window.__BN.ICON[b.tipo])+'</span> — '+esc(b.texto)+'</li>'; }).join('')+'</ul>';
         if(h.banderas.length >= 2) H += '<div class="pl-alerta">⚑ '+h.banderas.length+' banderas negras: candidata a descarte si sale vacía.</div>';
       } else H += '<div class="pl-nota">Sin banderas negras.</div>';
+      (h.a.muertes||[]).forEach(function(m){
+        H += '<div class="pl-nota pl-culpa" data-vaca="'+esc(r.numero)+'">✝ Cría <b>'+esc(m.numero)+'</b> murió ('+esc(String(m.etapa||'').toLowerCase())+') — «'+esc(m.causa||'')+'». '+
+          (m.culpa==='madre' ? '<b>Cuenta como bandera negra</b>' : (m.culpa==='ajena' ? 'Se tomó como <b>ajena a la madre</b> (sin bandera)' : '<b>Por revisar</b> (sin bandera)'))+(m.manual?' <small>(clasificado a mano)</small>':'')+
+          '<br>¿Fue culpa de la madre? <button type="button" data-num="'+esc(m.numero)+'" data-c="madre" style="'+(m.culpa==='madre'?'font-weight:700;':'')+'">Sí</button> <button type="button" data-num="'+esc(m.numero)+'" data-c="ajena" style="'+(m.culpa==='ajena'?'font-weight:700;':'')+'">No</button></div>';
+      });
       var cs = h.coms.slice(-2);
       if(cs.length) H += '<div class="pl-nota">'+cs.map(function(c){ return '<b>'+esc(c.fuente)+(c.fecha?' ('+fmt(c.fecha)+')':'')+':</b> '+esc(c.texto); }).join('<br>')+'</div>';
       return H+'</div>';

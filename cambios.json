@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T17:34:51.892Z",
+ "actualizado": "2026-10-21T17:35:31.029Z",
  "edits": [
   {
    "id": 1560,
@@ -4630,8 +4630,9 @@
      "veterinario": "DR MARCO GONSALEZ"
     },
     "obs": "",
-    "ts": 1792587050869,
-    "equipo": "Computador"
+    "ts": 1792604125572,
+    "equipo": "Computador",
+    "cerrada": true
    }
   },
   "regs": {

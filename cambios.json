@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T15:45:12.132Z",
+ "actualizado": "2026-10-21T15:45:35.442Z",
  "edits": [],
  "updates": [
   {
@@ -1145,7 +1145,7 @@
    "fecha": "2026-10-21"
   },
   {
-   "id": 179259750651177,
+   "id": 179259753204972,
    "tipo": "palpacion",
    "numero": "338/1",
    "detalle": {
@@ -2862,6 +2862,26 @@
    "finca": "OK",
    "ts": 1792597506524,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "338/1",
+   "texto": "2026-10-21 · Vacía · UCT",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259753204972",
+   "finca": "OK",
+   "ts": 1792597532049,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "338/1",
+   "texto": "Palpación (21/10/2026): Vacía · UCT",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvia9scvp1ds",
+   "finca": "OK",
+   "ts": 1792597532059,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -4296,10 +4316,10 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792597506511,
+    "ts": 1792597532039,
     "deleted": false,
     "updIds": [
-     179259750651177
+     179259753204972
     ]
    }
   }

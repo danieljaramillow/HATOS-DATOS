@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T14:13:52.454Z",
+ "actualizado": "2026-10-21T14:14:24.413Z",
  "edits": [],
  "updates": [
   {
@@ -557,6 +557,21 @@
     "toro": "646"
    },
    "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 646 · OJO BAJO RENDIMIENTO DE FERTILIDAD",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259205921558,
+   "tipo": "palpacion",
+   "numero": "546/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 130,
+    "parto_probable": "2027-03-23",
+    "hallazgo": "130",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Preñada 130 días · parto probable 2027-03-23",
    "fecha": "2026-10-21"
   }
  ],
@@ -1402,6 +1417,26 @@
    "finca": "OK",
    "ts": 1792592027768,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "546/1",
+   "texto": "2026-10-21 · Preñada 130 días · parto probable 2027-03-23",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259205921558",
+   "finca": "OK",
+   "ts": 1792592059215,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "546/1",
+   "texto": "Palpación (21/10/2026): Preñada 130 días · parto probable 23/03/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi71173v8p9",
+   "finca": "OK",
+   "ts": 1792592059225,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -2118,6 +2153,26 @@
     "deleted": false,
     "updIds": [
      179259197401662
+    ]
+   },
+   "rmvi71173v8p9": {
+    "id": "rmvi71173v8p9",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 778,
+    "numero": "546/1",
+    "ts0": 1792592059215,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 130,
+     "toro": "",
+     "parto": "2027-03-23"
+    },
+    "ts": 1792592059215,
+    "deleted": false,
+    "updIds": [
+     179259205921558
     ]
    }
   }

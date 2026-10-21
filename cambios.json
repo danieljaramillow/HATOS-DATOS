@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T16:54:19.002Z",
+ "actualizado": "2026-10-21T16:56:54.651Z",
  "edits": [],
  "updates": [
   {
@@ -1598,6 +1598,21 @@
    "id": 179260165288248,
    "tipo": "palpacion",
    "numero": "91/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Preñada",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179260180932954,
+   "tipo": "palpacion",
+   "numero": "633/1",
    "detalle": {
     "fecha": "2026-10-21",
     "resultado": "PREÑADA",
@@ -3992,6 +4007,26 @@
    "finca": "OK",
    "ts": 1792601652896,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "633/1",
+   "texto": "2026-10-21 · Preñada",
+   "origen": "Visita: Palpación",
+   "ref": "u:179260180932954",
+   "finca": "OK",
+   "ts": 1792601809329,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "633/1",
+   "texto": "Palpación (21/10/2026): Preñada",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvicu0flup24",
+   "finca": "OK",
+   "ts": 1792601809342,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -5982,6 +6017,26 @@
     "deleted": false,
     "updIds": [
      179260165288248
+    ]
+   },
+   "rmvicu0flup24": {
+    "id": "rmvicu0flup24",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 850,
+    "numero": "633/1",
+    "ts0": 1792601809329,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": "",
+     "toro": "",
+     "parto": ""
+    },
+    "ts": 1792601809329,
+    "deleted": false,
+    "updIds": [
+     179260180932954
     ]
    }
   }

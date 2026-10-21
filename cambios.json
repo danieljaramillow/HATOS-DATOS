@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T15:58:44.497Z",
+ "actualizado": "2026-10-21T15:59:39.233Z",
  "edits": [],
  "updates": [
   {
@@ -1307,6 +1307,21 @@
     "toro": "FENOL S"
    },
    "detalle_texto": "2026-10-21 · Preñada 125 días · parto probable 2027-03-28 · Toro: FENOL S",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259837367872,
+   "tipo": "palpacion",
+   "numero": "686/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "CLOD",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · CLOD",
    "fecha": "2026-10-21"
   }
  ],
@@ -3252,6 +3267,26 @@
    "finca": "OK",
    "ts": 1792598318761,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "686/1",
+   "texto": "2026-10-21 · Vacía · CLOD",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259837367872",
+   "finca": "OK",
+   "ts": 1792598373678,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "686/1",
+   "texto": "Palpación (21/10/2026): Vacía · CLOD",
+   "origen": "Visita Palpación",
+   "ref": "w:rmviasdgu02ps",
+   "finca": "OK",
+   "ts": 1792598373691,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -4875,6 +4910,23 @@
     "deleted": false,
     "updIds": [
      179259831875072
+    ]
+   },
+   "rmviasdgu02ps": {
+    "id": "rmviasdgu02ps",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 914,
+    "numero": "686/1",
+    "ts0": 1792598373678,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "CLOD"
+    },
+    "ts": 1792598373678,
+    "deleted": false,
+    "updIds": [
+     179259837367872
     ]
    }
   }

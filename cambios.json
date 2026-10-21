@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T15:55:35.985Z",
+ "actualizado": "2026-10-21T15:57:35.401Z",
  "edits": [],
  "updates": [
   {
@@ -1250,7 +1250,7 @@
    "fecha": "2026-10-21"
   },
   {
-   "id": 179259813239133,
+   "id": 179259825037382,
    "tipo": "palpacion",
    "numero": "67/2",
    "detalle": {
@@ -3127,6 +3127,26 @@
    "finca": "OK",
    "ts": 1792598132404,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "67/2",
+   "texto": "2026-10-21 · Preñada 70 días · parto probable 2027-05-22 · Toro: 7141/3",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259825037382",
+   "finca": "OK",
+   "ts": 1792598250374,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "67/2",
+   "texto": "Palpación (21/10/2026): Preñada 70 días · toro 7141/3 · parto probable 22/05/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvian7afyrkr",
+   "finca": "OK",
+   "ts": 1792598250386,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -4689,10 +4709,10 @@
      "toro": "7141/3",
      "parto": "2027-05-22"
     },
-    "ts": 1792598132391,
+    "ts": 1792598250362,
     "deleted": false,
     "updIds": [
-     179259813239133
+     179259825037382
     ]
    }
   }

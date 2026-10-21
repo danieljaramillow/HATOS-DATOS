@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T14:30:30.531Z",
+ "actualizado": "2026-10-21T15:08:17.450Z",
  "edits": [],
  "updates": [
   {
@@ -752,6 +752,141 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Vacía · UCT",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259468065762,
+   "tipo": "palpacion",
+   "numero": "855/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 55,
+    "parto_probable": "2027-06-06",
+    "hallazgo": "55",
+    "toro": "54/0"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 55 días · parto probable 2027-06-06 · Toro: 54/0 · POSIBLE DESCARTE POR RENDIEMNETO (PERÑADA)",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259471388110,
+   "tipo": "palpacion",
+   "numero": "455/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 50,
+    "parto_probable": "2027-06-11",
+    "hallazgo": "50",
+    "toro": "54/0"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 50 días · parto probable 2027-06-11 · Toro: 54/0",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259478054347,
+   "tipo": "palpacion",
+   "numero": "986/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 80,
+    "parto_probable": "2027-05-12",
+    "hallazgo": "80",
+    "toro": "34/2"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 80 días · parto probable 2027-05-12 · Toro: 34/2",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259486428298,
+   "tipo": "palpacion",
+   "numero": "136/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 60,
+    "parto_probable": "2027-06-01",
+    "hallazgo": "60",
+    "toro": "34/2"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 60 días · parto probable 2027-06-01 · Toro: 34/2",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259488924660,
+   "tipo": "palpacion",
+   "numero": "68/23",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 85,
+    "parto_probable": "2027-05-07",
+    "hallazgo": "85",
+    "toro": "54/0"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 85 días · parto probable 2027-05-07 · Toro: 54/0",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259493395032,
+   "tipo": "palpacion",
+   "numero": "56/24",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "ESTATICA",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · ESTATICA · DEVOLVER A DR DOMINGUEZ",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259499641244,
+   "tipo": "palpacion",
+   "numero": "873/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "UCT",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · UCT",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259507843742,
+   "tipo": "palpacion",
+   "numero": "735/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "CLOI",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · CLOI · DESCARTE FERTILIDAD",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259510903898,
+   "tipo": "palpacion",
+   "numero": "467/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "ESTATICA",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
    "fecha": "2026-10-21"
   }
  ],
@@ -1877,6 +2012,206 @@
    "finca": "OK",
    "ts": 1792593025644,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "855/1",
+   "texto": "2026-10-21 · Preñada 55 días · parto probable 2027-06-06 · Toro: 54/0 · POSIBLE DESCARTE POR RENDIEMNETO (PERÑADA)",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259468065762",
+   "finca": "OK",
+   "ts": 1792594680657,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "855/1",
+   "texto": "Palpación (21/10/2026): Preñada 55 días · toro 54/0 · parto probable 06/06/2027 · POSIBLE DESCARTE POR RENDIEMNETO (PERÑADA)",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi8l7wx2psf",
+   "finca": "OK",
+   "ts": 1792594680668,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "455/2",
+   "texto": "2026-10-21 · Preñada 50 días · parto probable 2027-06-11 · Toro: 54/0",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259471388110",
+   "finca": "OK",
+   "ts": 1792594713882,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "455/2",
+   "texto": "Palpación (21/10/2026): Preñada 50 días · toro 54/0 · parto probable 11/06/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi8lxjtnrcp",
+   "finca": "OK",
+   "ts": 1792594713892,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "986/1",
+   "texto": "2026-10-21 · Preñada 80 días · parto probable 2027-05-12 · Toro: 34/2",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259478054347",
+   "finca": "OK",
+   "ts": 1792594780543,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "986/1",
+   "texto": "Palpación (21/10/2026): Preñada 80 días · toro 34/2 · parto probable 12/05/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi8nczj9tme",
+   "finca": "OK",
+   "ts": 1792594780553,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "136/2",
+   "texto": "2026-10-21 · Preñada 110 días · parto probable 2027-04-12 · Toro: 34/2",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259482040179",
+   "finca": "OK",
+   "ts": 1792594820401,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "136/2",
+   "texto": "Palpación (21/10/2026): Preñada 110 días · toro 34/2 · parto probable 12/04/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi8o7qpiix1",
+   "finca": "OK",
+   "ts": 1792594820413,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "136/2",
+   "texto": "2026-10-21 · Preñada 60 días · parto probable 2027-06-01 · Toro: 34/2",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259486428298",
+   "finca": "OK",
+   "ts": 1792594864283,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "136/2",
+   "texto": "Palpación (21/10/2026): Preñada 60 días · toro 34/2 · parto probable 01/06/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi8o7qpiix1",
+   "finca": "OK",
+   "ts": 1792594864293,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "68/23",
+   "texto": "2026-10-21 · Preñada 85 días · parto probable 2027-05-07 · Toro: 54/0",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259488924660",
+   "finca": "OK",
+   "ts": 1792594889246,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "68/23",
+   "texto": "Palpación (21/10/2026): Preñada 85 días · toro 54/0 · parto probable 07/05/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi8pov2hgcn",
+   "finca": "OK",
+   "ts": 1792594889259,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "56/24",
+   "texto": "2026-10-21 · Vacía · ESTATICA · DEVOLVER A DR DOMINGUEZ",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259493395032",
+   "finca": "OK",
+   "ts": 1792594933950,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "56/24",
+   "texto": "Palpación (21/10/2026): Vacía · ESTATICA · DEVOLVER A DR DOMINGUEZ",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi8qnct6ovz",
+   "finca": "OK",
+   "ts": 1792594933962,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "873/1",
+   "texto": "2026-10-21 · Vacía · UCT",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259499641244",
+   "finca": "OK",
+   "ts": 1792594996412,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "873/1",
+   "texto": "Palpación (21/10/2026): Vacía · UCT",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi8rzjw9hak",
+   "finca": "OK",
+   "ts": 1792594996425,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "735/1",
+   "texto": "2026-10-21 · Vacía · CLOI · DESCARTE FERTILIDAD",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259507843742",
+   "finca": "OK",
+   "ts": 1792595078437,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "735/1",
+   "texto": "Palpación (21/10/2026): Vacía · CLOI · DESCARTE FERTILIDAD",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi8tqud9kzl",
+   "finca": "OK",
+   "ts": 1792595078448,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "467/2",
+   "texto": "2026-10-21 · Vacía · ESTATICA",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259510903898",
+   "finca": "OK",
+   "ts": 1792595109039,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "467/2",
+   "texto": "Palpación (21/10/2026): Vacía · ESTATICA",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi8uege76kr",
+   "finca": "OK",
+   "ts": 1792595109050,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -2826,6 +3161,174 @@
     "deleted": false,
     "updIds": [
      179259302563161
+    ]
+   },
+   "rmvi8l7wx2psf": {
+    "id": "rmvi8l7wx2psf",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1079,
+    "numero": "855/1",
+    "ts0": 1792594680657,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "POSIBLE DESCARTE POR RENDIEMNETO (PERÑADA)",
+     "unidad": "dias",
+     "dias": 55,
+     "toro": "54/0",
+     "parto": "2027-06-06"
+    },
+    "ts": 1792594680657,
+    "deleted": false,
+    "updIds": [
+     179259468065762
+    ]
+   },
+   "rmvi8lxjtnrcp": {
+    "id": "rmvi8lxjtnrcp",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1310,
+    "numero": "455/2",
+    "ts0": 1792594713881,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 50,
+     "toro": "54/0",
+     "parto": "2027-06-11"
+    },
+    "ts": 1792594713881,
+    "deleted": false,
+    "updIds": [
+     179259471388110
+    ]
+   },
+   "rmvi8nczj9tme": {
+    "id": "rmvi8nczj9tme",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1237,
+    "numero": "986/1",
+    "ts0": 1792594780543,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 80,
+     "toro": "34/2",
+     "parto": "2027-05-12"
+    },
+    "ts": 1792594780543,
+    "deleted": false,
+    "updIds": [
+     179259478054347
+    ]
+   },
+   "rmvi8o7qpiix1": {
+    "id": "rmvi8o7qpiix1",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1481,
+    "numero": "136/2",
+    "ts0": 1792594820401,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 60,
+     "toro": "34/2",
+     "parto": "2027-06-01"
+    },
+    "ts": 1792594864272,
+    "deleted": false,
+    "updIds": [
+     179259486428298
+    ]
+   },
+   "rmvi8pov2hgcn": {
+    "id": "rmvi8pov2hgcn",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1396,
+    "numero": "68/23",
+    "ts0": 1792594889246,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 85,
+     "toro": "54/0",
+     "parto": "2027-05-07"
+    },
+    "ts": 1792594889246,
+    "deleted": false,
+    "updIds": [
+     179259488924660
+    ]
+   },
+   "rmvi8qnct6ovz": {
+    "id": "rmvi8qnct6ovz",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1462,
+    "numero": "56/24",
+    "ts0": 1792594933950,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "DEVOLVER A DR DOMINGUEZ",
+     "diag": "ESTATICA"
+    },
+    "ts": 1792594933950,
+    "deleted": false,
+    "updIds": [
+     179259493395032
+    ]
+   },
+   "rmvi8rzjw9hak": {
+    "id": "rmvi8rzjw9hak",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1097,
+    "numero": "873/1",
+    "ts0": 1792594996412,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "UCT"
+    },
+    "ts": 1792594996412,
+    "deleted": false,
+    "updIds": [
+     179259499641244
+    ]
+   },
+   "rmvi8tqud9kzl": {
+    "id": "rmvi8tqud9kzl",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 972,
+    "numero": "735/1",
+    "ts0": 1792595078437,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "DESCARTE FERTILIDAD",
+     "diag": "CLOI"
+    },
+    "ts": 1792595078437,
+    "deleted": false,
+    "updIds": [
+     179259507843742
+    ]
+   },
+   "rmvi8uege76kr": {
+    "id": "rmvi8uege76kr",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1321,
+    "numero": "467/2",
+    "ts0": 1792595109038,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "ESTATICA"
+    },
+    "ts": 1792595109038,
+    "deleted": false,
+    "updIds": [
+     179259510903898
     ]
    }
   }

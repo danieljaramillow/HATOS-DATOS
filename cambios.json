@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T13:19:55.613Z",
+ "actualizado": "2026-10-21T13:21:45.886Z",
  "edits": [],
  "updates": [
   {
@@ -272,6 +272,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Vacía · UCT",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179258890244848,
+   "tipo": "palpacion",
+   "numero": "720/17",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 70,
+    "parto_probable": "2027-05-22",
+    "hallazgo": "70",
+    "toro": "112/2"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 70 días · parto probable 2027-05-22 · Toro: 112/2",
    "fecha": "2026-10-21"
   }
  ],
@@ -717,6 +732,26 @@
    "finca": "OK",
    "ts": 1792588790536,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "720/17",
+   "texto": "2026-10-21 · Preñada 70 días · parto probable 2027-05-22 · Toro: 112/2",
+   "origen": "Visita: Palpación",
+   "ref": "u:179258890244848",
+   "finca": "OK",
+   "ts": 1792588902448,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "720/17",
+   "texto": "Palpación (21/10/2026): Preñada 70 días · toro 112/2 · parto probable 22/05/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi55df4oyz7",
+   "finca": "OK",
+   "ts": 1792588902461,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -1060,6 +1095,26 @@
     "deleted": false,
     "updIds": [
      179258879052682
+    ]
+   },
+   "rmvi55df4oyz7": {
+    "id": "rmvi55df4oyz7",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 807,
+    "numero": "720/17",
+    "ts0": 1792588902448,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 70,
+     "toro": "112/2",
+     "parto": "2027-05-22"
+    },
+    "ts": 1792588902448,
+    "deleted": false,
+    "updIds": [
+     179258890244848
     ]
    }
   }

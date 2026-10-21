@@ -1854,7 +1854,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 10:50 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 11:00 a.m.</b>
     </div>
   </header>
 
@@ -13822,7 +13822,8 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
           var TOL = 10, conc = addDays(v.fecha, -dias), k = String(r.numero||'').trim(), lim = ultimoParto(r) || '0000';
           function dd(a, b){ return Math.round((new Date(a) - new Date(b)) / 864e5); }
           var serv = [];
-          (ENT[k] || []).forEach(function(e){ if(!e.fecha || e.fecha < lim) return;
+          var ENTk = window.__cerrarMontas ? window.__cerrarMontas(ENT[k] || []) : (ENT[k] || []);
+          ENTk.forEach(function(e){ if(!e.fecha || (e.fecha < lim && !(e.toro && (!e.salida || e.salida >= lim)))) return;
             if(e.toro) serv.push({ tipo:'monta', toro:String(e.toro).trim(), desde:e.fecha, hasta:e.salida || v.fecha });
             else if(e.ia) serv.push({ tipo:'IA', toro:String(e.ia).trim(), desde:e.fecha, hasta:e.fecha });
             else if(e.te) serv.push({ tipo:'TE', toro:String(e.te).trim(), desde:e.fecha, hasta:e.fecha }); });
@@ -13841,7 +13842,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
           });
           var ok = serv.filter(function(x){ return x.ok; }).sort(function(a,b){ return a.dist - b.dist || (a.tipo==='IA' ? -1 : 1); });
           H += '<ul style="margin:6px 0 0 16px;padding:0">'+serv.map(function(x){
-            var sigue = !(ENT[k]||[]).some(function(e){ return e.toro && String(e.toro).trim()===x.toro && e.fecha===x.desde && e.salida; });
+            var sigue = !ENTk.some(function(e){ return e.toro && String(e.toro).trim()===x.toro && e.fecha===x.desde && e.salida; });
             var desc = x.tipo==='monta' ? 'Monta con <b>'+esc(x.toro)+'</b> '+(sigue ? 'desde '+fmt(x.desde)+' (sigue en monta)' : 'del '+fmt(x.desde)+' al '+fmt(x.hasta))
                                        : x.tipo+' del '+fmt(x.desde)+' · '+(x.toro ? 'toro <b>'+esc(x.toro)+'</b>' : '<span style="color:var(--rust-deep)">toro no registrado</span>');
             return '<li>'+(x.ok ? '✅ ' : '❌ ')+desc+(x.ok ? '' : ' <small>(fuera por '+x.dist+' días)</small>')+'</li>'; }).join('')+'</ul>';
@@ -14613,14 +14614,14 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
   }
   function servicios(r, h){
     var desde = h.ult || sumaDias(hoyIso(), -400);
-    var L = entoresDe(r.numero).filter(function(e){ return e.fecha && e.fecha >= desde; });
+    var L = (window.__cerrarMontas ? window.__cerrarMontas(entoresDe(r.numero)) : entoresDe(r.numero)).filter(function(e){ return e.fecha && (e.fecha >= desde || (e.salida && e.salida >= desde) || (!e.salida && e.toro)); });
     (window.__reportes ? window.__reportes.palpaciones(r) : []).forEach(function(p){
       if(p.fecha && p.fecha >= desde && /insem/i.test(p.estado||'') && !L.some(function(e){ return e.ia && e.fecha===p.fecha; }))
         L.push({ fecha:p.fecha, ia:p.toro || '', insemPalp:true });
     });
     L.sort(function(a,b){ return a.fecha < b.fecha ? -1 : 1; });
     var txt = L.length ? L.map(function(e){
-      if(e.toro) return 'Monta con <strong>'+esc(e.toro)+'</strong> desde '+fmt(e.fecha)+(e.salida ? ' hasta '+fmt(e.salida) : ' <span class="pl-ok">(sigue en monta)</span>');
+      if(e.toro) return 'Monta con <strong>'+esc(e.toro)+'</strong> desde '+fmt(e.fecha)+(e.salida ? ' hasta '+fmt(e.salida)+(e.salidaAuto ? ' <small>('+esc(e.salidaAuto)+')</small>' : '') : ' <span class="pl-ok">(sigue en monta)</span>');
       if(e.ia || e.insemPalp) return 'IA '+fmt(e.fecha)+' · '+(e.ia ? 'toro <strong>'+esc(e.ia)+'</strong>' : '<span class="pl-mal">toro no registrado</span>');
       if(e.te) return 'TE '+fmt(e.fecha)+' · <strong>'+esc(e.te)+'</strong>';
       return fmt(e.fecha);
@@ -16840,6 +16841,31 @@ window.__irAFicha = function(id, soloSiHayVentana){
   var orig = window.__renderReproHead;
   if(orig) window.__renderReproHead = function(o){ var res = orig.apply(this, arguments); try{ ficha(o && o.r); }catch(e){} return res; };
   window.HLact = { ficha:ficha, criaAlPie:criaAlPie, ultimaCria:ultimaCria, estadoCria:estadoCria };
+})();
+</script>
+
+<script>
+/* Cierre automático de montas sin fecha de salida:
+   1) si el toro salió del hato (inactivo), la monta termina en la fecha de salida del toro;
+   2) si la vaca entró después con otro toro, la monta anterior termina el día antes. */
+(function(){
+  var D = []; try{ D = JSON.parse(document.getElementById('data-source').textContent) || []; }catch(e){}
+  var SAL = {};
+  D.forEach(function(r){ if(r.numero && String(r.activo||'').toUpperCase() !== 'ACTIVO' && r.fecha_salida) SAL[String(r.numero).trim().toUpperCase()] = String(r.fecha_salida).slice(0,10); });
+  function menos1(iso){ var d = new Date(iso+'T12:00:00'); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10); }
+  window.__cerrarMontas = function(lista){
+    var L = (lista||[]).map(function(e){ var x = {}; for(var k in e) x[k] = e[k]; return x; }).sort(function(a,b){ return (a.fecha||'') < (b.fecha||'') ? -1 : 1; });
+    L.forEach(function(e, i){
+      if(!e.toro || e.salida || !e.fecha) return;
+      var fin = null, motivo = '';
+      var st = SAL[String(e.toro).trim().toUpperCase()];
+      if(st && st >= e.fecha){ fin = st; motivo = 'el toro salió del hato'; }
+      for(var j = i+1; j < L.length; j++){ var n = L[j];
+        if(n.toro && String(n.toro).trim() !== String(e.toro).trim() && n.fecha > e.fecha){ var f = menos1(n.fecha); if(!fin || f < fin){ fin = f; motivo = 'entró con el toro '+n.toro; } break; } }
+      if(fin){ e.salida = fin; e.salidaAuto = motivo; }
+    });
+    return L;
+  };
 })();
 </script>
 </body>

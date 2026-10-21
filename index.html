@@ -13485,6 +13485,13 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
   .vs-chip small{ color:var(--ink-soft); }
   .vs-chip.on{ background:var(--green-pale); border-color:var(--green-deep); }
   .vs-btns{ display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 6px; }
+  /* Botones de guardar siempre a la vista: columna fija a la izquierda en pantallas anchas, barra fija abajo en celular */
+  .vs-fijo{ position:sticky; bottom:-14px; z-index:5; background:var(--paper,#EFE8DA); margin:14px -14px 0; padding:10px 130px 10px 14px calc(10px + env(safe-area-inset-bottom,0px)); box-shadow:0 -6px 14px rgba(0,0,0,.08); }
+  @media (min-width:1100px){
+    .vs-fijo{ position:fixed; left:24px; top:120px; bottom:auto; flex-direction:column; width:210px; margin:0; padding:12px; border-radius:12px;
+      background:var(--card,#FBF8F1); box-shadow:0 6px 18px rgba(0,0,0,.12); }
+    .vs-fijo .vs-btn{ width:100%; }
+  }
   .vs-btn{ min-height:44px; padding:0 16px; border-radius:10px; border:0; background:var(--rust); color:#fff; font-weight:700; font-family:inherit; font-size:14.5px; cursor:pointer; }
   .vs-btn.verde{ background:var(--green-deep); }
   .vs-btn.ghost{ background:var(--card); color:var(--ink); border:1px solid var(--line); }
@@ -13792,7 +13799,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
           '<div class="full"><label style="display:flex;align-items:center;gap:8px;text-transform:none;font-family:inherit;font-size:15px;color:var(--rust-deep);font-weight:700"><input type="checkbox" id="vfDesc" style="width:22px;height:22px"'+(d.descarte?' checked':'')+'> ⚑ Marcar para posible descarte</label>'+
           '<input id="vfMotivo" value="'+esc(d.motivo||'')+'" placeholder="Motivo del descarte" style="margin-top:6px'+(d.descarte?'':';display:none')+'"></div></div>';
       }
-      H += '<div class="vs-btns"><button class="vs-btn verde" id="vfGuardar">Guardar</button><button class="vs-btn" id="vfGuardarOtro">Guardar y agregar otro</button>'+(reg?'<button class="vs-btn ghost" id="vfQuitar">Quitar de la visita</button>':'')+'</div>';
+      H += '<div class="vs-btns vs-fijo"><button class="vs-btn verde" id="vfGuardar">Guardar</button><button class="vs-btn" id="vfGuardarOtro">Guardar y agregar otro</button>'+(reg?'<button class="vs-btn ghost" id="vfQuitar">Quitar de la visita</button>':'')+'</div>';
       c.appendChild(el(H));
 
       // --- vida de cada formulario ---
@@ -14579,9 +14586,9 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
     });
     L.sort(function(a,b){ return a.fecha < b.fecha ? -1 : 1; });
     var txt = L.length ? L.map(function(e){
-      if(e.toro) return 'Monta con <b>'+esc(e.toro)+'</b> desde '+fmt(e.fecha)+(e.salida ? ' hasta '+fmt(e.salida) : ' <span class="pl-ok">(sigue en monta)</span>');
-      if(e.ia || e.insemPalp) return 'IA '+fmt(e.fecha)+' · '+(e.ia ? 'toro <b>'+esc(e.ia)+'</b>' : '<span class="pl-mal">toro no registrado</span>');
-      if(e.te) return 'TE '+fmt(e.fecha)+' · <b>'+esc(e.te)+'</b>';
+      if(e.toro) return 'Monta con <strong>'+esc(e.toro)+'</strong> desde '+fmt(e.fecha)+(e.salida ? ' hasta '+fmt(e.salida) : ' <span class="pl-ok">(sigue en monta)</span>');
+      if(e.ia || e.insemPalp) return 'IA '+fmt(e.fecha)+' · '+(e.ia ? 'toro <strong>'+esc(e.ia)+'</strong>' : '<span class="pl-mal">toro no registrado</span>');
+      if(e.te) return 'TE '+fmt(e.fecha)+' · <strong>'+esc(e.te)+'</strong>';
       return fmt(e.fecha);
     }).join('<br>') : '<span class="pl-mal">Sin servicios registrados desde el último parto</span>';
     return '<div style="grid-column:1/-1"><b>Servicios desde el último parto</b>'+txt+'</div>';

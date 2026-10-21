@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T16:19:38.753Z",
+ "actualizado": "2026-10-21T16:20:18.469Z",
  "edits": [],
  "updates": [
   {
@@ -1457,6 +1457,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Vacía · UCT",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259961460987,
+   "tipo": "palpacion",
+   "numero": "701/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 120,
+    "parto_probable": "2027-04-02",
+    "hallazgo": "120",
+    "toro": "FENOL S"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: FENOL S",
    "fecha": "2026-10-21"
   }
  ],
@@ -3622,6 +3637,26 @@
    "finca": "OK",
    "ts": 1792599522830,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "701/1",
+   "texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: FENOL S",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259961460987",
+   "finca": "OK",
+   "ts": 1792599614610,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "701/1",
+   "texto": "Palpación (21/10/2026): Preñada 120 días · toro FENOL S · parto probable 02/04/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvibiyz5f65t",
+   "finca": "OK",
+   "ts": 1792599614622,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -5418,6 +5453,26 @@
     "deleted": false,
     "updIds": [
      179259952281719
+    ]
+   },
+   "rmvibiyz5f65t": {
+    "id": "rmvibiyz5f65t",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 937,
+    "numero": "701/1",
+    "ts0": 1792599614609,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 120,
+     "toro": "FENOL S",
+     "parto": "2027-04-02"
+    },
+    "ts": 1792599614609,
+    "deleted": false,
+    "updIds": [
+     179259961460987
     ]
    }
   }

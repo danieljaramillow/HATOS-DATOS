@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T14:16:42.348Z",
+ "actualizado": "2026-10-21T14:17:12.369Z",
  "edits": [],
  "updates": [
   {
@@ -590,7 +590,7 @@
    "fecha": "2026-10-21"
   },
   {
-   "id": 179259219937560,
+   "id": 179259222965132,
    "tipo": "palpacion",
    "numero": "1/2",
    "detalle": {
@@ -601,7 +601,7 @@
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
+   "detalle_texto": "2026-10-21 · Vacía · UCT · DESCARTE",
    "fecha": "2026-10-21"
   }
  ],
@@ -1507,6 +1507,26 @@
    "finca": "OK",
    "ts": 1792592199386,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "1/2",
+   "texto": "2026-10-21 · Vacía · UCT · DESCARTE",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259222965132",
+   "finca": "OK",
+   "ts": 1792592229651,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "1/2",
+   "texto": "Palpación (21/10/2026): Vacía · UCT · DESCARTE",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi741cfb9fr",
+   "finca": "OK",
+   "ts": 1792592229662,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -2270,13 +2290,13 @@
     "ts0": 1792592199375,
     "datos": {
      "estado": "VACIA",
-     "obs": "",
+     "obs": "DESCARTE",
      "diag": "UCT"
     },
-    "ts": 1792592199375,
+    "ts": 1792592229641,
     "deleted": false,
     "updIds": [
-     179259219937560
+     179259222965132
     ]
    }
   }

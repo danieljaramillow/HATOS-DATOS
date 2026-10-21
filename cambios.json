@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T13:36:40.544Z",
+ "actualizado": "2026-10-21T14:09:46.130Z",
  "edits": [],
  "updates": [
   {
@@ -440,18 +440,18 @@
    "fecha": "2026-10-21"
   },
   {
-   "id": 179258979644305,
+   "id": 179259178029808,
    "tipo": "palpacion",
-   "numero": "809/20",
+   "numero": "77/2",
    "detalle": {
     "fecha": "2026-10-21",
     "resultado": "PREÑADA",
-    "dias": 50,
-    "parto_probable": "2027-06-11",
-    "hallazgo": "50",
-    "toro": "112/2"
+    "dias": 130,
+    "parto_probable": "2027-03-23",
+    "hallazgo": "130",
+    "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Preñada 50 días · parto probable 2027-06-11 · Toro: 112/2",
+   "detalle_texto": "2026-10-21 · Preñada 130 días · parto probable 2027-03-23",
    "fecha": "2026-10-21"
   }
  ],
@@ -1120,22 +1120,22 @@
   },
   {
    "tipo": "palpacion",
-   "numero": "809/20",
-   "texto": "2026-10-21 · Preñada 50 días · parto probable 2027-06-11 · Toro: 112/2",
+   "numero": "77/2",
+   "texto": "2026-10-21 · Preñada 130 días · parto probable 2027-03-23",
    "origen": "Visita: Palpación",
-   "ref": "u:179258979644305",
+   "ref": "u:179259178029808",
    "finca": "OK",
-   "ts": 1792589796443,
+   "ts": 1792591780299,
    "equipo": "Computador"
   },
   {
    "tipo": "visita",
-   "numero": "809/20",
-   "texto": "Palpación (21/10/2026): Preñada 50 días · toro 112/2 · parto probable 11/06/2027",
+   "numero": "77/2",
+   "texto": "Palpación (21/10/2026): Preñada 130 días · parto probable 23/03/2027",
    "origen": "Visita Palpación",
-   "ref": "w:rmvi5oj8bovbu",
+   "ref": "w:rmvi6v1zee9v4",
    "finca": "OK",
-   "ts": 1792589796453,
+   "ts": 1792591780320,
    "equipo": "Computador"
   }
  ],
@@ -1705,6 +1705,26 @@
     "deleted": false,
     "updIds": [
      179258979644305
+    ]
+   },
+   "rmvi6v1zee9v4": {
+    "id": "rmvi6v1zee9v4",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1360,
+    "numero": "77/2",
+    "ts0": 1792591780298,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 130,
+     "toro": "",
+     "parto": "2027-03-23"
+    },
+    "ts": 1792591780298,
+    "deleted": false,
+    "updIds": [
+     179259178029808
     ]
    }
   }

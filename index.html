@@ -1854,7 +1854,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 11:00 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 11:15 a.m.</b>
     </div>
   </header>
 
@@ -4793,6 +4793,7 @@ window.__renderReproHead = function(o){
     }
   }
 
+  window.__recordEdit = function(r, field, cur, val){ recordEdit(r, field, cur, val); };
   function renderEditsBar(){
     var bar = document.getElementById('editsBar');
     if(!bar) return;
@@ -6182,6 +6183,7 @@ window.__renderReproHead = function(o){
     if(window.HSobre) window.HSobre.ficha(r);
     if(window.HConsang) window.HConsang.ficha(r);
     if(window.HLact) window.HLact.ficha(r);
+    if(window.HEdit) window.HEdit.ficha(r);
     var printBtn = document.getElementById('fh-print-btn');
     printBtn.onclick = function(){ printPedigree(r); };
     var downloadHtmlBtn = document.getElementById('fh-download-html-btn');
@@ -16866,6 +16868,62 @@ window.__irAFicha = function(id, soloSiHayVentana){
     });
     return L;
   };
+})();
+</script>
+
+<style>
+  .he-estado{ cursor:pointer; position:relative; }
+  .he-estado::after{ content:' ▾'; font-size:10px; }
+  .he-menu{ position:absolute; z-index:60; background:#FBF8F1; border:1px solid #c9bfa8; border-radius:10px; box-shadow:0 8px 22px rgba(0,0,0,.25); padding:6px; display:flex; flex-direction:column; gap:4px; min-width:180px; }
+  .he-menu button{ border:none; background:none; text-align:left; padding:8px 10px; border-radius:6px; font:600 14px 'IBM Plex Sans',sans-serif; color:#1E3626; cursor:pointer; }
+  .he-menu button:hover{ background:#E9F0E3; }
+  .he-menu .cur{ background:#E9F0E3; }
+  .he-menu small{ display:block; font-weight:400; color:#5F574A; padding:2px 10px 4px; }
+  .he-edit{ margin-left:8px; display:inline-flex; align-items:center; gap:6px; border-radius:20px; padding:6px 14px; cursor:pointer;
+    font:600 13px 'IBM Plex Sans',sans-serif; border:2px solid rgba(242,237,224,.6); background:transparent; color:#F2EDE0; }
+  .he-edit:hover{ background:rgba(242,237,224,.12); }
+</style>
+<script>
+(function(){
+  var ESTADOS = [['ACTIVO','Activo','Está en el hato'],['INACTIVO','Inactivo','Salió (venta, muerte, descarte…)'],['PENDIENTE','Pendiente','Por confirmar']];
+  function rec(id){ return (window.__BD__||[]).filter(function(x){ return x.id === id; })[0]; }
+  function cerrarMenus(){ document.querySelectorAll('.he-menu').forEach(function(m){ m.remove(); }); }
+  document.addEventListener('click', function(e){ if(!e.target.closest('.he-menu') && !e.target.closest('.he-estado')) cerrarMenus(); });
+  function ficha(r0){
+    var tags = document.getElementById('fh-tags'); if(!tags || !r0) return;
+    var r = rec(r0.id) || r0;
+    var tag = Array.prototype.filter.call(tags.children, function(t){ return /^(ACTIVO|INACTIVO|PENDIENTE|—|SIN ESTADO)$/i.test((t.textContent||'').trim()); })[0];
+    if(tag){
+      tag.classList.add('he-estado'); tag.title = 'Tocar para cambiar el estado';
+      tag.onclick = function(ev){
+        ev.stopPropagation(); cerrarMenus();
+        var m = document.createElement('div'); m.className = 'he-menu';
+        m.innerHTML = '<small>Cambiar estado de '+r.numero+'</small>'+ESTADOS.map(function(x){ return '<button type="button" data-v="'+x[0]+'" class="'+(String(r.activo||'').toUpperCase()===x[0]?'cur':'')+'"><b>'+x[1]+'</b><small style="padding:0">'+x[2]+'</small></button>'; }).join('');
+        var rc = tag.getBoundingClientRect(); m.style.position = 'fixed'; m.style.left = Math.min(rc.left, window.innerWidth-200)+'px'; m.style.top = (rc.bottom+6)+'px';
+        document.body.appendChild(m);
+        m.querySelectorAll('button[data-v]').forEach(function(b){ b.onclick = function(){
+          var val = b.getAttribute('data-v'), cur = r.activo;
+          cerrarMenus();
+          if(String(cur||'').toUpperCase() === val) return;
+          if(val === 'INACTIVO' && !confirm('¿Marcar '+r.numero+' como INACTIVO? Para registrar venta o muerte con fecha y causa, use "Registrar algo que pasó → Salida".')) return;
+          if(window.__recordEdit) window.__recordEdit(r, 'activo', cur, val);
+          if(window.__selectAnimal) window.__selectAnimal(r.id, true);
+        }; });
+      };
+    }
+    var old = document.getElementById('he-edit'); if(old) old.remove();
+    var star = document.getElementById('fh-sobre');
+    var btn = document.createElement('button'); btn.type = 'button'; btn.id = 'he-edit'; btn.className = 'he-edit'; btn.textContent = '✏ Editar datos';
+    btn.onclick = function(){
+      var t = document.getElementById('fh-edit-toggle'), g = document.getElementById('fh-info-id');
+      if(t && !/Editando/i.test(t.textContent)) t.click();
+      if(g) g.scrollIntoView({ behavior:'smooth', block:'center' });
+    };
+    var wrap = document.getElementById('he-wrap');
+    if(!wrap){ wrap = document.createElement('div'); wrap.id = 'he-wrap'; wrap.style.marginTop = '8px'; if(star) star.parentNode.insertBefore(wrap, star.nextSibling); }
+    wrap.innerHTML = ''; btn.style.marginLeft = '0'; wrap.appendChild(btn);
+  }
+  window.HEdit = { ficha:ficha };
 })();
 </script>
 </body>

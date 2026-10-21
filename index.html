@@ -16738,6 +16738,7 @@ window.__irAFicha = function(id, soloSiHayVentana){
   .hl-lact{ margin-top:10px; padding-top:10px; border-top:1px solid rgba(242,237,224,.18); font-size:13px; color:#F2EDE0; }
   .hl-lact .t{ font:600 10.5px 'IBM Plex Mono',monospace; letter-spacing:.08em; color:#FFE28C; text-transform:uppercase; }
   .hl-lact b{ color:#fff; }
+  .hl-lact .rp-warn{ color:#F0B48E; }
   .hl-lact a{ color:#FFE28C; text-decoration:underline dotted; cursor:pointer; }
 </style>
 <script>
@@ -16748,38 +16749,49 @@ window.__irAFicha = function(id, soloSiHayVentana){
   function fmt(iso){ if(!iso) return '—'; var p = String(iso).slice(0,10).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : iso; }
   function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function meses(iso){ return (Date.now() - new Date(String(iso).slice(0,10)+'T12:00:00')) / (30.4375*86400000); }
-  /* Cría al pie: la más reciente, viva (ACTIVO), sin destete registrado y con menos de 12 meses. */
-  function criaAlPie(r){
+  /* Última cría de la vaca (la más reciente por fecha de nacimiento). */
+  function ultimaCria(r){
     var cur = (window.__BD__||[]).filter(function(x){ return x.id === r.id; })[0] || r;
     var ids = cur.crias_ids || r.crias_ids || [];
     var BD = window.__BD__ || D, map = {}; BD.forEach(function(x){ map[x.id] = x; });
     var cs = ids.map(function(i){ return map[i] || byId[i]; }).filter(function(c){ return c && c.fecha_nac; });
-    (window.__BD__||[]).forEach(function(x){ if(x.madre && String(x.madre).trim()===String(r.numero).trim() && x.fecha_nac && cs.indexOf(x)<0 && ids.indexOf(x.id)<0) cs.push(x); });
+    BD.forEach(function(x){ if(x.madre && String(x.madre).trim()===String(r.numero).trim() && x.fecha_nac && cs.indexOf(x)<0) cs.push(x); });
     cs.sort(function(a,b){ return a.fecha_nac < b.fecha_nac ? 1 : -1; });
-    var c = cs[0];
-    if(!c) return null;
-    var viva = String(c.activo||'').toUpperCase() === 'ACTIVO';
-    var destetada = c.peso_dest != null || !!c.fecha_dest;
-    if(!viva || destetada || meses(c.fecha_nac) > 12) return null;
-    return c;
+    return cs[0] || null;
   }
+  var RXM = /MUER|MURI|NACI[OÓ]\s+MUERT|AHOG|GOLERO|CHULO|AVENTAD/i;
+  function estadoCria(c){
+    var viva = String(c.activo||'').toUpperCase() === 'ACTIVO';
+    var txt = [c.causa_salida, c.obs_salida, c.vendido_a].filter(Boolean).join(' · ');
+    if(!viva && RXM.test(txt)) return 'muerta';
+    if(c.peso_dest != null || c.fecha_dest) return 'destetada';
+    if(viva && meses(c.fecha_nac) <= 12) return 'lactando';
+    if(!viva) return 'salio';
+    return 'sin_destete';
+  }
+  function criaAlPie(r){ var c = ultimaCria(r); return c && estadoCria(c) === 'lactando' ? c : null; }
   function ficha(r){
     var box = document.getElementById('fh-repro'); if(!box) return;
     var old = document.getElementById('hl-lact'); if(old) old.remove();
     if(!r || String(r.sexo||'').toUpperCase() !== 'H') return;
-    var c = criaAlPie(r); if(!c) return;
+    var c = ultimaCria(r); if(!c) return;
+    var e = estadoCria(c);
     var sx = String(c.sexo||'').toUpperCase()==='M' ? 'Macho' : (String(c.sexo||'').toUpperCase()==='H' ? 'Hembra' : '');
-    var m = meses(c.fecha_nac);
+    var TIT = { lactando:'Lactando · cría al pie', muerta:'Última cría · murió', destetada:'Última cría · destetada', salio:'Última cría · salió del hato', sin_destete:'Última cría · sin destete registrado' };
+    var linea2 = '';
+    if(e === 'muerta') linea2 = '<div class="rp-warn">✝ Murió '+(c.fecha_salida?'el <b>'+fmt(c.fecha_salida)+'</b>':'')+(c.causa_salida||c.obs_salida?' — '+esc([c.causa_salida,c.obs_salida].filter(Boolean).join(' · ')):'')+'</div>';
+    else if(e === 'destetada') linea2 = '<div>Destete: <b>'+(c.peso_dest!=null?c.peso_dest+' kg':'—')+'</b>'+(c.fecha_dest?' el <b>'+fmt(c.fecha_dest)+'</b>':'')+(c.peso_aj_8m!=null?' · ajustado 8 m: <b>'+Math.round(c.peso_aj_8m)+' kg</b>':'')+'</div>';
+    else if(e === 'salio') linea2 = '<div>Salió '+(c.fecha_salida?'el <b>'+fmt(c.fecha_salida)+'</b>':'')+(c.causa_salida?' — '+esc(c.causa_salida):'')+' (sin destete registrado)</div>';
     var d = document.createElement('div'); d.id = 'hl-lact'; d.className = 'hl-lact';
-    d.innerHTML = '<div class="t">Lactando · cría al pie</div>'+
-      '<div>Cría <a data-id="'+c.id+'"><b>'+esc(c.numero)+'</b></a>'+(sx?' · '+sx:'')+' · nació <b>'+fmt(c.fecha_nac)+'</b> ('+m.toFixed(1)+' meses)</div>'+
-      '<div>Padre: <b>'+esc(c.padre||'—')+'</b></div>';
+    d.innerHTML = '<div class="t">'+TIT[e]+'</div>'+
+      '<div>Cría <a data-id="'+c.id+'"><b>'+esc(c.numero)+'</b></a>'+(sx?' · '+sx:'')+' · nació <b>'+fmt(c.fecha_nac)+'</b>'+(e==='lactando'?' ('+meses(c.fecha_nac).toFixed(1)+' meses)':'')+'</div>'+
+      '<div>Padre: <b>'+esc(c.padre||'—')+'</b></div>'+linea2;
     var a = d.querySelector('a[data-id]'); if(a) a.onclick = function(){ if(window.__selectAnimal) window.__selectAnimal(c.id); };
     box.appendChild(d);
   }
   var orig = window.__renderReproHead;
   if(orig) window.__renderReproHead = function(o){ var res = orig.apply(this, arguments); try{ ficha(o && o.r); }catch(e){} return res; };
-  window.HLact = { ficha:ficha, criaAlPie:criaAlPie };
+  window.HLact = { ficha:ficha, criaAlPie:criaAlPie, ultimaCria:ultimaCria, estadoCria:estadoCria };
 })();
 </script>
 </body>

@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T12:54:38.136Z",
+ "actualizado": "2026-10-21T13:00:40.843Z",
  "edits": [],
  "updates": [
   {
@@ -17,6 +17,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179258763621949,
+   "tipo": "palpacion",
+   "numero": "807/20",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 150,
+    "parto_probable": "2027-03-03",
+    "hallazgo": "150",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Preñada 150 días · parto probable 2027-03-03",
    "fecha": "2026-10-21"
   }
  ],
@@ -122,6 +137,26 @@
    "finca": "OK",
    "ts": 1792587274934,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "807/20",
+   "texto": "2026-10-21 · Preñada 150 días · parto probable 2027-03-03",
+   "origen": "Visita: Palpación",
+   "ref": "u:179258763621949",
+   "finca": "OK",
+   "ts": 1792587636219,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "807/20",
+   "texto": "Palpación (21/10/2026): Preñada 150 días · parto probable 03/03/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi4e8e3kvaz",
+   "finca": "OK",
+   "ts": 1792587636224,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -161,6 +196,26 @@
     "deleted": false,
     "updIds": [
      179258727493015
+    ]
+   },
+   "rmvi4e8e3kvaz": {
+    "id": "rmvi4e8e3kvaz",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1098,
+    "numero": "807/20",
+    "ts0": 1792587636219,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 150,
+     "toro": "",
+     "parto": "2027-03-03"
+    },
+    "ts": 1792587636219,
+    "deleted": false,
+    "updIds": [
+     179258763621949
     ]
    }
   }

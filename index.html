@@ -331,6 +331,7 @@ window.__BN = (function(){
   }
 
   /* Análisis completo de una hembra */
+  var EDAD_SIN_PRENEZ = 35;   // meses: novilla sin ninguna preñez confirmada a esta edad = bandera negra
   function analizar(r){
     init();
     var k = N(r.numero), crias = criasDe(r);
@@ -388,6 +389,12 @@ window.__BN = (function(){
       var m = meses(ult, hoyIso());
       var preñada = (PALP[k] || []).some(function(p){ return p.fecha >= ult && /^P\s*\+|PREÑ|PREN/i.test(p.estado||''); });
       if(m > MESES_ABIERTA && !preñada) extra.push({ tipo:'abierta', fecha:hoyIso(), texto:'Lleva '+m.toFixed(1)+' meses desde su último parto ('+fmt(ult)+') sin preñez confirmada.' });
+    }
+    // ---- Novilla de 35 meses o más sin preñez confirmada ----
+    if(!partos.length && String(r.sexo||'').toUpperCase()==='H' && String(r.activo||'').toUpperCase()!=='INACTIVO' && r.fecha_nac){
+      var em = meses(r.fecha_nac, hoyIso());
+      var algunaP = (PALP[k] || []).some(function(p){ return /^P\s*\+|^P\s*P|PREÑ|PREN/i.test(p.estado||''); });
+      if(em >= EDAD_SIN_PRENEZ && !algunaP && !abD.length) extra.push({ tipo:'tardia', fecha:hoyIso(), texto:'Tiene '+em.toFixed(1)+' meses de edad y ninguna preñez confirmada ('+EDAD_SIN_PRENEZ+' meses o más).' });
     }
     // ---- Comentarios que piden descarte ----
     // "MADRE DESCARTE" / "HIJA DE DESCARTE" hablan de otro animal, no de esta vaca
@@ -518,7 +525,7 @@ window.__BN = (function(){
       if(culpa) m[k] = { culpa:culpa, ts:Date.now() }; else delete m[k];
       try{ localStorage.setItem('hatos_muertes_v1', JSON.stringify(m)); }catch(e){}
     },
-    ICON:{ abierta:'Parto muy abierto', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sugerido', muerte:'Cría muerta por la madre' },
+    ICON:{ abierta:'Parto muy abierto', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sugerido', muerte:'Cría muerta por la madre', tardia:'Novilla sin preñez a los 35 meses' },
     ICON_EST:{ iep:'IEP corto', destete:'Destete alto', calif:'Crías bien calificadas', precoz:'Primer parto precoz' } };
 })();
 </script>
@@ -1854,7 +1861,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 12:20 p.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 12:40 p.m.</b>
     </div>
   </header>
 
@@ -14589,7 +14596,7 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
   }
   function flagsCortas(h){
     var c = {}; h.banderas.forEach(function(b){ c[b.tipo] = (c[b.tipo]||0)+1; });
-    var L = { abierta:'Abierta', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sug.', muerte:'Cría muerta' };
+    var L = { abierta:'Abierta', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sug.', muerte:'Cría muerta', tardia:'Sin preñez 35 m' };
     return Object.keys(c).map(function(k){ return (L[k]||k)+(c[k]>1?' ×'+c[k]:''); }).join(', ');
   }
   function sugerencia(h){

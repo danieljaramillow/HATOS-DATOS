@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T14:12:57.524Z",
+ "actualizado": "2026-10-21T14:13:52.454Z",
  "edits": [],
  "updates": [
   {
@@ -485,21 +485,6 @@
    "fecha": "2026-10-21"
   },
   {
-   "id": 179259190102406,
-   "tipo": "palpacion",
-   "numero": "677/10",
-   "detalle": {
-    "fecha": "2026-10-21",
-    "resultado": "PREÑADA",
-    "dias": 120,
-    "parto_probable": "2027-04-02",
-    "hallazgo": "120",
-    "toro": "646"
-   },
-   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 646",
-   "fecha": "2026-10-21"
-  },
-  {
    "id": 179259191927495,
    "tipo": "palpacion",
    "numero": "801/1",
@@ -557,6 +542,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259202775365,
+   "tipo": "palpacion",
+   "numero": "677/10",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 120,
+    "parto_probable": "2027-04-02",
+    "hallazgo": "120",
+    "toro": "646"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 646 · OJO BAJO RENDIMIENTO DE FERTILIDAD",
    "fecha": "2026-10-21"
   }
  ],
@@ -1382,6 +1382,26 @@
    "finca": "OK",
    "ts": 1792591974026,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "677/10",
+   "texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 646 · OJO BAJO RENDIMIENTO DE FERTILIDAD",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259202775365",
+   "finca": "OK",
+   "ts": 1792592027753,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "677/10",
+   "texto": "Palpación (21/10/2026): Preñada 120 días · toro 646 · parto probable 02/04/2027 · OJO BAJO RENDIMIENTO DE FERTILIDAD",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi6xn4wc1z9",
+   "finca": "OK",
+   "ts": 1792592027768,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -2017,16 +2037,16 @@
     "ts0": 1792591901024,
     "datos": {
      "estado": "PREÑADA",
-     "obs": "",
+     "obs": "OJO BAJO RENDIMIENTO DE FERTILIDAD",
      "unidad": "dias",
      "dias": 120,
      "toro": "646",
      "parto": "2027-04-02"
     },
-    "ts": 1792591901024,
+    "ts": 1792592027740,
     "deleted": false,
     "updIds": [
-     179259190102406
+     179259202775365
     ]
    },
    "rmvi6y17usuf2": {

@@ -1854,7 +1854,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 10:30 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 10:50 a.m.</b>
     </div>
   </header>
 
@@ -16780,8 +16780,11 @@ window.__irAFicha = function(id, soloSiHayVentana){
 </script>
 
 <style>
-  .hl-lact{ margin-top:10px; padding-top:10px; border-top:1px solid rgba(242,237,224,.18); font-size:13px; color:#F2EDE0; }
-  .hl-lact .t{ font:600 10.5px 'IBM Plex Mono',monospace; letter-spacing:.08em; color:#FFE28C; text-transform:uppercase; }
+  .hl-lact{ margin-top:12px; padding:10px 14px; border:1.5px solid rgba(255,226,140,.55); border-radius:10px; background:rgba(0,0,0,.18);
+    font-size:16px; line-height:1.45; color:#F2EDE0; max-width:520px; }
+  .hl-lact .t{ font:700 12.5px 'IBM Plex Mono',monospace; letter-spacing:.08em; color:#FFE28C; text-transform:uppercase; margin-bottom:2px; }
+  .hl-lact b{ font-size:17px; }
+  @media (max-width:640px){ .hl-lact{ font-size:15px; } .hl-lact b{ font-size:16px; } }
   .hl-lact b{ color:#fff; }
   .hl-lact .rp-warn{ color:#F0B48E; }
   .hl-lact a{ color:#FFE28C; text-decoration:underline dotted; cursor:pointer; }
@@ -16816,7 +16819,7 @@ window.__irAFicha = function(id, soloSiHayVentana){
   }
   function criaAlPie(r){ var c = ultimaCria(r); return c && estadoCria(c) === 'lactando' ? c : null; }
   function ficha(r){
-    var box = document.getElementById('fh-repro'); if(!box) return;
+    var ref = document.getElementById('fh-sobre') || document.getElementById('fh-tags'); if(!ref) return;
     var old = document.getElementById('hl-lact'); if(old) old.remove();
     if(!r || String(r.sexo||'').toUpperCase() !== 'H') return;
     var c = ultimaCria(r); if(!c) return;
@@ -16832,7 +16835,7 @@ window.__irAFicha = function(id, soloSiHayVentana){
       '<div>Cría <a data-id="'+c.id+'"><b>'+esc(c.numero)+'</b></a>'+(sx?' · '+sx:'')+' · nació <b>'+fmt(c.fecha_nac)+'</b>'+(e==='lactando'?' ('+meses(c.fecha_nac).toFixed(1)+' meses)':'')+'</div>'+
       '<div>Padre: <b>'+esc(c.padre||'—')+'</b></div>'+linea2;
     var a = d.querySelector('a[data-id]'); if(a) a.onclick = function(){ if(window.__selectAnimal) window.__selectAnimal(c.id); };
-    box.appendChild(d);
+    ref.parentNode.insertBefore(d, ref.nextSibling);
   }
   var orig = window.__renderReproHead;
   if(orig) window.__renderReproHead = function(o){ var res = orig.apply(this, arguments); try{ ficha(o && o.r); }catch(e){} return res; };

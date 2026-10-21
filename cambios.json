@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T14:27:09.502Z",
+ "actualizado": "2026-10-21T14:29:24.866Z",
  "edits": [],
  "updates": [
   {
@@ -722,6 +722,21 @@
     "toro": "34/2"
    },
    "detalle_texto": "2026-10-21 · Preñada 58 días · parto probable 2027-06-03 · Toro: 34/2",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259294105738,
+   "tipo": "palpacion",
+   "numero": "118/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "UCT",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · UCT",
    "fecha": "2026-10-21"
   }
  ],
@@ -1807,6 +1822,26 @@
    "finca": "OK",
    "ts": 1792592825857,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "118/2",
+   "texto": "2026-10-21 · Vacía · UCT",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259294105738",
+   "finca": "OK",
+   "ts": 1792592941058,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "118/2",
+   "texto": "Palpación (21/10/2026): Vacía · UCT",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi7jxmp1xte",
+   "finca": "OK",
+   "ts": 1792592941070,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -2722,6 +2757,23 @@
     "deleted": false,
     "updIds": [
      179259282584644
+    ]
+   },
+   "rmvi7jxmp1xte": {
+    "id": "rmvi7jxmp1xte",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1444,
+    "numero": "118/2",
+    "ts0": 1792592941057,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "UCT"
+    },
+    "ts": 1792592941057,
+    "deleted": false,
+    "updIds": [
+     179259294105738
     ]
    }
   }

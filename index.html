@@ -1854,7 +1854,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 11:15 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 12:10 p.m.</b>
     </div>
   </header>
 
@@ -13908,8 +13908,9 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       var inp = $('vsBuscar'), sug = $('vsSug');
       inp.oninput = function(){ var q = N(inp.value); if(!q){ sug.innerHTML=''; return; }
         var todos = BD.filter(function(r){ return r.numero && N(r.numero).indexOf(q) >= 0; });
-        var ocultos = window.__vsVerInactivos ? 0 : todos.filter(function(r){ return r.activo !== 'ACTIVO'; }).length;
-        var m = todos.filter(function(r){ return window.__vsVerInactivos || r.activo === 'ACTIVO'; }).sort(function(a,b){ return (a.activo==='ACTIVO'?0:1)-(b.activo==='ACTIVO'?0:1) || (N(a.numero).indexOf(q)) - (N(b.numero).indexOf(q)); }).slice(0,8);
+        var esInact = function(r){ return String(r.activo||'').toUpperCase() === 'INACTIVO'; };   // PENDIENTE y sin estado se muestran
+        var ocultos = window.__vsVerInactivos ? 0 : todos.filter(esInact).length;
+        var m = todos.filter(function(r){ return window.__vsVerInactivos || !esInact(r); }).sort(function(a,b){ return (a.activo==='ACTIVO'?0:1)-(b.activo==='ACTIVO'?0:1) || (N(a.numero).indexOf(q)) - (N(b.numero).indexOf(q)); }).slice(0,8);
         sug.innerHTML = m.length ? '<div class="vs-sug">'+m.map(function(r){ var ya = regDeAnimal(vid, r.numero); return '<button data-id="'+r.id+'"><b>'+esc(r.numero)+'</b>'+(r.nombre?' · '+esc(r.nombre):'')+' <small style="color:var(--ink-soft)">'+esc(descAnimal(r))+(r.activo!=='ACTIVO'?' · '+esc(r.activo):'')+(ya?' · ya registrado':'')+'</small></button>'; }).join('')+'</div>' : '<div class="vs-vacio">Sin coincidencias.</div>';
                 if(ocultos || window.__vsVerInactivos){ sug.insertAdjacentHTML('beforeend', '<div class="vs-sug-inact"><button type="button" id="vsInact">'+(window.__vsVerInactivos ? '✓ Mostrando también inactivos — ocultarlos' : '👁 Mostrar inactivos ('+ocultos+')')+'</button></div>'); var bi = $('vsInact'); if(bi) bi.onclick = function(ev){ ev.preventDefault(); window.__vsVerInactivos = !window.__vsVerInactivos; inp.oninput(); inp.focus(); }; }
 sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = function(){ var rr = byId[+b.getAttribute('data-id')]; ir(scrForm(vid, rr.id), TIPOS[v.tipo].i+' '+esc(rr.numero)+'<small>'+TIPOS[v.tipo].n+' · '+fmt(v.fecha)+'</small>'); }; }); };

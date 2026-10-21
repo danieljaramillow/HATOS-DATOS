@@ -1706,6 +1706,7 @@ function recientesBorrar(){ try{ localStorage.removeItem(RECIENTES_KEY); }catch(
 .fh-repro .rp-kpi .v{ font-family:'Fraunces',serif; font-size:20px; font-weight:700; color:#fff; line-height:1.2; }
 .fh-repro .rp-kpi .v small{ font-family:'IBM Plex Sans',sans-serif; font-size:12px; font-weight:500; color:#C9D2C0; }
 @media (max-width:700px){ .fh-repro{ max-width:none; } }
+  .vs-sug-inact{ padding:6px 8px; } .vs-sug-inact button{ background:none; border:1px dashed var(--line,#c9bfa8); border-radius:14px; padding:4px 12px; font-size:12px; cursor:pointer; color:var(--ink-soft,#5F574A); }
 </style>
 <script>
 // Resumen reproductivo para el encabezado de la ficha individual.
@@ -13862,9 +13863,12 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       // buscar y agregar
       var inp = $('vsBuscar'), sug = $('vsSug');
       inp.oninput = function(){ var q = N(inp.value); if(!q){ sug.innerHTML=''; return; }
-        var m = BD.filter(function(r){ return r.numero && N(r.numero).indexOf(q) >= 0; }).sort(function(a,b){ return (a.activo==='ACTIVO'?0:1)-(b.activo==='ACTIVO'?0:1) || (N(a.numero).indexOf(q)) - (N(b.numero).indexOf(q)); }).slice(0,8);
+        var todos = BD.filter(function(r){ return r.numero && N(r.numero).indexOf(q) >= 0; });
+        var ocultos = window.__vsVerInactivos ? 0 : todos.filter(function(r){ return r.activo !== 'ACTIVO'; }).length;
+        var m = todos.filter(function(r){ return window.__vsVerInactivos || r.activo === 'ACTIVO'; }).sort(function(a,b){ return (a.activo==='ACTIVO'?0:1)-(b.activo==='ACTIVO'?0:1) || (N(a.numero).indexOf(q)) - (N(b.numero).indexOf(q)); }).slice(0,8);
         sug.innerHTML = m.length ? '<div class="vs-sug">'+m.map(function(r){ var ya = regDeAnimal(vid, r.numero); return '<button data-id="'+r.id+'"><b>'+esc(r.numero)+'</b>'+(r.nombre?' · '+esc(r.nombre):'')+' <small style="color:var(--ink-soft)">'+esc(descAnimal(r))+(r.activo!=='ACTIVO'?' · '+esc(r.activo):'')+(ya?' · ya registrado':'')+'</small></button>'; }).join('')+'</div>' : '<div class="vs-vacio">Sin coincidencias.</div>';
-        sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = function(){ var rr = byId[+b.getAttribute('data-id')]; ir(scrForm(vid, rr.id), TIPOS[v.tipo].i+' '+esc(rr.numero)+'<small>'+TIPOS[v.tipo].n+' · '+fmt(v.fecha)+'</small>'); }; }); };
+                if(ocultos || window.__vsVerInactivos){ sug.insertAdjacentHTML('beforeend', '<div class="vs-sug-inact"><button type="button" id="vsInact">'+(window.__vsVerInactivos ? '✓ Mostrando también inactivos — ocultarlos' : '👁 Mostrar inactivos ('+ocultos+')')+'</button></div>'); var bi = $('vsInact'); if(bi) bi.onclick = function(ev){ ev.preventDefault(); window.__vsVerInactivos = !window.__vsVerInactivos; inp.oninput(); inp.focus(); }; }
+sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = function(){ var rr = byId[+b.getAttribute('data-id')]; ir(scrForm(vid, rr.id), TIPOS[v.tipo].i+' '+esc(rr.numero)+'<small>'+TIPOS[v.tipo].n+' · '+fmt(v.fecha)+'</small>'); }; }); };
       if(foco === 'buscar') setTimeout(function(){ inp.focus(); }, 50);
       c.querySelectorAll('.vs-tabs button').forEach(function(b){ b.onclick = function(){ vista.tab = b.getAttribute('data-t'); pintar(); }; });
       var T = $('vsTab');

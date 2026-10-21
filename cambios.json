@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T13:11:25.579Z",
+ "actualizado": "2026-10-21T13:13:11.031Z",
  "edits": [],
  "updates": [
   {
@@ -182,6 +182,21 @@
     "toro": ""
    },
    "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179258838624623,
+   "tipo": "palpacion",
+   "numero": "962/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "UCT",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · UCT",
    "fecha": "2026-10-21"
   }
  ],
@@ -507,6 +522,26 @@
    "finca": "OK",
    "ts": 1792588280473,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "962/1",
+   "texto": "2026-10-21 · Vacía · UCT",
+   "origen": "Visita: Palpación",
+   "ref": "u:179258838624623",
+   "finca": "OK",
+   "ts": 1792588386246,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "962/1",
+   "texto": "Palpación (21/10/2026): Vacía · UCT",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi4ub46hlyc",
+   "finca": "OK",
+   "ts": 1792588386255,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -745,6 +780,23 @@
     "deleted": false,
     "updIds": [
      179258828046703
+    ]
+   },
+   "rmvi4ub46hlyc": {
+    "id": "rmvi4ub46hlyc",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1191,
+    "numero": "962/1",
+    "ts0": 1792588386246,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "UCT"
+    },
+    "ts": 1792588386246,
+    "deleted": false,
+    "updIds": [
+     179258838624623
     ]
    }
   }

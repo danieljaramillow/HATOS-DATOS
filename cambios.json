@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T16:20:18.469Z",
+ "actualizado": "2026-10-21T16:21:06.638Z",
  "edits": [],
  "updates": [
   {
@@ -1472,6 +1472,21 @@
     "toro": "FENOL S"
    },
    "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: FENOL S",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259966099092,
+   "tipo": "palpacion",
+   "numero": "478/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "UCT",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · UCT",
    "fecha": "2026-10-21"
   }
  ],
@@ -3657,6 +3672,26 @@
    "finca": "OK",
    "ts": 1792599614622,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "478/1",
+   "texto": "2026-10-21 · Vacía · UCT",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259966099092",
+   "finca": "OK",
+   "ts": 1792599660990,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "478/1",
+   "texto": "Palpación (21/10/2026): Vacía · UCT",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvibjyrido43",
+   "finca": "OK",
+   "ts": 1792599661004,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -5473,6 +5508,23 @@
     "deleted": false,
     "updIds": [
      179259961460987
+    ]
+   },
+   "rmvibjyrido43": {
+    "id": "rmvibjyrido43",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 715,
+    "numero": "478/1",
+    "ts0": 1792599660990,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "UCT"
+    },
+    "ts": 1792599660990,
+    "deleted": false,
+    "updIds": [
+     179259966099092
     ]
    }
   }

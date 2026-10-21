@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T15:26:10.964Z",
+ "actualizado": "2026-10-21T15:30:06.834Z",
  "edits": [],
  "updates": [
   {
@@ -1067,6 +1067,21 @@
     "toro": "54/0"
    },
    "detalle_texto": "2026-10-21 · Preñada 85 días · parto probable 2027-05-07 · Toro: 54/0",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259660173410,
+   "tipo": "palpacion",
+   "numero": "62/24",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "ESTATICA",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
    "fecha": "2026-10-21"
   }
  ],
@@ -2632,6 +2647,26 @@
    "finca": "OK",
    "ts": 1792596343661,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "62/24",
+   "texto": "2026-10-21 · Vacía · ESTATICA",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259660173410",
+   "finca": "OK",
+   "ts": 1792596601734,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "62/24",
+   "texto": "Palpación (21/10/2026): Vacía · ESTATICA",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi9qe851854",
+   "finca": "OK",
+   "ts": 1792596601746,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -3965,6 +4000,23 @@
     "deleted": false,
     "updIds": [
      179259634365012
+    ]
+   },
+   "rmvi9qe851854": {
+    "id": "rmvi9qe851854",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1482,
+    "numero": "62/24",
+    "ts0": 1792596601733,
+    "datos": {
+     "estado": "VACIA",
+     "obs": "",
+     "diag": "ESTATICA"
+    },
+    "ts": 1792596601733,
+    "deleted": false,
+    "updIds": [
+     179259660173410
     ]
    }
   }

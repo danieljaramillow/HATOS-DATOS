@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T14:11:45.975Z",
+ "actualizado": "2026-10-21T14:12:03.297Z",
  "edits": [],
  "updates": [
   {
@@ -497,6 +497,21 @@
     "toro": "646"
    },
    "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 646",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259191927495,
+   "tipo": "palpacion",
+   "numero": "801/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 220,
+    "parto_probable": "2026-12-23",
+    "hallazgo": "220",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-21 · Preñada 220 días · parto probable 2026-12-23",
    "fecha": "2026-10-21"
   }
  ],
@@ -1242,6 +1257,26 @@
    "finca": "OK",
    "ts": 1792591901036,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "801/1",
+   "texto": "2026-10-21 · Preñada 220 días · parto probable 2026-12-23",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259191927495",
+   "finca": "OK",
+   "ts": 1792591919274,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "801/1",
+   "texto": "Palpación (21/10/2026): Preñada 220 días · parto probable 23/12/2026",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvi6y17usuf2",
+   "finca": "OK",
+   "ts": 1792591919285,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -1887,6 +1922,26 @@
     "deleted": false,
     "updIds": [
      179259190102406
+    ]
+   },
+   "rmvi6y17usuf2": {
+    "id": "rmvi6y17usuf2",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1031,
+    "numero": "801/1",
+    "ts0": 1792591919274,
+    "datos": {
+     "estado": "PREÑADA",
+     "obs": "",
+     "unidad": "dias",
+     "dias": 220,
+     "toro": "",
+     "parto": "2026-12-23"
+    },
+    "ts": 1792591919274,
+    "deleted": false,
+    "updIds": [
+     179259191927495
     ]
    }
   }

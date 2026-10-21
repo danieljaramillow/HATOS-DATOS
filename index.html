@@ -13867,7 +13867,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       if(foco === 'buscar') setTimeout(function(){ inp.focus(); }, 50);
       c.querySelectorAll('.vs-tabs button').forEach(function(b){ b.onclick = function(){ vista.tab = b.getAttribute('data-t'); pintar(); }; });
       var T = $('vsTab');
-      if(tab === 'animales') T.innerHTML = listaRegs(v, regs); else T.innerHTML = resumen(v, regs);
+      if(tab === 'animales') T.innerHTML = listaRegs(v, regs.slice().reverse()); else T.innerHTML = resumen(v, regs);   // lo último registrado arriba
       T.querySelectorAll('[data-edit]').forEach(function(b){ b.onclick = function(){ var rg = S.regs[b.getAttribute('data-edit')]; var rr = byNum[N(rg.numero)]; if(rr) ir(scrForm(vid, rr.id), TIPOS[v.tipo].i+' '+esc(rr.numero)+'<small>'+TIPOS[v.tipo].n+' · '+fmt(v.fecha)+'</small>'); }; });
       T.querySelectorAll('a[data-num]').forEach(function(a){ a.onclick = function(){ var rr = byNum[N(a.getAttribute('data-num'))]; if(!rr) return; cerrarModal(); if(window.__guia) window.__guia.cerrar(); if(window.__abrirFicha) window.__abrirFicha(rr.id); }; });
       T.querySelectorAll('[data-agregar]').forEach(function(b){ b.onclick = function(){ ir(scrForm(vid, +b.getAttribute('data-agregar')), TIPOS[v.tipo].i+' '+esc(byId[+b.getAttribute('data-agregar')].numero)+'<small>'+TIPOS[v.tipo].n+'</small>'); }; });

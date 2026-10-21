@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T16:05:12.555Z",
+ "actualizado": "2026-10-21T16:10:18.477Z",
  "edits": [],
  "updates": [
   {
@@ -1130,21 +1130,6 @@
    "fecha": "2026-10-21"
   },
   {
-   "id": 179259741599799,
-   "tipo": "palpacion",
-   "numero": "618/1",
-   "detalle": {
-    "fecha": "2026-10-21",
-    "resultado": "PREÑADA",
-    "dias": 120,
-    "parto_probable": "2027-04-02",
-    "hallazgo": "120",
-    "toro": "7141"
-   },
-   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 7141",
-   "fecha": "2026-10-21"
-  },
-  {
    "id": 179259753204972,
    "tipo": "palpacion",
    "numero": "338/1",
@@ -1352,6 +1337,21 @@
     "toro": "FENOL S"
    },
    "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: FENOL S",
+   "fecha": "2026-10-21"
+  },
+  {
+   "id": 179259901328801,
+   "tipo": "palpacion",
+   "numero": "618/1",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "resultado": "PREÑADA",
+    "dias": 120,
+    "parto_probable": "2027-04-02",
+    "hallazgo": "120",
+    "toro": "7141/3"
+   },
+   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 7141/3",
    "fecha": "2026-10-21"
   }
  ],
@@ -3357,6 +3357,26 @@
    "finca": "OK",
    "ts": 1792598706905,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "palpacion",
+   "numero": "618/1",
+   "texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 7141/3",
+   "origen": "Visita: Palpación",
+   "ref": "u:179259901328801",
+   "finca": "OK",
+   "ts": 1792599013288,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "618/1",
+   "texto": "Palpación (21/10/2026): Preñada 120 días · toro 7141/3 · parto probable 02/04/2027",
+   "origen": "Visita Palpación",
+   "ref": "w:rmvia7uil493o",
+   "finca": "OK",
+   "ts": 1792599013304,
+   "equipo": "Computador"
   }
  ],
  "muertes": null,
@@ -4771,13 +4791,13 @@
      "obs": "",
      "unidad": "dias",
      "dias": 120,
-     "toro": "7141",
+     "toro": "7141/3",
      "parto": "2027-04-02"
     },
-    "ts": 1792597415997,
+    "ts": 1792599013275,
     "deleted": false,
     "updIds": [
-     179259741599799
+     179259901328801
     ]
    },
    "rmvia9scvp1ds": {

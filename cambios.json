@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-21T17:35:31.029Z",
+ "actualizado": "2026-10-28T11:10:42.577Z",
  "edits": [
   {
    "id": 1560,
@@ -13,6 +13,17 @@
    "valor_nuevo": "ACTIVO",
    "fecha": "2026-10-21",
    "ts": 1792603324959
+  },
+  {
+   "id": 1487,
+   "numero": "141/2",
+   "field": "comentario",
+   "field_label": "Comentario",
+   "col": "K",
+   "valor_anterior": null,
+   "valor_nuevo": "ENTREGADO A CALIXTO",
+   "fecha": "2026-10-28",
+   "ts": 1793185838496
   }
  ],
  "updates": [
@@ -4608,6 +4619,16 @@
    "ref": "w:rmvie6ti2x3rl",
    "finca": "OK",
    "ts": 1792604086503,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "edicion",
+   "numero": "141/2",
+   "texto": "Comentario: (vacío) → ENTREGADO A CALIXTO",
+   "origen": "Ficha (✏ Editar datos)",
+   "ref": "e:1487:comentario",
+   "finca": "OK",
+   "ts": 1793185838497,
    "equipo": "Computador"
   }
  ],

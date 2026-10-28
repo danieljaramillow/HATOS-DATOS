@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-28T11:11:31.822Z",
+ "actualizado": "2026-10-28T11:12:28.074Z",
  "edits": [
   {
    "id": 1560,
@@ -35,6 +35,17 @@
    "valor_nuevo": "CALIXTO CORDERO",
    "fecha": "2026-10-28",
    "ts": 1793185886111
+  },
+  {
+   "id": 1540,
+   "numero": "185/2",
+   "field": "comentario",
+   "field_label": "Comentario",
+   "col": "K",
+   "valor_anterior": null,
+   "valor_nuevo": "CALICTO",
+   "fecha": "2026-10-28",
+   "ts": 1793185932949
   }
  ],
  "updates": [
@@ -4650,6 +4661,16 @@
    "ref": "e:1541:comentario",
    "finca": "OK",
    "ts": 1793185886111,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "edicion",
+   "numero": "185/2",
+   "texto": "Comentario: (vacío) → CALICTO",
+   "origen": "Ficha (✏ Editar datos)",
+   "ref": "e:1540:comentario",
+   "finca": "OK",
+   "ts": 1793185932949,
    "equipo": "Computador"
   }
  ],

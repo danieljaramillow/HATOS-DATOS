@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-28T11:10:42.577Z",
+ "actualizado": "2026-10-28T11:11:31.822Z",
  "edits": [
   {
    "id": 1560,
@@ -24,6 +24,17 @@
    "valor_nuevo": "ENTREGADO A CALIXTO",
    "fecha": "2026-10-28",
    "ts": 1793185838496
+  },
+  {
+   "id": 1541,
+   "numero": "186/2",
+   "field": "comentario",
+   "field_label": "Comentario",
+   "col": "K",
+   "valor_anterior": null,
+   "valor_nuevo": "CALIXTO CORDERO",
+   "fecha": "2026-10-28",
+   "ts": 1793185886111
   }
  ],
  "updates": [
@@ -4629,6 +4640,16 @@
    "ref": "e:1487:comentario",
    "finca": "OK",
    "ts": 1793185838497,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "edicion",
+   "numero": "186/2",
+   "texto": "Comentario: (vacío) → CALIXTO CORDERO",
+   "origen": "Ficha (✏ Editar datos)",
+   "ref": "e:1541:comentario",
+   "finca": "OK",
+   "ts": 1793185886111,
    "equipo": "Computador"
   }
  ],

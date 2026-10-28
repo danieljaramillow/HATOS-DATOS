@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-28T11:12:28.074Z",
+ "actualizado": "2026-10-28T11:13:27.719Z",
  "edits": [
   {
    "id": 1560,
@@ -46,6 +46,17 @@
    "valor_nuevo": "CALICTO",
    "fecha": "2026-10-28",
    "ts": 1793185932949
+  },
+  {
+   "id": 1405,
+   "numero": "104/2",
+   "field": "comentario",
+   "field_label": "Comentario",
+   "col": "K",
+   "valor_anterior": null,
+   "valor_nuevo": "P ADJUDICADO",
+   "fecha": "2026-10-28",
+   "ts": 1793186001438
   }
  ],
  "updates": [
@@ -4671,6 +4682,16 @@
    "ref": "e:1540:comentario",
    "finca": "OK",
    "ts": 1793185932949,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "edicion",
+   "numero": "104/2",
+   "texto": "Comentario: (vacío) → P ADJUDICADO",
+   "origen": "Ficha (✏ Editar datos)",
+   "ref": "e:1405:comentario",
+   "finca": "OK",
+   "ts": 1793186001438,
    "equipo": "Computador"
   }
  ],

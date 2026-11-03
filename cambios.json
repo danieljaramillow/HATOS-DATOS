@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-10-28T11:13:27.719Z",
+ "actualizado": "2026-11-03T23:05:29.895Z",
  "edits": [
   {
    "id": 1560,
@@ -1934,6 +1934,17 @@
    "motivo": "",
    "creado": 1791413662326,
    "ts": 1791413662326
+  },
+  {
+   "id": "mw1aq4kh9kzar",
+   "numero": "182/2",
+   "finca": "OK",
+   "fecha": "2026-01-18",
+   "texto": "",
+   "descarte": true,
+   "motivo": "DESCRTE DESARROLLO - HUERFANA",
+   "creado": 1793747126177,
+   "ts": 1793747126177
   }
  ],
  "historial": [

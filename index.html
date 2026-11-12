@@ -335,7 +335,7 @@ window.__BN = (function(){
   }
 
   /* Análisis completo de una hembra */
-  var EDAD_SIN_PRENEZ = 35;   // meses: novilla sin ninguna preñez confirmada a esta edad = bandera negra
+  var EDAD_SIN_PRENEZ = 32;   // meses: novilla que pasa de esta edad sin preñez, o que concibe después de ella = bandera negra
   function analizar(r){
     init();
     var k = N(r.numero), crias = criasDe(r);
@@ -394,11 +394,18 @@ window.__BN = (function(){
       var preñada = (PALP[k] || []).some(function(p){ return p.fecha >= ult && /^P\s*\+|PREÑ|PREN/i.test(p.estado||''); });
       if(m > MESES_ABIERTA && !preñada) extra.push({ tipo:'abierta', fecha:hoyIso(), texto:'Lleva '+m.toFixed(1)+' meses desde su último parto ('+fmt(ult)+') sin preñez confirmada.' });
     }
-    // ---- Novilla de 35 meses o más sin preñez confirmada ----
-    if(!partos.length && String(r.sexo||'').toUpperCase()==='H' && String(r.activo||'').toUpperCase()!=='INACTIVO' && r.fecha_nac){
-      var em = meses(r.fecha_nac, hoyIso());
-      var algunaP = (PALP[k] || []).some(function(p){ return /^P\s*\+|^P\s*P|PREÑ|PREN/i.test(p.estado||''); });
-      if(em >= EDAD_SIN_PRENEZ && !algunaP && !abD.length) extra.push({ tipo:'tardia', fecha:hoyIso(), texto:'Tiene '+em.toFixed(1)+' meses de edad y ninguna preñez confirmada ('+EDAD_SIN_PRENEZ+' meses o más).' });
+    // ---- Novilla tardía: pasa de 32 meses sin preñez, o concibió después de los 32 meses ----
+    if(String(r.sexo||'').toUpperCase()==='H' && r.fecha_nac){
+      if(partos.length){
+        var ec1 = meses(r.fecha_nac, partos[0].fecha) - EST.GESTACION_MESES;
+        if(ec1 > EDAD_SIN_PRENEZ && ec1 < 120) extra.push({ tipo:'tardia', fecha:partos[0].fecha, texto:'Su primera preñez fue a los '+ec1.toFixed(1)+' meses de edad (después de '+EDAD_SIN_PRENEZ+'): primer parto a los '+(ec1+EST.GESTACION_MESES).toFixed(1)+' meses.' });
+      } else if(String(r.activo||'').toUpperCase()!=='INACTIVO'){
+        var em = meses(r.fecha_nac, hoyIso());
+        var pP = (PALP[k] || []).filter(function(p){ return p.fecha && /^P\s*\+|^P\s*P|PREÑ|PREN/i.test(p.estado||''); }).sort(function(a,b){ return a.fecha.localeCompare(b.fecha); })[0];
+        if(pP){ var dP = parseInt(pP.hallazgo, 10), fc = (dP > 0 && dP < 290) ? new Date(new Date(pP.fecha).getTime() - dP*86400000).toISOString().slice(0,10) : pP.fecha, ec2 = meses(r.fecha_nac, fc);
+          if(ec2 > EDAD_SIN_PRENEZ) extra.push({ tipo:'tardia', fecha:hoyIso(), texto:'Quedó preñada a los '+ec2.toFixed(1)+' meses de edad (después de '+EDAD_SIN_PRENEZ+'), según la palpación del '+fmt(pP.fecha)+'.' }); }
+        else if(em >= EDAD_SIN_PRENEZ && !abD.length) extra.push({ tipo:'tardia', fecha:hoyIso(), texto:'Tiene '+em.toFixed(1)+' meses de edad y ninguna preñez confirmada ('+EDAD_SIN_PRENEZ+' meses o más).' });
+      }
     }
     // ---- Comentarios que piden descarte ----
     // "MADRE DESCARTE" / "HIJA DE DESCARTE" hablan de otro animal, no de esta vaca
@@ -475,7 +482,7 @@ window.__BN = (function(){
       var ecp = epp - EST.GESTACION_MESES;
       if(epp > 18 && ecp < EST.EDAD_MIN_SERVICIO) out.push({ k:'aviso', texto:'Primer parto a los '+epp.toFixed(1)+' meses de edad: la novilla quedó preñada a los '+ecp.toFixed(1)+' meses, antes de los '+EST.EDAD_MIN_SERVICIO+', edad a partir de la cual entran a monta. Revise si fue un servicio no planeado.' });
       else if(ecp >= EST.EDAD_MIN_SERVICIO && ecp <= EST.PRECOZ_MAX_CONCEPCION) out.push({ k:'estrella', texto:'Primer parto a los '+epp.toFixed(1)+' meses de edad (concibió a los '+ecp.toFixed(1)+' meses, en su primera temporada de monta): novilla precoz. Gana una estrella ⭐.' });
-      else if(epp > 42) out.push({ k:'aviso', texto:'Primer parto tardío: a los '+epp.toFixed(1)+' meses de edad (más de 42). Revise la fertilidad de su grupo de novillas.' });
+      else if(ecp > EDAD_SIN_PRENEZ) out.push({ k:'bandera', texto:'Primer parto tardío: a los '+epp.toFixed(1)+' meses de edad; concibió a los '+ecp.toFixed(1)+' meses (después de '+EDAD_SIN_PRENEZ+'). Suma una bandera negra ⚑.' });
       else out.push({ k:'info', texto:'Primer parto, a los '+epp.toFixed(1)+' meses de edad.' }); }
     var pn = parseFloat(String(pesoNac == null ? '' : pesoNac).replace(',','.'));
     if(!isNaN(pn) && pn > 0){ var vs = BD.filter(function(x){ return x.peso_nacimiento; }).map(function(x){ return x.peso_nacimiento; });
@@ -532,7 +539,7 @@ window.__BN = (function(){
       if(culpa) m[k] = { culpa:culpa, ts:Date.now() }; else delete m[k];
       try{ localStorage.setItem('hatos_muertes_v1', JSON.stringify(m)); }catch(e){}
     },
-    ICON:{ abierta:'Parto muy abierto', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sugerido', muerte:'Cría muerta por la madre', tardia:'Novilla sin preñez a los 35 meses' },
+    ICON:{ abierta:'Parto muy abierto', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sugerido', muerte:'Cría muerta por la madre', tardia:'Novilla tardía (sin preñez a los 32 meses)' },
     ICON_EST:{ iep:'IEP corto', destete:'Destete alto', calif:'Crías bien calificadas', precoz:'Primer parto precoz' } };
 })();
 </script>
@@ -14619,7 +14626,7 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
   }
   function flagsCortas(h){
     var c = {}; h.banderas.forEach(function(b){ c[b.tipo] = (c[b.tipo]||0)+1; });
-    var L = { abierta:'Abierta', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sug.', muerte:'Cría muerta', tardia:'Sin preñez 35 m' };
+    var L = { abierta:'Abierta', destete:'Destete bajo', aborto:'Aborto', comentario:'Descarte sug.', muerte:'Cría muerta', tardia:'Tardía 32 m' };
     return Object.keys(c).map(function(k){ return (L[k]||k)+(c[k]>1?' ×'+c[k]:''); }).join(', ');
   }
   function sugerencia(h){
@@ -17016,8 +17023,8 @@ window.__irAFicha = function(id, soloSiHayVentana){
       x:'De las hembras activas palpadas en los últimos 12 meses (después de su último parto), el % que está preñada.' },
     { id:'abiertas',   g:'Reproducción', l:'Vacas con más de 20 meses sin parir y sin preñez', u:'vacas', d:0, mejor:'baja',
       x:'Vacas activas que llevan más de 20 meses desde su último parto sin preñez confirmada (bandera negra).' },
-    { id:'tardias',    g:'Reproducción', l:'Novillas de 35 meses o más sin preñez', u:'novillas', d:0, mejor:'baja',
-      x:'Hembras activas sin partos, de 35 meses o más, sin ninguna preñez confirmada (bandera negra).' },
+    { id:'tardias',    g:'Reproducción', l:'Novillas de 32 meses o más sin preñez', u:'novillas', d:0, mejor:'baja',
+      x:'Hembras activas sin partos, de 32 meses o más, sin ninguna preñez confirmada (bandera negra).' },
     { id:'abortos',    g:'Reproducción', l:'Abortos (últimos 12 meses)', u:'%', d:1, mejor:'baja',
       x:'Abortos ÷ (partos + abortos) de las vacas activas en los últimos 365 días.' },
     { id:'mortalidad', g:'Crías', l:'Mortalidad de crías (últimos 12 meses)', u:'%', d:1, mejor:'baja',
@@ -17066,7 +17073,7 @@ window.__irAFicha = function(id, soloSiHayVentana){
       if(a.partos.length){ vientres++; if(a.partos.some(function(p){ return p.fecha && p.fecha >= d365; })) paridas++; }
       a.abortos.forEach(function(b){ if(b.fecha && b.fecha >= d365) ab12++; });
       if(a.extra.some(function(e){ return e.tipo === 'abierta' && e.fecha === hoy; })) abiertas++;
-      if(a.extra.some(function(e){ return e.tipo === 'tardia'; })) tardias++;
+      if(!a.partos.length && a.extra.some(function(e){ return e.tipo === 'tardia' && /ninguna preñez/.test(e.texto); })) tardias++;
       var cand = (r.crias_ids && r.crias_ids.length) || r.edad_actual >= 2;
       if(cand && a.banderas.length >= 2) desc++;
       if(r.crias_ids && r.crias_ids.length && a.estrellas.length >= 2) dest++;
@@ -17257,12 +17264,13 @@ window.__irAFicha = function(id, soloSiHayVentana){
             var ec = meses(r.fecha_nac, conc);
             if(ec < 20) out.push({ k:'aviso', texto:'Novilla preñada a los '+ec.toFixed(1)+' meses de edad, antes de los 20 meses, edad a partir de la cual entran a monta (parto probable '+fmt(pp)+' a los '+e1.toFixed(1)+' meses). Revise si fue un servicio no planeado.' });
             else if(ec <= 26) out.push({ k:'alto', texto:'🏆 Novilla precoz: concibió a los '+ec.toFixed(1)+' meses de edad, en su primera temporada de monta; primer parto proyectado a los '+e1.toFixed(1)+' meses (parto probable '+fmt(pp)+'): ganará ⭐ si se confirma.' });
+            else if(ec > 32) out.push({ k:'bandera', texto:'⚑ Novilla tardía: concibió a los '+ec.toFixed(1)+' meses de edad, después de los 32. Bandera negra (parto probable '+fmt(pp)+').' });
             else out.push({ k:'info', texto:'Novilla preñada de '+dp+' días · primer parto probable '+fmt(pp)+' a los '+e1.toFixed(1)+' meses de edad.' }); } }
         else if(est === 'vacía'){
-          var ab = a && a.extra.filter(function(e){ return e.tipo === 'abierta' || e.tipo === 'tardia'; })[0];
+          var ab = a && a.extra.filter(function(e){ return e.tipo === 'abierta' || (e.tipo === 'tardia' && !a.partos.length); })[0];
           if(ab) out.push({ k:'bandera', texto:'⚑ Sigue vacía y mantiene la bandera negra «'+window.__BN.ICON[ab.tipo]+'»: '+ab.texto+(a.banderas.length >= 2 ? ' Tiene '+a.banderas.length+' banderas: está en «Animales para descarte».' : '') });
           else if(ult){ var mv = meses(ult, f); if(mv > 12 && mv <= 20) out.push({ k:'aviso', texto:'Vacía a los '+mv.toFixed(1)+' meses de su último parto ('+fmt(ult)+'): a los 20 meses sin preñez será bandera negra ⚑.' }); }
-          else if(r.fecha_nac){ var em = meses(r.fecha_nac, f); if(em >= 28 && em < 35) out.push({ k:'aviso', texto:'Novilla vacía de '+em.toFixed(1)+' meses: a los 35 meses sin preñez será bandera negra ⚑.' }); } } } }
+          else if(r.fecha_nac){ var em = meses(r.fecha_nac, f); if(em >= 26 && em < 32) out.push({ k:'aviso', texto:'Novilla vacía de '+em.toFixed(1)+' meses: ya pasó su primera temporada de monta; a los 32 meses sin preñez será bandera negra ⚑.' }); } } } }
 
     // Lo que cambió en la vaca: banderas nuevas / quitadas, estrellas nuevas, destacada, descarte
     var vr = p && p.vaca ? byNum(p.vaca) : null, va = p && p.vacaAntes, vd = estadoVaca(vr);

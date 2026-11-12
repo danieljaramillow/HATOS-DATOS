@@ -17243,7 +17243,7 @@ window.__irAFicha = function(id, soloSiHayVentana){
         var ult = a && a.partos.length ? a.partos[a.partos.length-1].fecha : null, dp = parseInt(d.hallazgo, 10);
         if(est === 'preñada' && dp > 0 && dp < 290){ var conc = addDias(f, -dp), pp = addDias(conc, 283);
           if(ult){ var iepP = meses(ult, pp);
-            if(iepP >= 9 && iepP <= 12) out.push({ k:'alto', texto:'🏆 Preñez temprana: concibió a los '+Math.round(dias(ult, conc))+' días del parto. IEP proyectado de '+iepP.toFixed(1)+' meses (parto probable '+fmt(pp)+'): ganará ⭐ IEP corto cuando para.' });
+            if(iepP >= 9 && iepP <= 15) out.push({ k:'alto', texto:'🏆 Preñez temprana: concibió a los '+Math.round(dias(ult, conc))+' días del parto. IEP proyectado de '+iepP.toFixed(1)+' meses (parto probable '+fmt(pp)+')'+(iepP <= 12 ? ': ganará ⭐ IEP corto cuando para.' : ' (15 meses o menos).') });
             else if(iepP > 20) out.push({ k:'aviso', texto:'Preñada, pero el IEP proyectado es de '+iepP.toFixed(1)+' meses (parto probable '+fmt(pp)+'): ese parto saldrá con bandera ⚑ de parto muy abierto.' });
             else out.push({ k:'info', texto:'Preñada de '+dp+' días · parto probable '+fmt(pp)+' · IEP proyectado '+iepP.toFixed(1)+' meses.' }); }
           else if(r.fecha_nac){ var e1 = meses(r.fecha_nac, pp);

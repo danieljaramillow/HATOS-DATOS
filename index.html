@@ -1861,7 +1861,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 21 oct 2026 · 12:40 p.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 12 nov 2026 · 9:30 a.m.</b>
     </div>
   </header>
 
@@ -1894,6 +1894,7 @@ window.__renderReproHead = function(o){
       <button type="button" data-p="descarte"><b>⚑ Animales para descarte <span class="rep-n" id="rpNDesc">·</span></b><span>Vacas activas con 2 o más banderas negras</span></button>
       <button type="button" data-p="destacadas"><b>⭐ Vacas destacadas <span class="rep-n" id="rpNDest">·</span></b><span>Vacas activas con 2 o más estrellas por buenos resultados</span></button>
       <button type="button" data-p="visitas"><b>🏅 Visitas ASOCEBU <span class="rep-n" id="rpNVis">·</span></b><span>Visitas guardadas en este equipo, con su Excel</span></button>
+      <button type="button" data-p="sesiones"><b>📊 Sesiones de actualización <span class="rep-n" id="rpNSes">·</span></b><span>Lo que registró en cada jornada: parámetros que mejoraron o empeoraron, banderas negras y sobresalientes</span></button>
       <button type="button" data-p="palpacion"><b>🩺 Planilla de palpación <span class="rep-n" id="rpNPalp">·</span></b><span>Para imprimir y anotar: último parto, destete, palpación anterior y banderas</span></button>
     </div>
     <div class="rep-panel" id="rpP-revision">
@@ -1925,6 +1926,13 @@ window.__renderReproHead = function(o){
       </div>
       <div id="stResumen" class="hint" style="margin:0 0 8px;"></div>
       <div id="stLista" class="bn-desc-lista"></div>
+    </div>
+    <div class="rep-panel" id="rpP-sesiones">
+      <div class="section-head" style="margin-top:4px"><h2>Sesiones de actualización</h2><div class="rail"></div></div>
+      <p class="hint" style="margin:-6px 0 12px;">Cada vez que registra un nacimiento, destete, palpación, pesaje, aborto o salida, la app recalcula los <b>parámetros de producción</b> de la finca y le muestra cómo quedaron:
+        <b style="color:#1D5A22">verde = mejoró</b>, <b style="color:#8E1F14">rojo = empeoró</b>, <b style="color:#1C4E8C">azul = siguió igual</b>. También avisa al momento las <b>⚑ banderas negras</b> y los <b>⭐ animales sobresalientes o de alto rendimiento</b>.
+        Todo lo de una jornada queda en una <b>sesión</b>, con su resumen para descargar en PDF o Excel o compartir por WhatsApp. La sesión se cierra sola después de 10 horas sin registros, o con el botón «Terminar sesión».</p>
+      <div id="rpSesLista"></div>
     </div>
     <div class="rep-panel" id="rpP-visitas"><div id="rpVisLista"></div></div>
     <div class="rep-panel" id="rpP-palpacion">
@@ -8037,6 +8045,7 @@ window.__renderReproHead = function(o){
   }
 
   function addUpdate(tipo, numero, detalleObj, detalleTexto, origen){
+    try{ if(window.__antesActualizar) window.__antesActualizar(tipo, numero, detalleObj || {}); }catch(e){}
     var u = { id: Date.now()*100 + Math.floor(Math.random()*100), tipo: tipo, numero: numero, detalle: detalleObj, detalle_texto: detalleTexto, fecha: new Date().toISOString().slice(0,10) };
     UPDATES.push(u);
     saveUpdates();
@@ -8045,6 +8054,13 @@ window.__renderReproHead = function(o){
       finca: (detalleObj && detalleObj.finca) || (rec && rec.finca) || '' });
     renderUpdTable();
     try{ if(window.__aplicarPendiente) window.__aplicarPendiente(u); }catch(e){}
+    /* Palpación o pesaje de formulario / modo guiado: entra de una vez a los datos
+       (las visitas lo hacen por su cuenta), para que ficha e indicadores ya lo usen. */
+    try{ var dd = detalleObj || {};
+      if(window.__provisional && !/^Visita/.test(origen||'')){
+        if(tipo === 'palpacion') window.__provisional('palp', numero, { fecha:dd.fecha||u.fecha, estado:dd.resultado==='PREÑADA' ? 'P+' : (dd.resultado==='VACIA' ? 'VACIA' : (dd.resultado||'')), toro:dd.toro||null, hallazgo:dd.hallazgo||null, provisional:true, __key:'u'+u.id });
+        if(tipo === 'peso' && dd.peso != null && dd.peso !== '') window.__provisional('peso', numero, { fecha:dd.fecha||u.fecha, peso:+String(dd.peso).replace(',','.'), nota:(dd.nota||'')+' (pendiente)', provisional:true, __key:'u'+u.id });
+      } }catch(e){ console.warn(e); }
     try{ if(window.__novedadesTras) window.__novedadesTras(u); }catch(e){ console.warn(e); }
     return u;
   }
@@ -8166,7 +8182,7 @@ window.__renderReproHead = function(o){
   window.__updRemove = function(x){
     var i = (x && typeof x==='object') ? UPDATES.indexOf(x) : -1;
     if(i<0) for(var k=0;k<UPDATES.length;k++){ var u=UPDATES[k]; if(x && typeof x==='object' ? (u.id===x.id && u.tipo===x.tipo && u.numero===x.numero && u.fecha===x.fecha) : u.id===x){ i=k; break; } }
-    if(i>=0){ UPDATES.splice(i,1); saveUpdates(); renderUpdTable(); renderHist(); }
+    if(i>=0){ try{ if(window.__sesionQuitar) window.__sesionQuitar(UPDATES[i].id); }catch(e){} UPDATES.splice(i,1); saveUpdates(); renderUpdTable(); renderHist(); }
   };
   window.__updClear = function(){ UPDATES = []; saveUpdates(); renderUpdTable(); renderHist(); };
   window.__updDownload = function(){ var b = document.getElementById('updDownloadBtn'); if(b) b.click(); };
@@ -16933,6 +16949,627 @@ window.__irAFicha = function(id, soloSiHayVentana){
   }
   window.HEdit = { ficha:ficha };
 })();
+</script>
+<script>
+/* =====================================================================
+   SESIÓN DE ACTUALIZACIÓN — indicadores en vivo
+   Cada vez que se registra un dato de producción (nacimiento, aborto,
+   destete, pesaje, palpación, salida, corrección…), se calculan los
+   parámetros de producción de la finca ANTES y DESPUÉS del registro y se
+   muestra cómo quedó cada uno:
+     verde  = mejoró · rojo = empeoró · azul = siguió igual
+   Además avisa al momento:
+     ⚑ banderas negras nuevas (y las que se le quitan a la vaca),
+     ⭐ / 🏆 animales sobresalientes o de alto rendimiento,
+     ⚠ resultados bajos o para revisar.
+   Todo queda en la "sesión" (lo registrado en una jornada) y al terminar
+   sale un reporte de resumen descargable (PDF / Excel) y para compartir.
+   ===================================================================== */
+(function(){
+  if(!window.__BD__) return;
+  var KEY = 'hatos_sesion_act_v1', KEY_HIST = 'hatos_sesiones_v1', HIST_MAX = 40, HORAS_CIERRE = 10;
+  var PROD = ['OK','CACHO','TNJ'];
+  function $(id){ return document.getElementById(id); }
+  function N(x){ return String(x == null ? '' : x).trim().toUpperCase(); }
+  function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function ls(k, d){ try{ var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; }catch(e){ return d; } }
+  function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function hoyIso(){ var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  function iso(v){ v = String(v || '').trim(); if(!v) return null; if(/^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0,10); return window.fechaAIso ? window.fechaAIso(v) : null; }
+  function meses(a, b){ return (new Date(b) - new Date(a)) / 86400000 / 30.4375; }
+  function dias(a, b){ return (new Date(b) - new Date(a)) / 86400000; }
+  function addDias(f, n){ var d = new Date(f+'T12:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+  function fmt(f){ if(!f) return '—'; var p = String(f).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : f; }
+  function hora(ts){ var d = new Date(ts); return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
+  function fechaHora(ts){ var d = new Date(ts); return fmt(d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2))+' '+hora(ts); }
+  function J(id){ try{ return JSON.parse(document.getElementById(id).textContent); }catch(e){ return {}; } }
+  function prom(a){ return a.length ? a.reduce(function(s,v){ return s+v; },0)/a.length : null; }
+  function num(v){ var x = parseFloat(String(v == null ? '' : v).replace(',','.')); return isNaN(x) ? null : x; }
+  function esTE(c){ return typeof esCriaTE === 'function' ? esCriaTE(c) : /\bTE\b/.test(N(c.comentario)); }
+  function byNum(n){ var k = N(n); if(!k) return null; var BD = window.__BD__, alt = null;
+    for(var i = 0; i < BD.length; i++){ var r = BD[i]; if(r.numero && N(r.numero) === k){ if(r.activo === 'ACTIVO') return r; alt = alt || r; } } return alt; }
+  function palpEstado(e){
+    e = N(e).replace(/\s/g,'');
+    if(e==='P+' || e.indexOf('PREÑ')===0 || e.indexOf('PREN')===0) return 'preñada';
+    if(e==='PP' || e==='P*') return 'dudosa';
+    if(e.indexOf('VAC')===0 || e==='VN' || e==='V') return 'vacía';
+    return null;
+  }
+  var RX_MUERTE = /MUER|MURI|AHOG|GOLERO|CHULO/;
+
+  /* ================= PARÁMETROS DE PRODUCCIÓN ================= */
+  var DEF = [
+    { id:'iep',        g:'Reproducción', l:'IEP promedio', u:'meses', d:2, mejor:'baja',
+      x:'Promedio de los intervalos entre partos (cada parto con el anterior) de las vacas activas de la finca.' },
+    { id:'natalidad',  g:'Reproducción', l:'Vacas paridas en los últimos 12 meses', u:'%', d:1, mejor:'sube',
+      x:'De las vacas activas que ya parieron alguna vez, el % que parió en los últimos 365 días.' },
+    { id:'primer',     g:'Reproducción', l:'Edad al primer parto', u:'meses', d:2, mejor:'baja',
+      x:'Edad promedio al primer parto de las novillas que parieron por primera vez en los últimos 3 años.' },
+    { id:'prenez',     g:'Reproducción', l:'Preñez a la palpación', u:'%', d:1, mejor:'sube',
+      x:'De las hembras activas palpadas en los últimos 12 meses (después de su último parto), el % que está preñada.' },
+    { id:'abiertas',   g:'Reproducción', l:'Vacas con más de 20 meses sin parir y sin preñez', u:'vacas', d:0, mejor:'baja',
+      x:'Vacas activas que llevan más de 20 meses desde su último parto sin preñez confirmada (bandera negra).' },
+    { id:'tardias',    g:'Reproducción', l:'Novillas de 35 meses o más sin preñez', u:'novillas', d:0, mejor:'baja',
+      x:'Hembras activas sin partos, de 35 meses o más, sin ninguna preñez confirmada (bandera negra).' },
+    { id:'abortos',    g:'Reproducción', l:'Abortos (últimos 12 meses)', u:'%', d:1, mejor:'baja',
+      x:'Abortos ÷ (partos + abortos) de las vacas activas en los últimos 365 días.' },
+    { id:'mortalidad', g:'Crías', l:'Mortalidad de crías (últimos 12 meses)', u:'%', d:1, mejor:'baja',
+      x:'Crías muertas antes del destete en los últimos 365 días ÷ crías nacidas en ese mismo periodo.' },
+    { id:'desteteM',   g:'Destete y crecimiento', l:'Destete ajustado a 8 meses — machos', u:'kg', d:1, mejor:'sube',
+      x:'Promedio del peso ajustado a 8 meses de los machos destetados en los últimos 12 meses (sin crías TE).' },
+    { id:'desteteH',   g:'Destete y crecimiento', l:'Destete ajustado a 8 meses — hembras', u:'kg', d:1, mejor:'sube',
+      x:'Promedio del peso ajustado a 8 meses de las hembras destetadas en los últimos 12 meses (sin crías TE).' },
+    { id:'ara',        g:'Destete y crecimiento', l:'ARA promedio', u:'kg/año', d:1, mejor:'sube',
+      x:'Kilos de cría destetada por año de intervalo entre partos (peso al destete ÷ IEP × 12), promedio de los partos de las vacas activas.' },
+    { id:'gdp',        g:'Destete y crecimiento', l:'Ganancia diaria de peso (menores de 3 años)', u:'g/día', d:0, mejor:'sube',
+      x:'Animales activos de menos de 3 años con dos pesajes en los últimos 12 meses (o peso al nacer y un pesaje): ganancia entre los dos últimos.' },
+    { id:'descarte',   g:'Resultado del hato', l:'Vacas para descarte (2 o más ⚑)', u:'vacas', d:0, mejor:'baja',
+      x:'Vacas activas con 2 o más banderas negras: entran a «Animales para descarte».' },
+    { id:'destacadas', g:'Resultado del hato', l:'Vacas destacadas (2 o más ⭐)', u:'vacas', d:0, mejor:'sube',
+      x:'Vacas activas con 2 o más estrellas por buenos resultados.' }
+  ];
+  var DEFI = {}; DEF.forEach(function(d){ DEFI[d.id] = d; });
+  /* Qué parámetros toca cada tipo de registro (se muestran aunque sigan igual). */
+  var AFECTA = {
+    cria:['iep','natalidad','primer','prenez','abiertas','tardias','mortalidad','descarte','destacadas'],
+    aborto:['abortos','descarte'],
+    palpacion:['prenez','abiertas','tardias','descarte'],
+    destete:['desteteM','desteteH','ara','gdp','descarte','destacadas'],
+    peso:['gdp'],
+    salida:['mortalidad','descarte','destacadas'],
+    servicio:[], correccion:[]
+  };
+
+  function calcular(F){
+    var BN = window.__BN, BD = window.__BD__, hoy = hoyIso(), d365 = addDias(hoy, -365), d3a = addDias(hoy, -1096);
+    var PALP = J('palp-source'), PESOS = J('pesos-source');
+    var V = {}, n = {};
+    function set(id, v, base){ V[id] = (v == null || isNaN(v)) ? null : v; n[id] = base; }
+    var deF = BD.filter(function(r){ return r.finca === F && r.numero; });
+    var activos = deF.filter(function(r){ return r.activo === 'ACTIVO'; });
+    var hembras = activos.filter(function(r){ return r.sexo === 'H'; });
+    var A = []; hembras.forEach(function(r){ try{ A.push({ r:r, a:BN.analizar(r) }); }catch(e){} });
+
+    // IEP, natalidad, ARA, abortos, banderas
+    var ivs = [], vientres = 0, paridas = 0, ara = [], ab12 = 0, pa12 = 0, abiertas = 0, tardias = 0, desc = 0, dest = 0;
+    A.forEach(function(x){ var a = x.a, r = x.r;
+      a.partos.forEach(function(p){ if(p.iep_meses != null && p.iep_meses >= 9) ivs.push(p.iep_meses);
+        if(p.kg_ano != null && p.iep_meses && !p.anomalia) ara.push(p.kg_ano);
+        if(p.fecha && p.fecha >= d365) pa12++; });
+      if(a.partos.length){ vientres++; if(a.partos.some(function(p){ return p.fecha && p.fecha >= d365; })) paridas++; }
+      a.abortos.forEach(function(b){ if(b.fecha && b.fecha >= d365) ab12++; });
+      if(a.extra.some(function(e){ return e.tipo === 'abierta' && e.fecha === hoy; })) abiertas++;
+      if(a.extra.some(function(e){ return e.tipo === 'tardia'; })) tardias++;
+      var cand = (r.crias_ids && r.crias_ids.length) || r.edad_actual >= 2;
+      if(cand && a.banderas.length >= 2) desc++;
+      if(r.crias_ids && r.crias_ids.length && a.estrellas.length >= 2) dest++;
+    });
+    set('iep', prom(ivs), ivs.length+' intervalos');
+    set('natalidad', vientres ? paridas/vientres*100 : null, paridas+' de '+vientres+' vacas');
+    set('ara', prom(ara), ara.length+' partos');
+    set('abortos', (ab12+pa12) ? ab12/(ab12+pa12)*100 : null, ab12+' abortos · '+pa12+' partos');
+    set('abiertas', abiertas, hembras.length+' hembras activas');
+    set('tardias', tardias, hembras.length+' hembras activas');
+    set('descarte', desc, ''); set('destacadas', dest, '');
+
+    // Edad al primer parto (todas las hembras de la finca, activas o no, primer parto en 3 años)
+    var epp = [];
+    deF.forEach(function(r){ if(r.sexo !== 'H' || !r.fecha_nac || !(r.crias_ids && r.crias_ids.length)) return;
+      var a; if(r.activo === 'ACTIVO'){ for(var i=0;i<A.length;i++) if(A[i].r === r){ a = A[i].a; break; } }
+      if(!a){ try{ a = BN.analizar(r); }catch(e){ return; } }
+      var p = a.partos[0]; if(!p || !p.fecha || p.fecha < d3a) return;
+      var m = meses(r.fecha_nac, p.fecha); if(m > 18 && m < 80) epp.push(m); });
+    set('primer', prom(epp), epp.length+' novillas');
+
+    // Preñez a la palpación
+    var palp = 0, pren = 0;
+    A.forEach(function(x){ var r = x.r, a = x.a;
+      if(!a.partos.length && !(r.edad_actual >= 1.5)) return;
+      var L = (PALP[String(r.numero).trim()] || PALP[r.numero] || []).filter(function(p){ return p.fecha && palpEstado(p.estado); })
+        .sort(function(p,q){ return q.fecha.localeCompare(p.fecha); });
+      var u = L[0]; if(!u || u.fecha < d365) return;
+      var est = palpEstado(u.estado); if(est === 'dudosa') return;
+      var ult = a.partos.length ? a.partos[a.partos.length-1].fecha : null;
+      if(ult && u.fecha < ult) return;
+      palp++; if(est === 'preñada') pren++; });
+    set('prenez', palp ? pren/palp*100 : null, pren+' preñadas de '+palp+' palpadas');
+
+    // Mortalidad de crías
+    var nac = 0, muertas = 0;
+    deF.forEach(function(c){
+      if(c.fecha_nac && c.fecha_nac >= d365 && !(window.esFetoAbortado && window.esFetoAbortado(c))) nac++;
+      if(c.fecha_salida && c.fecha_salida >= d365 && c.fecha_nac && c.peso_dest == null){
+        var t = N([c.causa_salida, c.obs_salida].join(' ')); if(RX_MUERTE.test(t) && !/VENT|VEND/.test(t) && dias(c.fecha_nac, c.fecha_salida) <= 300 && !(window.esFetoAbortado && window.esFetoAbortado(c))) muertas++; } });
+    set('mortalidad', nac ? muertas/nac*100 : null, muertas+' muertas · '+nac+' nacidas');
+
+    // Destete ajustado (12 meses)
+    var dM = [], dH = [];
+    deF.forEach(function(c){ if(c.fecha_dest && c.fecha_dest >= d365 && c.peso_aj_8m != null && !esTE(c)) (c.sexo === 'M' ? dM : dH).push(c.peso_aj_8m); });
+    set('desteteM', prom(dM), dM.length+' machos'); set('desteteH', prom(dH), dH.length+' hembras');
+
+    // Ganancia diaria (menores de 3 años)
+    var gd = [], porAnimal = {}, grupos = {};
+    activos.forEach(function(r){
+      if(!r.fecha_nac || meses(r.fecha_nac, hoy) > 36) return;
+      var L = (PESOS[String(r.numero).trim()] || PESOS[r.numero] || []).filter(function(p){ return p.fecha && num(p.peso) > 0; })
+        .sort(function(p,q){ return p.fecha.localeCompare(q.fecha); });
+      var b = L[L.length-1]; if(!b || b.fecha < d365) return;
+      var a = null;
+      for(var i = L.length-2; i >= 0; i--){ if(dias(L[i].fecha, b.fecha) >= 20){ a = L[i]; break; } }
+      var g = null;
+      if(a && a.fecha >= d365) g = (num(b.peso) - num(a.peso)) / dias(a.fecha, b.fecha) * 1000;
+      else if(r.peso_nacimiento && dias(r.fecha_nac, b.fecha) >= 20) g = (num(b.peso) - r.peso_nacimiento) / dias(r.fecha_nac, b.fecha) * 1000;
+      if(g == null || g < -1500 || g > 2500) return;
+      gd.push(g);
+      var k = (r.sexo||'')+'|'+r.fecha_nac.slice(0,4);
+      porAnimal[N(r.numero)] = { gdp:g, k:k, desde:a ? a.fecha : r.fecha_nac, hasta:b.fecha };
+      (grupos[k] = grupos[k] || []).push(g);
+    });
+    set('gdp', prom(gd), gd.length+' animales');
+    return { finca:F, v:V, n:n, inventario:activos.length, gdpAnimal:porAnimal, gdpGrupos:grupos };
+  }
+
+  /* Estado de una vaca (banderas y estrellas) para saber qué cambió con el registro */
+  function estadoVaca(r){
+    if(!r || r.sexo !== 'H') return null;
+    try{ var a = window.__BN.analizar(r);
+      return { numero:r.numero,
+        f:a.banderas.map(function(b){ return { k:b.tipo+'|'+(b.parto||'')+'|'+(b.tipo==='abierta'&&!b.parto?'hoy':(b.fecha||'')), tipo:b.tipo, texto:b.texto, parto:b.parto }; }),
+        s:a.estrellas.map(function(b){ return { k:b.tipo+'|'+(b.parto||''), tipo:b.tipo, texto:b.texto, parto:b.parto }; }) };
+    }catch(e){ return null; }
+  }
+
+  /* ================= SESIÓN ================= */
+  function nuevaSesion(){ return { id:Date.now(), inicio:Date.now(), fin:null, eventos:[], base:{}, ultimo:{} }; }
+  function cargar(){
+    var s = ls(KEY, null);
+    if(s && s.eventos && s.eventos.length && Date.now() - (s.eventos[s.eventos.length-1].ts || s.inicio) > HORAS_CIERRE*3600e3){ archivar(s); s = null; }
+    return s && s.eventos ? s : nuevaSesion();
+  }
+  var S = cargar();
+  function guardar(){ lsSet(KEY, S); }
+  function archivar(s){
+    if(!s || !s.eventos || !s.eventos.length) return;
+    s.fin = s.fin || s.eventos[s.eventos.length-1].ts;
+    var H = ls(KEY_HIST, []); H = H.filter(function(x){ return x.id !== s.id; }); H.unshift(s); lsSet(KEY_HIST, H.slice(0, HIST_MAX));
+  }
+
+  /* ================= ANTES / DESPUÉS ================= */
+  var pend = null;
+  function fincaDe(tipo, numero, d){
+    var r = byNum(numero);
+    if(tipo === 'cria'){ var m = byNum(d.madre); return N(d.finca) || (m && m.finca) || (r && r.finca) || null; }
+    return r ? r.finca : (N(d.finca) || null);
+  }
+  function vacaDe(tipo, numero, d){
+    if(tipo === 'cria') return N(d.tipo_parto) === 'TE' ? null : byNum(d.madre);
+    var r = byNum(numero);
+    if((tipo === 'peso' || tipo === 'salida') && r && r.madre && (tipo === 'salida' || /DESTET/i.test(String(d.nota||'')))) return byNum(r.madre);
+    return r && r.sexo === 'H' ? r : null;
+  }
+  window.__antesActualizar = function(tipo, numero, d){
+    try{
+      d = d || {}; if(window.__BN) window.__BN.reset();
+      var F = fincaDe(tipo, numero, d), vaca = vacaDe(tipo, numero, d), rec = byNum(numero);
+      var antes = (F && PROD.indexOf(F) >= 0) ? calcular(F) : null;
+      pend = { tipo:tipo, numero:numero, finca:F, antes:antes, vaca:vaca ? vaca.numero : null, vacaAntes:estadoVaca(vaca),
+        animalAntes: rec ? { activo:rec.activo, finca:rec.finca } : null };
+    }catch(e){ console.warn(e); pend = null; }
+  };
+
+  function tipoEvento(u){ var d = u.detalle || {}; return (u.tipo === 'peso' && /DESTET/i.test(String(d.nota||''))) ? 'destete' : u.tipo; }
+  var NOMBRE = { cria:'Nacimiento', aborto:'Aborto', palpacion:'Palpación', destete:'Destete', peso:'Pesaje', salida:'Salida', servicio:'Servicio', correccion:'Corrección' };
+  var ICON = { cria:'🐮', aborto:'⚠', palpacion:'🩺', destete:'⚖', peso:'⚖', salida:'🚚', servicio:'❤', correccion:'✏' };
+
+  function comparar(antes, despues, tipo){
+    var out = [], lista = AFECTA[tipo] || [];
+    DEF.forEach(function(D){
+      var a = antes ? antes.v[D.id] : null, b = despues ? despues.v[D.id] : null;
+      var fa = a == null ? null : +a.toFixed(D.d), fb = b == null ? null : +b.toFixed(D.d);
+      var cambia = fa !== fb;
+      if(!cambia && lista.indexOf(D.id) < 0) return;
+      if(fa == null && fb == null) return;
+      var dir = 'igual';
+      if(cambia && fa != null && fb != null) dir = ((fb > fa) === (D.mejor === 'sube')) ? 'mejor' : 'peor';
+      else if(cambia) dir = 'nuevo';
+      out.push({ id:D.id, antes:fa, despues:fb, dir:dir, base:despues ? despues.n[D.id] : '' });
+    });
+    var orden = { peor:0, mejor:1, nuevo:2, igual:3 };
+    out.sort(function(x,y){ var ax = lista.indexOf(x.id) < 0 ? 1 : 0, ay = lista.indexOf(y.id) < 0 ? 1 : 0; return ax - ay || orden[x.dir] - orden[y.dir]; });
+    return out;
+  }
+
+  /* Alertas individuales del registro: lo malo, lo bueno y lo sobresaliente */
+  var mellizos = {};
+  function alertasDe(u, tipo, p, despues){
+    var BN = window.__BN, d = u.detalle || {}, out = [], res = null, f = iso(d.fecha) || u.fecha;
+    try{
+      if(tipo === 'cria' && d.madre && N(d.tipo_parto) !== 'TE'){
+        var km = N(d.madre)+'|'+f;
+        if(!mellizos[km]){ mellizos[km] = 1; res = BN.novedadParto(d.madre, f, d.peso_nac); }
+      } else if(tipo === 'aborto') res = BN.novedadAborto(u.numero, f, d.meses);
+      else if(tipo === 'salida' && /MUER/i.test(String(d.causa||'')+' '+String(d.obs||''))) res = BN.novedadMuerte(u.numero);
+      else if(tipo === 'destete') res = BN.novedadDestete(u.numero, d.peso, f);
+    }catch(e){ console.warn(e); }
+    if(res && res.items) res.items.forEach(function(i){
+      var k = i.k;
+      if(k === 'aviso' && /sobresaliente/i.test(i.texto)) k = 'alto';
+      out.push({ k:k, texto:i.texto });
+    });
+
+    // Destete: puesto dentro de su grupo de contemporáneos
+    if(tipo === 'destete'){ var c = byNum(u.numero);
+      if(c && c.peso_aj_8m != null && c.fecha_nac){
+        var y = c.fecha_nac.slice(0,4), G = window.__BD__.filter(function(x){ return x.finca === c.finca && x.sexo === c.sexo && x.fecha_nac && x.fecha_nac.slice(0,4) === y && x.peso_aj_8m != null && !esTE(x); })
+          .map(function(x){ return x.peso_aj_8m; }).sort(function(a,b){ return b-a; });
+        if(G.length >= 8){ var pos = G.indexOf(c.peso_aj_8m) + 1;
+          if(pos > 0 && pos <= Math.max(1, Math.ceil(G.length*0.1))) out.push({ k:'alto', texto:'🏆 Alto rendimiento: '+c.numero+' quedó de '+pos+' entre '+G.length+' '+(c.sexo==='H'?'hembras':'machos')+' de '+c.finca+' nacidos en '+y+' (10 % mejor) con '+Math.round(c.peso_aj_8m)+' kg ajustados a 8 meses.' });
+          else if(pos > 0 && pos > G.length - Math.ceil(G.length*0.1)) out.push({ k:'aviso', texto:c.numero+' quedó de '+pos+' entre '+G.length+' de su grupo ('+c.finca+' '+y+'): entre el 10 % más bajo en destete.' }); } } }
+
+    // Pesaje: ganancia diaria frente a su grupo
+    if((tipo === 'peso' || tipo === 'destete') && despues){
+      var ga = despues.gdpAnimal[N(u.numero)];
+      if(ga){ var gg = despues.gdpGrupos[ga.k] || [], otros = gg.slice(); var ix = otros.indexOf(ga.gdp); if(ix >= 0) otros.splice(ix, 1);
+        var pm = prom(otros), txt = Math.round(ga.gdp)+' g/día entre '+fmt(ga.desde)+' y '+fmt(ga.hasta);
+        if(ga.gdp < 0) out.push({ k:'aviso', texto:'Perdió peso: '+txt+'. Revise sanidad, potrero o si el pesaje es correcto.' });
+        else if(pm && otros.length >= 4 && ga.gdp >= pm*1.2) out.push({ k:'alto', texto:'🏆 Ganancia sobresaliente: '+txt+' — '+Math.round(ga.gdp/pm*100)+' % del promedio de su grupo ('+Math.round(pm)+' g/día, '+otros.length+' animales del mismo sexo y año).' });
+        else if(pm && otros.length >= 4 && ga.gdp <= pm*0.7) out.push({ k:'aviso', texto:'Ganancia baja: '+txt+' — '+Math.round(ga.gdp/pm*100)+' % del promedio de su grupo ('+Math.round(pm)+' g/día).' });
+        else out.push({ k:'info', texto:'Ganancia diaria: '+txt+(pm && otros.length >= 4 ? ' (su grupo promedia '+Math.round(pm)+' g/día).' : '.') });
+      } }
+
+    // Palpación: lo que se proyecta
+    if(tipo === 'palpacion'){ var r = byNum(u.numero), est = palpEstado(d.resultado === 'PREÑADA' ? 'P+' : d.resultado);
+      if(r){ var a = null; try{ a = window.__BN.analizar(r); }catch(e){}
+        var ult = a && a.partos.length ? a.partos[a.partos.length-1].fecha : null, dp = parseInt(d.hallazgo, 10);
+        if(est === 'preñada' && dp > 0 && dp < 290){ var conc = addDias(f, -dp), pp = addDias(conc, 283);
+          if(ult){ var iepP = meses(ult, pp);
+            if(iepP >= 9 && iepP <= 12) out.push({ k:'alto', texto:'🏆 Preñez temprana: concibió a los '+Math.round(dias(ult, conc))+' días del parto. IEP proyectado de '+iepP.toFixed(1)+' meses (parto probable '+fmt(pp)+'): ganará ⭐ IEP corto cuando para.' });
+            else if(iepP > 20) out.push({ k:'aviso', texto:'Preñada, pero el IEP proyectado es de '+iepP.toFixed(1)+' meses (parto probable '+fmt(pp)+'): ese parto saldrá con bandera ⚑ de parto muy abierto.' });
+            else out.push({ k:'info', texto:'Preñada de '+dp+' días · parto probable '+fmt(pp)+' · IEP proyectado '+iepP.toFixed(1)+' meses.' }); }
+          else if(r.fecha_nac){ var e1 = meses(r.fecha_nac, pp);
+            if(e1 <= 30) out.push({ k:'alto', texto:'🏆 Novilla precoz: primer parto proyectado a los '+e1.toFixed(1)+' meses de edad (parto probable '+fmt(pp)+'): ganará ⭐ si se confirma.' });
+            else out.push({ k:'info', texto:'Novilla preñada de '+dp+' días · primer parto probable '+fmt(pp)+' a los '+e1.toFixed(1)+' meses de edad.' }); } }
+        else if(est === 'vacía'){
+          var ab = a && a.extra.filter(function(e){ return e.tipo === 'abierta' || e.tipo === 'tardia'; })[0];
+          if(ab) out.push({ k:'bandera', texto:'⚑ Sigue vacía y mantiene la bandera negra «'+window.__BN.ICON[ab.tipo]+'»: '+ab.texto+(a.banderas.length >= 2 ? ' Tiene '+a.banderas.length+' banderas: está en «Animales para descarte».' : '') });
+          else if(ult){ var mv = meses(ult, f); if(mv > 12 && mv <= 20) out.push({ k:'aviso', texto:'Vacía a los '+mv.toFixed(1)+' meses de su último parto ('+fmt(ult)+'): a los 20 meses sin preñez será bandera negra ⚑.' }); }
+          else if(r.fecha_nac){ var em = meses(r.fecha_nac, f); if(em >= 28 && em < 35) out.push({ k:'aviso', texto:'Novilla vacía de '+em.toFixed(1)+' meses: a los 35 meses sin preñez será bandera negra ⚑.' }); } } } }
+
+    // Lo que cambió en la vaca: banderas nuevas / quitadas, estrellas nuevas, destacada, descarte
+    var vr = p && p.vaca ? byNum(p.vaca) : null, va = p && p.vacaAntes, vd = estadoVaca(vr);
+    if(va && vd){
+      var kA = va.f.map(function(x){ return x.k; }), kD = vd.f.map(function(x){ return x.k; });
+      var nuevas = vd.f.filter(function(x){ return kA.indexOf(x.k) < 0; }), quitadas = va.f.filter(function(x){ return kD.indexOf(x.k) < 0; });
+      var sA = va.s.map(function(x){ return x.k; }), sNuevas = vd.s.filter(function(x){ return sA.indexOf(x.k) < 0; });
+      var yaB = out.some(function(i){ return i.k === 'bandera'; }), yaE = out.some(function(i){ return i.k === 'estrella'; });
+      if(!yaB) nuevas.forEach(function(x){ out.push({ k:'bandera', texto:'Bandera negra nueva para '+vd.numero+' — '+window.__BN.ICON[x.tipo]+(x.parto?' (parto '+x.parto+')':'')+': '+x.texto }); });
+      quitadas.forEach(function(x){ out.push({ k:'mejora', texto:'Se le quita a '+va.numero+' la bandera «'+window.__BN.ICON[x.tipo]+'»'+(x.tipo==='abierta'?' porque ya tiene preñez confirmada o parió':'')+'.' }); });
+      if(!yaE) sNuevas.forEach(function(x){ out.push({ k:'estrella', texto:'Estrella nueva para '+vd.numero+' — '+window.__BN.ICON_EST[x.tipo]+(x.parto?' (parto '+x.parto+')':'')+': '+x.texto }); });
+      if(vd.f.length >= 2 && va.f.length < 2) out.push({ k:'bandera', texto:'⚑ ALERTA: la vaca '+vd.numero+' llegó a '+vd.f.length+' banderas negras y entra a «Animales para descarte».' });
+      if(vd.f.length < 2 && va.f.length >= 2) out.push({ k:'mejora', texto:'La vaca '+vd.numero+' baja a '+vd.f.length+' bandera'+(vd.f.length===1?'':'s')+' y sale de «Animales para descarte».' });
+      if(vd.s.length >= 2 && va.s.length < 2) out.push({ k:'alto', texto:'🏆 La vaca '+vd.numero+' llegó a '+vd.s.length+' estrellas ⭐: ahora es VACA DESTACADA.' });
+      out.push({ k:'resumen', texto:'La vaca '+vd.numero+' queda con '+vd.s.length+' ⭐ y '+vd.f.length+' ⚑'+(vd.s.length>=2?' — destacada':'')+(vd.f.length>=2?' — candidata a descarte':'')+'.' });
+    }
+    return out;
+  }
+
+  /* ================= TRAS CADA REGISTRO ================= */
+  function trasRegistro(u){
+    var p = (pend && N(pend.numero) === N(u.numero) && pend.tipo === u.tipo) ? pend : null; pend = null;
+    setTimeout(function(){ try{ procesar(u, p); }catch(e){ console.warn(e); } }, 40);
+  }
+  function procesar(u, p){
+    if(window.__BN) window.__BN.reset();
+    var tipo = tipoEvento(u), d = u.detalle || {};
+    var F = (byNum(u.numero) || {}).finca || (p && p.finca) || N(d.finca) || null;
+    if(tipo === 'cria' && p && p.finca) F = p.finca;
+    var esProd = F && PROD.indexOf(F) >= 0;
+    var despues = esProd ? calcular(F) : null, antes = p && p.antes && p.antes.finca === F ? p.antes : null;
+    if(esProd && !antes) antes = S.ultimo[F] || null;
+    var cambios = esProd ? comparar(antes, despues, tipo) : [];
+    var alertas = alertasDe(u, tipo, p, despues);
+    if(esProd){
+      if(!S.base[F]) S.base[F] = antes ? { v:antes.v, n:antes.n, inventario:antes.inventario } : { v:despues.v, n:despues.n, inventario:despues.inventario };
+      S.ultimo[F] = { finca:F, v:despues.v, n:despues.n, inventario:despues.inventario, gdpAnimal:{}, gdpGrupos:{} };
+    }
+    var ev = { ts:Date.now(), uid:u.id, tipo:tipo, numero:u.numero, finca:F, texto:u.detalle_texto || '', vaca:p && p.vaca,
+      cambios:cambios, alertas:alertas };
+    S.eventos.push(ev); guardar();
+    tarjeta(ev, esProd);
+    chip();
+  }
+  window.__novedadesTras = trasRegistro;   // reemplaza el aviso anterior (ahora va dentro de la tarjeta)
+
+  /* Si se borra un registro pendiente, se marca en la sesión */
+  window.__sesionQuitar = function(uid){ var e = S.eventos.filter(function(x){ return x.uid === uid; })[0]; if(e){ e.borrado = true; guardar(); chip(); } };
+
+  /* ================= INTERFAZ ================= */
+  var css = document.createElement('style');
+  css.textContent = [
+    '.sa-card{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:10088;width:min(560px,calc(100vw - 20px));max-height:min(78vh,680px);overflow-y:auto;background:#F7F3E9;border:2px solid #1E3626;border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,.35);font-family:"IBM Plex Sans",sans-serif;color:#241D14;display:none}',
+    '.sa-card.on{display:block;animation:saUp .22s ease-out}@keyframes saUp{from{transform:translate(-50%,30px);opacity:0}to{transform:translate(-50%,0);opacity:1}}',
+    '.sa-card.alerta{border-color:#111}.sa-card.alerta .sa-hd{background:#111}',
+    '.sa-hd{background:#1E3626;color:#fff;padding:10px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:1}',
+    '.sa-hd b{font-size:15px;flex:1;line-height:1.25}.sa-hd small{display:block;font-weight:400;opacity:.85;font-size:12px}',
+    '.sa-x{background:transparent;border:0;color:#fff;font-size:22px;line-height:1;cursor:pointer;padding:2px 6px}',
+    '.sa-bd{padding:10px 12px 12px}',
+    '.sa-h4{margin:8px 0 5px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5b5346;font-weight:700}',
+    '.sa-ind{display:flex;align-items:center;gap:8px;border-radius:9px;padding:8px 10px;margin:5px 0;border:1px solid;font-size:14px;line-height:1.3}',
+    '.sa-ind .nm{flex:1}.sa-ind .nm small{display:block;color:#5b5346;font-size:11.5px}',
+    '.sa-ind .vl{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.sa-ind .vl b{font-size:15.5px}',
+    '.sa-ind .ar{font-size:18px;width:22px;text-align:center;font-weight:700}',
+    '.sa-mejor{background:#E5F2E3;border-color:#7DB37A;color:#1D5A22}.sa-peor{background:#F8E0DC;border-color:#D48474;color:#8E1F14}',
+    '.sa-igual,.sa-nuevo{background:#E2ECF8;border-color:#86A9D6;color:#1C4E8C}',
+    '.sa-al{display:flex;gap:9px;align-items:flex-start;padding:8px 10px;border-radius:9px;margin:5px 0;font-size:14px;line-height:1.38;border:1px solid #ddd;background:#fff}',
+    '.sa-al .ic{font-size:18px;line-height:1.1;flex:none;width:20px;text-align:center}',
+    '.sa-al.bandera{background:#1d1d1d;color:#fff;border-color:#000}.sa-al.bandera .ic{color:#fff}',
+    '.sa-al.estrella,.sa-al.alto{background:#FBF1CF;border-color:#D9B44A}.sa-al.aviso{background:#FFF1DE;border-color:#E2A65B}',
+    '.sa-al.mejora{background:#E5F2E3;border-color:#7DB37A}.sa-al.resumen{background:transparent;border:0;padding:4px 2px;font-size:13.5px}',
+    '.sa-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:10px}',
+    '.sa-btn{border:1px solid #1E3626;background:#fff;color:#1E3626;border-radius:8px;padding:9px 13px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit}',
+    '.sa-btn.p{background:#1E3626;color:#fff}.sa-btn.r{border-color:#A9481A;color:#A9481A}',
+    '.sa-chip{position:fixed;left:14px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:10086;background:#1E3626;color:#fff;border:0;border-radius:999px;padding:10px 14px;font:700 13.5px "IBM Plex Sans",sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.3);cursor:pointer;display:none;max-width:calc(100vw - 150px)}',
+    '.sa-chip.on{display:block}.sa-chip .bn{background:#000;border-radius:999px;padding:1px 7px;margin-left:4px}.sa-chip .st{background:#D9B44A;color:#241D14;border-radius:999px;padding:1px 7px;margin-left:4px}',
+    '@media(min-width:900px){.sa-chip{bottom:76px}}',
+    '.sa-ley{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;margin:2px 0 6px;color:#5b5346}.sa-ley span{display:inline-flex;align-items:center;gap:4px}.sa-ley i{width:11px;height:11px;border-radius:3px;display:inline-block}',
+    '.sa-rep{position:fixed;inset:0;z-index:10089;background:rgba(36,29,20,.55);display:none;align-items:flex-start;justify-content:center;padding:16px 10px;overflow-y:auto}',
+    '.sa-rep.on{display:flex}.sa-rbox{background:#F7F3E9;border-radius:14px;width:100%;max-width:900px;padding:16px 16px 18px;font-family:"IBM Plex Sans",sans-serif;color:#241D14;box-shadow:0 18px 50px rgba(0,0,0,.35)}',
+    '.sa-rbox h3{font-family:Fraunces,serif;color:#1E3626;margin:0 0 2px;font-size:22px}.sa-rbox h4{margin:16px 0 6px;color:#1E3626;font-size:15.5px;border-bottom:2px solid #1E3626;padding-bottom:3px}',
+    '.sa-kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}',
+    '.sa-kp div{background:#fff;border:1px solid #ddd3bf;border-radius:10px;padding:8px 10px}.sa-kp b{display:block;font-size:22px;font-family:Fraunces,serif}.sa-kp span{font-size:12px;color:#5b5346}',
+    '.sa-kp .k-bn{background:#1d1d1d;color:#fff;border-color:#000}.sa-kp .k-bn span{color:#ddd}.sa-kp .k-st{background:#FBF1CF;border-color:#D9B44A}',
+    '.sa-tb{width:100%;border-collapse:collapse;font-size:13px;background:#fff}.sa-tb th{background:#1E3626;color:#fff;text-align:left;padding:6px 7px;font-size:12px}.sa-tb td{border-bottom:1px solid #e6dfd0;padding:6px 7px;vertical-align:top}',
+    '.sa-tb td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.sa-tb tr.mejor td.e{color:#1D5A22;background:#E5F2E3;font-weight:700}.sa-tb tr.peor td.e{color:#8E1F14;background:#F8E0DC;font-weight:700}.sa-tb tr.igual td.e,.sa-tb tr.nuevo td.e{color:#1C4E8C;background:#E2ECF8;font-weight:700}',
+    '.sa-wrap{overflow-x:auto}.sa-ev{font-size:13px;margin:6px 0;padding:8px 10px;background:#fff;border:1px solid #e6dfd0;border-radius:9px}.sa-ev.borrado{opacity:.45;text-decoration:line-through}',
+    '.sa-ev .tg{display:inline-block;font-size:11.5px;border-radius:5px;padding:1px 6px;margin:2px 3px 0 0}',
+    '.sa-hist{margin:8px 0}.sa-hist button{display:block;width:100%;text-align:left;margin:6px 0}',
+    '.sa-vacio{color:#5b5346;font-size:14px;padding:10px 0}'
+  ].join('\n');
+  document.head.appendChild(css);
+
+  var FLECHA = { mejor:'▲', peor:'▼', igual:'=', nuevo:'•' }, PAL = { mejor:'mejoró', peor:'empeoró', igual:'siguió igual', nuevo:'primer dato' };
+  var ICA = { bandera:'⚑', estrella:'⭐', alto:'🏆', aviso:'⚠', info:'ℹ', mejora:'✅', resumen:'📌' };
+  function v2t(v, D){ return v == null ? '—' : (D.d ? v.toFixed(D.d) : String(Math.round(v))); }
+  function flechaDe(c){ var D = DEFI[c.id]; if(c.dir === 'igual' || c.antes == null || c.despues == null) return FLECHA[c.dir]; return c.despues > c.antes ? '↑' : '↓'; }
+  function indHtml(c){
+    var D = DEFI[c.id], dif = (c.antes != null && c.despues != null) ? c.despues - c.antes : null;
+    return '<div class="sa-ind sa-'+c.dir+'" title="'+esc(D.x)+'"><span class="ar">'+flechaDe(c)+'</span><div class="nm">'+esc(D.l)+'<small>'+esc(PAL[c.dir])+(dif != null && c.dir !== 'igual' ? ' ('+(dif>0?'+':'')+v2t(dif, D)+' '+D.u+')' : '')+(c.base ? ' · '+esc(c.base) : '')+'</small></div>'+
+      '<div class="vl">'+(c.antes != null && c.dir !== 'igual' ? '<span style="opacity:.75">'+v2t(c.antes, D)+' → </span>' : '')+'<b>'+v2t(c.despues, D)+'</b> '+esc(D.u)+'</div></div>';
+  }
+  function alHtml(a){ return '<div class="sa-al '+a.k+'"><span class="ic">'+ICA[a.k]+'</span><div>'+esc(a.texto)+'</div></div>'; }
+  var LEY = '<div class="sa-ley"><span><i style="background:#7DB37A"></i>mejoró</span><span><i style="background:#D48474"></i>empeoró</span><span><i style="background:#86A9D6"></i>siguió igual</span></div>';
+
+  var tmr = null;
+  function tarjeta(ev, esProd){
+    var c = $('saCard'); if(!c){ c = document.createElement('div'); c.id = 'saCard'; c.className = 'sa-card'; c.setAttribute('role','dialog'); document.body.appendChild(c); }
+    var malos = ev.alertas.filter(function(a){ return a.k === 'bandera'; }), buenos = ev.alertas.filter(function(a){ return a.k === 'estrella' || a.k === 'alto'; });
+    var otros = ev.alertas.filter(function(a){ return a.k !== 'bandera' && a.k !== 'estrella' && a.k !== 'alto'; });
+    var nE = S.eventos.filter(function(e){ return !e.borrado; }).length;
+    var h = '<div class="sa-hd"><span style="font-size:20px">'+(malos.length ? '⚑' : (buenos.length ? '🏆' : ICON[ev.tipo]||'📝'))+'</span><b>'+esc(NOMBRE[ev.tipo]||ev.tipo)+' · '+esc(ev.numero||'')+(ev.vaca && ev.vaca !== ev.numero ? ' (vaca '+esc(ev.vaca)+')' : '')+
+      '<small>'+(ev.finca ? 'Finca '+esc(ev.finca)+' · ' : '')+'registro '+nE+' de esta sesión</small></b><button type="button" class="sa-x" aria-label="Cerrar">×</button></div><div class="sa-bd">';
+    if(malos.length) h += '<div class="sa-h4">⚑ Alertas — banderas negras</div>'+malos.map(alHtml).join('');
+    if(buenos.length) h += '<div class="sa-h4">⭐ Sobresalientes y alto rendimiento</div>'+buenos.map(alHtml).join('');
+    if(otros.length) h += '<div class="sa-h4">Novedades del registro</div>'+otros.map(alHtml).join('');
+    if(esProd){
+      if(ev.cambios.length) h += '<div class="sa-h4">Parámetros de producción de '+esc(ev.finca)+' — así quedaron</div>'+LEY+ev.cambios.map(indHtml).join('');
+      else h += '<div class="sa-h4">Parámetros de producción</div><p class="sa-vacio">Este registro no cambia los parámetros de producción'+(ev.tipo==='servicio'?' (se verá en la palpación y en el parto)':'')+'.</p>';
+    } else h += '<p class="sa-vacio">'+(ev.finca ? 'La finca '+esc(ev.finca)+' es de referencia genealógica: no tiene parámetros de producción.' : 'No se pudo saber la finca del animal para calcular los parámetros.')+'</p>';
+    h += '<div class="sa-acts"><button type="button" class="sa-btn" data-a="rep">📊 Resumen de la sesión</button>'+(ev.vaca || byNum(ev.numero) ? '<button type="button" class="sa-btn" data-a="ficha">Ver ficha</button>' : '')+'<button type="button" class="sa-btn p" data-a="ok">Entendido</button></div></div>';
+    c.innerHTML = h; c.classList.toggle('alerta', !!malos.length); c.classList.add('on'); c.scrollTop = 0;
+    c.querySelector('.sa-x').onclick = cerrarCard; c.querySelector('[data-a="ok"]').onclick = cerrarCard;
+    c.querySelector('[data-a="rep"]').onclick = function(){ cerrarCard(); reporte(S, true); };
+    var bf = c.querySelector('[data-a="ficha"]'); if(bf) bf.onclick = function(){ var r = byNum(ev.vaca || ev.numero); cerrarCard(); if(!r) return; if(window.__irAFicha && window.__irAFicha(r.id, true)) return; if(window.__abrirFicha) window.__abrirFicha(r.id); };
+    clearTimeout(tmr);
+    if(!malos.length && !buenos.length && !ev.alertas.some(function(a){ return a.k === 'aviso'; })) tmr = setTimeout(cerrarCard, 12000);
+  }
+  function cerrarCard(){ clearTimeout(tmr); var c = $('saCard'); if(c) c.classList.remove('on'); }
+
+  function cuenta(s){
+    var E = s.eventos.filter(function(e){ return !e.borrado; }), b = 0, st = 0, av = 0, me = 0;
+    E.forEach(function(e){ e.alertas.forEach(function(a){ if(a.k === 'bandera') b++; else if(a.k === 'estrella' || a.k === 'alto') st++; else if(a.k === 'aviso') av++; else if(a.k === 'mejora') me++; }); });
+    return { n:E.length, b:b, s:st, av:av, me:me, E:E };
+  }
+  function chip(){
+    var c = $('saChip'); if(!c){ c = document.createElement('button'); c.type = 'button'; c.id = 'saChip'; c.className = 'sa-chip'; c.onclick = function(){ reporte(S, true); }; document.body.appendChild(c); }
+    var k = cuenta(S);
+    c.innerHTML = '📊 Sesión: '+k.n+' registro'+(k.n===1?'':'s')+(k.b ? '<span class="bn">⚑ '+k.b+'</span>' : '')+(k.s ? '<span class="st">⭐ '+k.s+'</span>' : '');
+    c.classList.toggle('on', k.n > 0);
+    var nb = $('rpNSes'); if(nb) nb.textContent = k.n;
+  }
+
+  /* ================= REPORTE DE LA SESIÓN ================= */
+  function filasIndicadores(s){
+    var out = [];
+    Object.keys(s.base).forEach(function(F){
+      var a = s.base[F], b = s.ultimo[F] || a;
+      DEF.forEach(function(D){
+        var va = a.v[D.id], vb = b.v[D.id], fa = va == null ? null : +va.toFixed(D.d), fb = vb == null ? null : +vb.toFixed(D.d);
+        if(fa == null && fb == null) return;
+        var dir = fa === fb ? 'igual' : ((fa == null || fb == null) ? 'nuevo' : (((fb > fa) === (D.mejor === 'sube')) ? 'mejor' : 'peor'));
+        out.push({ finca:F, D:D, antes:fa, despues:fb, dir:dir, base:b.n[D.id] });
+      });
+    });
+    var ord = { peor:0, mejor:1, nuevo:2, igual:3 }, fi = Object.keys(s.base);
+    out.sort(function(x,y){ return fi.indexOf(x.finca) - fi.indexOf(y.finca) || ord[x.dir] - ord[y.dir] || DEF.indexOf(x.D) - DEF.indexOf(y.D); });
+    return out;
+  }
+  function todasAlertas(s, kinds){
+    var out = [];
+    s.eventos.forEach(function(e){ if(e.borrado) return; e.alertas.forEach(function(a){ if(kinds.indexOf(a.k) >= 0) out.push({ e:e, a:a }); }); });
+    return out;
+  }
+  function porTipo(E){ var t = {}; E.forEach(function(e){ t[e.tipo] = (t[e.tipo]||0)+1; }); return t; }
+
+  var repActual = null;
+  function reporte(s, actual){
+    repActual = s;
+    var m = $('saRep'); if(!m){ m = document.createElement('div'); m.id = 'saRep'; m.className = 'sa-rep'; m.innerHTML = '<div class="sa-rbox" id="saRBox"></div>'; document.body.appendChild(m);
+      m.addEventListener('click', function(e){ if(e.target === m) m.classList.remove('on'); }); }
+    $('saRBox').innerHTML = reporteHtml(s, actual);
+    m.classList.add('on'); m.scrollTop = 0;
+    var B = $('saRBox');
+    B.querySelectorAll('[data-r]').forEach(function(b){ b.onclick = function(){
+      var a = b.getAttribute('data-r');
+      if(a === 'cerrar') m.classList.remove('on');
+      if(a === 'pdf') pdf(s); if(a === 'xls') excel(s); if(a === 'comp') compartir(s);
+      if(a === 'fin'){ if(!confirm('¿Terminar esta sesión? El resumen queda guardado en Reportes → Sesiones de actualización y la próxima vez que registre algo empieza una sesión nueva.')) return;
+        S.fin = Date.now(); archivar(S); S = nuevaSesion(); guardar(); chip(); reporte(ls(KEY_HIST, [])[0], false); pintarPanel(); }
+    }; });
+    B.querySelectorAll('a[data-num]').forEach(function(el){ el.onclick = function(e){ e.preventDefault(); var r = byNum(el.getAttribute('data-num')); if(!r) return; m.classList.remove('on'); if(window.__irAFicha && window.__irAFicha(r.id, true)) return; if(window.__abrirFicha) window.__abrirFicha(r.id); }; });
+  }
+  function linkNum(n){ return n ? '<a href="#" data-num="'+esc(n)+'"><b>'+esc(n)+'</b></a>' : ''; }
+  function reporteHtml(s, actual){
+    var k = cuenta(s), t = porTipo(k.E), fin = s.fin || (k.E.length ? k.E[k.E.length-1].ts : Date.now());
+    var h = '<div style="display:flex;gap:10px;align-items:flex-start"><div style="flex:1"><h3>Resumen de la sesión de actualización</h3>'+
+      '<div style="font-size:13px;color:#5b5346">'+(actual ? 'Sesión en curso' : 'Sesión terminada')+' · '+fechaHora(s.inicio)+' a '+hora(fin)+' · '+Object.keys(s.base).join(', ')+'</div></div>'+
+      '<button type="button" class="sa-x" data-r="cerrar" style="color:#1E3626" aria-label="Cerrar">×</button></div>';
+    if(!k.n) return h+'<p class="sa-vacio">Todavía no se ha registrado nada en esta sesión. Cada nacimiento, destete, palpación, pesaje o salida que registre aparece aquí con sus resultados.</p><div class="sa-acts"><button type="button" class="sa-btn p" data-r="cerrar">Cerrar</button></div>';
+    h += '<div class="sa-kp"><div><b>'+k.n+'</b><span>registros</span></div><div class="k-bn"><b>'+k.b+'</b><span>⚑ alertas de banderas negras</span></div><div class="k-st"><b>'+k.s+'</b><span>⭐ sobresalientes / alto rendimiento</span></div><div><b>'+k.av+'</b><span>⚠ para revisar</span></div><div><b>'+k.me+'</b><span>✅ banderas quitadas</span></div></div>';
+    h += '<div style="font-size:13.5px">'+Object.keys(t).map(function(x){ return (ICON[x]||'')+' '+NOMBRE[x]+': <b>'+t[x]+'</b>'; }).join(' · ')+'</div>';
+    var F = filasIndicadores(s);
+    if(F.length){
+      h += '<h4>Parámetros de producción: inicio → final de la sesión</h4>'+LEY+'<div class="sa-wrap"><table class="sa-tb"><tr><th>Finca</th><th>Parámetro</th><th style="text-align:right">Al inicio</th><th style="text-align:right">Al final</th><th>Resultado</th></tr>'+
+        F.map(function(r){ var dif = (r.antes != null && r.despues != null) ? r.despues - r.antes : null;
+          return '<tr class="'+r.dir+'"><td>'+esc(r.finca)+'</td><td title="'+esc(r.D.x)+'">'+esc(r.D.l)+'<div style="font-size:11px;color:#7a705f">'+esc(r.base||'')+'</div></td><td class="n">'+v2t(r.antes, r.D)+'</td><td class="n"><b>'+v2t(r.despues, r.D)+'</b> '+esc(r.D.u)+'</td><td class="e">'+FLECHA[r.dir]+' '+PAL[r.dir]+(dif && r.dir !== 'igual' ? ' ('+(dif>0?'+':'')+v2t(dif, r.D)+')' : '')+'</td></tr>'; }).join('')+'</table></div>';
+    }
+    function lista(tit, kinds){ var L = todasAlertas(s, kinds); if(!L.length) return '';
+      return '<h4>'+tit+' ('+L.length+')</h4>'+L.map(function(x){ return '<div class="sa-al '+x.a.k+'"><span class="ic">'+ICA[x.a.k]+'</span><div><span style="font-size:12px;opacity:.8">'+hora(x.e.ts)+' · '+esc(NOMBRE[x.e.tipo])+' '+esc(x.e.numero)+'</span><br>'+esc(x.a.texto)+'</div></div>'; }).join(''); }
+    h += lista('⚑ Alertas de banderas negras', ['bandera']);
+    h += lista('⭐ Animales sobresalientes y de alto rendimiento', ['estrella','alto']);
+    h += lista('⚠ Resultados bajos o para revisar', ['aviso']);
+    h += lista('✅ Mejoras (banderas que se quitaron)', ['mejora']);
+    h += '<h4>Detalle de lo registrado</h4>'+s.eventos.slice().reverse().map(function(e){
+      var tg = e.cambios.filter(function(c){ return c.dir === 'mejor' || c.dir === 'peor'; }).map(function(c){ var D = DEFI[c.id];
+        return '<span class="tg sa-'+c.dir+'">'+(c.dir==='mejor'?'▲':'▼')+' '+esc(D.l)+': '+v2t(c.antes, D)+' → '+v2t(c.despues, D)+'</span>'; }).join('');
+      var nb = e.alertas.filter(function(a){ return a.k==='bandera'; }).length, ns = e.alertas.filter(function(a){ return a.k==='estrella'||a.k==='alto'; }).length;
+      return '<div class="sa-ev'+(e.borrado?' borrado':'')+'"><b>'+hora(e.ts)+'</b> · '+(ICON[e.tipo]||'')+' '+esc(NOMBRE[e.tipo])+' '+linkNum(e.numero)+(e.finca?' · '+esc(e.finca):'')+(nb?' · <b>⚑ '+nb+'</b>':'')+(ns?' · <b>⭐ '+ns+'</b>':'')+(e.borrado?' (borrado)':'')+
+        '<div style="color:#5b5346">'+esc(e.texto)+'</div>'+(tg?'<div>'+tg+'</div>':'')+'</div>'; }).join('');
+    h += '<p style="font-size:12px;color:#5b5346;margin-top:12px">Los parámetros se calculan con todo lo registrado (incluso lo pendiente de pasar al Excel). Toque el nombre de un parámetro para ver cómo se calcula.</p>';
+    h += '<div class="sa-acts"><button type="button" class="sa-btn" data-r="comp">📤 Compartir</button><button type="button" class="sa-btn" data-r="xls">⬇ Excel</button><button type="button" class="sa-btn" data-r="pdf">⬇ PDF</button>'+
+      (actual ? '<button type="button" class="sa-btn r" data-r="fin">Terminar sesión</button>' : '')+'<button type="button" class="sa-btn p" data-r="cerrar">Cerrar</button></div>';
+    return h;
+  }
+
+  /* ---------- Exportar ---------- */
+  function limpio(t){ return String(t==null?'':t).replace(/2 o más ⚑/g,'2 o más banderas').replace(/2 o más ⭐/g,'2 o más estrellas').replace(/[⚑⭐🏆⚠✅📌ℹ▲▼•↑↓→]/g, function(c){ return {'→':'->','▲':'+','▼':'-','↑':'+','↓':'-'}[c] || ''; }).replace(/[\u{1F300}-\u{1FAFF}]/gu,'').replace(/\s+/g,' ').trim(); }
+  function nombreArch(s, ext){ var d = new Date(s.inicio); return 'sesion_actualizacion_'+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'_'+('0'+d.getHours()).slice(-2)+('0'+d.getMinutes()).slice(-2)+'.'+ext; }
+  function textoResumen(s){
+    var k = cuenta(s), F = filasIndicadores(s), L = [];
+    L.push('GANCEBU · Resumen de actualización '+fechaHora(s.inicio));
+    L.push(k.n+' registros · '+k.b+' alertas de bandera negra · '+k.s+' sobresalientes · '+k.av+' para revisar');
+    var cam = F.filter(function(r){ return r.dir === 'mejor' || r.dir === 'peor'; });
+    if(cam.length){ L.push(''); L.push('Parámetros que cambiaron:'); cam.forEach(function(r){ L.push((r.dir==='mejor'?'🟢 ':'🔴 ')+r.finca+' · '+r.D.l+': '+v2t(r.antes, r.D)+' → '+v2t(r.despues, r.D)+' '+r.D.u); }); }
+    var B = todasAlertas(s, ['bandera']); if(B.length){ L.push(''); L.push('⚑ Banderas negras:'); B.forEach(function(x){ L.push('· '+x.e.numero+': '+x.a.texto); }); }
+    var E = todasAlertas(s, ['estrella','alto']); if(E.length){ L.push(''); L.push('⭐ Sobresalientes:'); E.forEach(function(x){ L.push('· '+x.e.numero+': '+x.a.texto.replace(/^🏆\s*/,'')); }); }
+    return L.join('\n');
+  }
+  function compartir(s){
+    var t = textoResumen(s);
+    if(navigator.share){ navigator.share({ title:'Resumen de actualización', text:t }).catch(function(){}); return; }
+    try{ navigator.clipboard.writeText(t).then(function(){ alert('Resumen copiado. Péguelo en WhatsApp o en un correo.'); }, function(){ prompt('Copie el resumen:', t); }); }catch(e){ prompt('Copie el resumen:', t); }
+  }
+  function excel(s){
+    var k = cuenta(s), F = filasIndicadores(s);
+    var R = [['Resumen de la sesión de actualización'], ['Inicio', fechaHora(s.inicio)], ['Fin', s.fin ? fechaHora(s.fin) : 'En curso'], ['Registros', k.n], ['Alertas de banderas negras', k.b], ['Sobresalientes / alto rendimiento', k.s], ['Para revisar', k.av], ['Banderas quitadas', k.me]];
+    var I = [['Finca','Parámetro','Al inicio','Al final','Unidad','Resultado','Base del cálculo','Cómo se calcula']].concat(F.map(function(r){ return [r.finca, r.D.l, r.antes, r.despues, r.D.u, PAL[r.dir], r.base||'', r.D.x]; }));
+    var A = [['Hora','Registro','Animal','Finca','Tipo de alerta','Detalle']];
+    s.eventos.forEach(function(e){ if(e.borrado) return; e.alertas.forEach(function(a){ if(a.k === 'resumen' || a.k === 'info') return;
+      A.push([hora(e.ts), NOMBRE[e.tipo], e.numero, e.finca||'', {bandera:'Bandera negra',estrella:'Estrella',alto:'Alto rendimiento',aviso:'Para revisar',mejora:'Bandera quitada'}[a.k], limpio(a.texto)]); }); });
+    var G = [['Hora','Registro','Animal','Finca','Detalle','Parámetros que mejoraron','Parámetros que empeoraron','Borrado']];
+    s.eventos.forEach(function(e){ function l(dir){ return e.cambios.filter(function(c){ return c.dir === dir; }).map(function(c){ var D = DEFI[c.id]; return D.l+' '+v2t(c.antes, D)+' -> '+v2t(c.despues, D); }).join(' | '); }
+      G.push([hora(e.ts), NOMBRE[e.tipo], e.numero, e.finca||'', e.texto, l('mejor'), l('peor'), e.borrado ? 'SÍ' : '']); });
+    if(window.XLSX){
+      var wb = XLSX.utils.book_new();
+      [['Resumen',R],['Parámetros',I],['Alertas',A],['Registros',G]].forEach(function(x){ var ws = XLSX.utils.aoa_to_sheet(x[1]);
+        ws['!cols'] = x[1][0].map(function(_, j){ return { wch: Math.min(60, Math.max(10, Math.max.apply(null, x[1].map(function(r){ return String(r[j]==null?'':r[j]).length; })))) }; });
+        if(x[0] !== 'Resumen'){ ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s:{r:0,c:0}, e:{r:x[1].length-1, c:x[1][0].length-1} }) }; ws['!freeze'] = { xSplit:0, ySplit:1 }; }
+        XLSX.utils.book_append_sheet(wb, ws, x[0]); });
+      XLSX.writeFile(wb, nombreArch(s, 'xlsx')); return;
+    }
+    function c(v){ v = v==null?'':String(v); return /[";\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+    var txt = [R, [[]], I, [[]], A, [[]], G].map(function(t){ return t.map(function(r){ return r.map(c).join(';'); }).join('\r\n'); }).join('\r\n');
+    var blob = new Blob(['﻿'+txt], {type:'text/csv;charset=utf-8;'}), u = URL.createObjectURL(blob), el = document.createElement('a');
+    el.href = u; el.download = nombreArch(s, 'csv'); document.body.appendChild(el); el.click(); el.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 1500);
+  }
+  function pdf(s){
+    var Jp = window.jspdf && window.jspdf.jsPDF; if(!Jp){ alert('No se pudo cargar el generador de PDF.'); return; }
+    var doc = new Jp({ orientation:'portrait', unit:'mm', format:'letter' }), W = 215.9, H = 279.4, M = 12, y = 16, k = cuenta(s);
+    function nl(h){ if(y + h > H - 12){ doc.addPage(); y = 16; } }
+    function txt(t, x, size, bold, col, maxW){ doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.setFontSize(size); doc.setTextColor.apply(doc, col || [36,29,20]);
+      var L = doc.splitTextToSize(limpio(t), maxW || (W - 2*M)); nl(L.length * size * 0.42 + 1); doc.text(L, x, y); y += L.length * size * 0.42 + 1.2; }
+    txt('GANCEBU — Resumen de la sesión de actualización', M, 15, true, [30,54,38]);
+    txt((s.fin ? 'Sesión terminada' : 'Sesión en curso')+' · '+fechaHora(s.inicio)+' a '+hora(s.fin || (k.E.length ? k.E[k.E.length-1].ts : Date.now()))+' · Fincas: '+Object.keys(s.base).join(', ')+' · Jaramillo Williamson SAS', M, 9, false, [90,90,90]);
+    y += 2;
+    var cajas = [['Registros', k.n, [255,255,255], [36,29,20]], ['Banderas negras', k.b, [29,29,29], [255,255,255]], ['Sobresalientes', k.s, [251,241,207], [36,29,20]], ['Para revisar', k.av, [255,241,222], [36,29,20]], ['Banderas quitadas', k.me, [229,242,227], [29,90,34]]];
+    var bw = (W - 2*M - 4*3) / 5;
+    cajas.forEach(function(c, i){ var x = M + i*(bw+3); doc.setFillColor.apply(doc, c[2]); doc.setDrawColor(200,190,170); doc.roundedRect(x, y, bw, 15, 2, 2, 'FD');
+      doc.setTextColor.apply(doc, c[3]); doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text(String(c[1]), x+3, y+7.5); doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.text(c[0], x+3, y+12.5); });
+    y += 21;
+    var F = filasIndicadores(s);
+    if(F.length){
+      txt('Parámetros de producción: inicio -> final de la sesión  (verde = mejoró · rojo = empeoró · azul = siguió igual)', M, 10.5, true, [30,54,38]);
+      var cols = [['Finca',16],['Parámetro',78],['Al inicio',22],['Al final',30],['Resultado',W-2*M-146]];
+      function cab(){ nl(8); doc.setFillColor(30,54,38); doc.rect(M, y-4, W-2*M, 6, 'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8); var x = M+1.5; cols.forEach(function(c){ doc.text(c[0], x, y); x += c[1]; }); y += 4.5; }
+      cab();
+      var COL = { mejor:[[229,242,227],[29,90,34]], peor:[[248,224,220],[142,31,20]], igual:[[226,236,248],[28,78,140]], nuevo:[[226,236,248],[28,78,140]] };
+      F.forEach(function(r){ var dif = (r.antes != null && r.despues != null) ? r.despues - r.antes : null;
+        var cells = [r.finca, r.D.l, v2t(r.antes, r.D), v2t(r.despues, r.D)+' '+r.D.u, PAL[r.dir]+(dif && r.dir !== 'igual' ? ' ('+(dif>0?'+':'')+v2t(dif, r.D)+')' : '')];
+        doc.setFontSize(8); var L = cells.map(function(c, i){ return doc.splitTextToSize(limpio(c), cols[i][1]-3); }), h = Math.max.apply(null, L.map(function(l){ return l.length; })) * 3.4 + 2;
+        if(y + h > H - 12){ doc.addPage(); y = 16; cab(); }
+        var x = M; doc.setFillColor.apply(doc, COL[r.dir][0]); doc.rect(M + cols.slice(0,4).reduce(function(a,c){ return a+c[1]; },0), y-3, cols[4][1], h, 'F');
+        cells.forEach(function(c, i){ doc.setFont('helvetica', i===3||i===4 ? 'bold' : 'normal'); doc.setTextColor.apply(doc, i===4 ? COL[r.dir][1] : [36,29,20]); doc.text(L[i], x+1.5, y); x += cols[i][1]; });
+        doc.setDrawColor(225,218,205); doc.line(M, y-3+h, W-M, y-3+h); y += h; });
+      y += 4;
+    }
+    function bloque(tit, kinds, col){ var L = todasAlertas(s, kinds); if(!L.length) return;
+      y += 2; txt(tit+' ('+L.length+')', M, 10.5, true, col);
+      L.forEach(function(x){ txt(hora(x.e.ts)+' · '+NOMBRE[x.e.tipo]+' '+x.e.numero+' — '+x.a.texto, M+3, 8.6, false, [36,29,20], W-2*M-3); y += 0.6; }); }
+    bloque('Alertas de banderas negras', ['bandera'], [20,20,20]);
+    bloque('Animales sobresalientes y de alto rendimiento', ['estrella','alto'], [140,104,10]);
+    bloque('Resultados bajos o para revisar', ['aviso'], [169,72,26]);
+    bloque('Mejoras (banderas que se quitaron)', ['mejora'], [29,90,34]);
+    y += 2; txt('Detalle de lo registrado', M, 10.5, true, [30,54,38]);
+    s.eventos.forEach(function(e){ txt(hora(e.ts)+' · '+NOMBRE[e.tipo]+' '+e.numero+(e.finca?' ('+e.finca+')':'')+(e.borrado?' — BORRADO':'')+' — '+e.texto, M+3, 8.4, false, e.borrado ? [150,150,150] : [36,29,20], W-2*M-3); });
+    doc.save(nombreArch(s, 'pdf'));
+  }
+
+  /* ---------- Panel en Reportes: sesiones guardadas ---------- */
+  function pintarPanel(){
+    var box = $('rpSesLista'); if(!box) return;
+    var H = ls(KEY_HIST, []), k = cuenta(S), h = '';
+    h += '<div class="sa-hist"><button type="button" class="sa-btn p" data-s="actual">📊 Sesión en curso — '+k.n+' registro'+(k.n===1?'':'s')+(k.b?' · ⚑ '+k.b:'')+(k.s?' · ⭐ '+k.s:'')+'</button></div>';
+    if(H.length) h += '<p class="hint" style="margin:10px 0 4px">Sesiones anteriores (últimas '+HIST_MAX+'):</p><div class="sa-hist">'+H.map(function(s, i){ var c = cuenta(s);
+      return '<button type="button" class="sa-btn" data-s="'+i+'">'+fechaHora(s.inicio)+' · '+c.n+' registros · '+Object.keys(s.base).join(', ')+(c.b?' · ⚑ '+c.b:'')+(c.s?' · ⭐ '+c.s:'')+'</button>'; }).join('')+'</div>';
+    else h += '<p class="hint">Aún no hay sesiones terminadas guardadas en este equipo.</p>';
+    box.innerHTML = h;
+    box.querySelectorAll('[data-s]').forEach(function(b){ b.onclick = function(){ var v = b.getAttribute('data-s'); if(v === 'actual') reporte(S, true); else reporte(ls(KEY_HIST, [])[+v], false); }; });
+  }
+  document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('#rpMenu [data-p="sesiones"]'); if(b) setTimeout(pintarPanel, 0); });
+  window.__sesionAct = { reporte:function(){ reporte(S, true); }, calcular:calcular, estado:function(){ return S; }, pintarPanel:pintarPanel, DEF:DEF };
+  function arranque(){ chip(); pintarPanel(); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(arranque, 300); }); else setTimeout(arranque, 300);
+})();
+
 </script>
 </body>
 </html>

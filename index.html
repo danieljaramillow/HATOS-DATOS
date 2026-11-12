@@ -227,10 +227,10 @@ window.__BN = (function(){
      promedio de sus contemporáneas CON la cría calificada en 90/100 o más · crías
      calificadas con promedio de 90/100 o más (2 o más crías) · primer parto
      a los 30 meses o antes. Vaca activa con 2 o más estrellas = destacada. */
-  var EST = { IEP_MAX:12, IEP_MIN:9, DESTETE_PCT:115, CALIF:4.5, CALIF_MIN_N:2, PRIMER_PARTO_MESES:33.3, EDAD_MIN_SERVICIO:22, PRECOZ_MAX_CONCEPCION:24, GESTACION_MESES:9.3 };
-  /* Política GANCEBU: no se preñan hembras menores de 22 meses (desarrollo completo a pasto, sin ayudas
-     nutricionales ni hormonales). Novilla precoz = concibió entre los 22 y los 24 meses de edad
-     (primer parto entre unos 31.3 y 33.3 meses). */
+  var EST = { IEP_MAX:12, IEP_MIN:9, DESTETE_PCT:115, CALIF:4.5, CALIF_MIN_N:2, PRIMER_PARTO_MESES:31.3, EDAD_MIN_SERVICIO:20, PRECOZ_MAX_CONCEPCION:22, GESTACION_MESES:9.3 };
+  /* Política GANCEBU: las hembras se programan y entran a monta a partir de los 20 meses, no antes
+     (desarrollo completo a pasto, sin ayudas nutricionales ni hormonales). Novilla precoz = concibió
+     entre los 20 y los 22 meses de edad (primer parto entre unos 29.3 y 31.3 meses). */
   var ini = false, BD, byId, byNum, PESOS, PALP, grupos, abortosPorMadre, araP75 = null, araP25 = null;
   function N(x){ return String(x == null ? '' : x).trim().toUpperCase(); }
   function J(id){ try{ return JSON.parse(document.getElementById(id).textContent); }catch(e){ return {}; } }
@@ -472,7 +472,7 @@ window.__BN = (function(){
       else out.push({ k:'info', texto:'IEP de '+iep.toFixed(1)+' meses desde el parto anterior ('+fmt(ult.fecha)+').' });
     } else if(r.fecha_nac){ var epp = meses(r.fecha_nac, fecha);
       var ecp = epp - EST.GESTACION_MESES;
-      if(epp > 18 && ecp < EST.EDAD_MIN_SERVICIO) out.push({ k:'aviso', texto:'Primer parto a los '+epp.toFixed(1)+' meses de edad: la novilla quedó preñada a los '+ecp.toFixed(1)+' meses, antes de los '+EST.EDAD_MIN_SERVICIO+' que maneja la ganadería. Revise si fue un servicio no planeado.' });
+      if(epp > 18 && ecp < EST.EDAD_MIN_SERVICIO) out.push({ k:'aviso', texto:'Primer parto a los '+epp.toFixed(1)+' meses de edad: la novilla quedó preñada a los '+ecp.toFixed(1)+' meses, antes de los '+EST.EDAD_MIN_SERVICIO+', edad a partir de la cual entran a monta. Revise si fue un servicio no planeado.' });
       else if(ecp >= EST.EDAD_MIN_SERVICIO && ecp <= EST.PRECOZ_MAX_CONCEPCION) out.push({ k:'estrella', texto:'Primer parto a los '+epp.toFixed(1)+' meses de edad (concibió a los '+ecp.toFixed(1)+' meses): novilla precoz. Gana una estrella ⭐.' });
       else if(epp > 42) out.push({ k:'aviso', texto:'Primer parto tardío: a los '+epp.toFixed(1)+' meses de edad (más de 42). Revise la fertilidad de su grupo de novillas.' });
       else out.push({ k:'info', texto:'Primer parto, a los '+epp.toFixed(1)+' meses de edad.' }); }
@@ -1924,7 +1924,7 @@ window.__renderReproHead = function(o){
         <b>⭐ IEP corto</b> (12 meses o menos entre un parto y el siguiente),
         <b>⭐ destete alto</b> (la cría destetó 115 % o más del promedio de sus contemporáneas — misma finca, año de nacimiento y sexo — en peso ajustado a 8 meses <b>y</b> tiene calificación de 90/100 o más),
         <b>⭐ crías bien calificadas</b> (2 o más crías con promedio de 90/100 o más en conformación) y
-        <b>⭐ primer parto precoz</b> (la novilla concibió entre los 22 y los 24 meses de edad; no se busca preñar hembras menores de 22 meses). Cada parto da como máximo <b>2 estrellas</b> (una por IEP y otra por destete), y solo si cada dato es sobresaliente. Una vaca activa con 2 o más estrellas es <b>destacada</b>. Si también tiene banderas negras, se muestran al lado para decidir con todo a la vista.</p>
+        <b>⭐ primer parto precoz</b> (la novilla concibió entre los 20 y los 22 meses de edad; las hembras entran a monta a partir de los 20 meses, no antes). Cada parto da como máximo <b>2 estrellas</b> (una por IEP y otra por destete), y solo si cada dato es sobresaliente. Una vaca activa con 2 o más estrellas es <b>destacada</b>. Si también tiene banderas negras, se muestran al lado para decidir con todo a la vista.</p>
       <div class="bn-ctrl">
         <label>Finca <select id="stFinca"><option value="prod">Productivas (OK, CACHO, TNJ)</option><option value="OK">OK</option><option value="CACHO">CACHO</option><option value="TNJ">TNJ</option><option value="">Todas</option></select></label>
         <label class="bn-chk"><input type="checkbox" id="stUna"> Ver también las de 1 estrella</label>
@@ -17254,8 +17254,8 @@ window.__irAFicha = function(id, soloSiHayVentana){
             else out.push({ k:'info', texto:'Preñada de '+dp+' días · parto probable '+fmt(pp)+' · IEP proyectado '+iepP.toFixed(1)+' meses.' }); }
           else if(r.fecha_nac){ var e1 = meses(r.fecha_nac, pp);
             var ec = meses(r.fecha_nac, conc);
-            if(ec < 22) out.push({ k:'aviso', texto:'Novilla preñada a los '+ec.toFixed(1)+' meses de edad, antes de los 22 que maneja la ganadería (parto probable '+fmt(pp)+' a los '+e1.toFixed(1)+' meses). Revise si fue un servicio no planeado.' });
-            else if(ec <= 24) out.push({ k:'alto', texto:'🏆 Novilla precoz: concibió a los '+ec.toFixed(1)+' meses de edad; primer parto proyectado a los '+e1.toFixed(1)+' meses (parto probable '+fmt(pp)+'): ganará ⭐ si se confirma.' });
+            if(ec < 20) out.push({ k:'aviso', texto:'Novilla preñada a los '+ec.toFixed(1)+' meses de edad, antes de los 20 meses, edad a partir de la cual entran a monta (parto probable '+fmt(pp)+' a los '+e1.toFixed(1)+' meses). Revise si fue un servicio no planeado.' });
+            else if(ec <= 22) out.push({ k:'alto', texto:'🏆 Novilla precoz: concibió a los '+ec.toFixed(1)+' meses de edad; primer parto proyectado a los '+e1.toFixed(1)+' meses (parto probable '+fmt(pp)+'): ganará ⭐ si se confirma.' });
             else out.push({ k:'info', texto:'Novilla preñada de '+dp+' días · primer parto probable '+fmt(pp)+' a los '+e1.toFixed(1)+' meses de edad.' }); } }
         else if(est === 'vacía'){
           var ab = a && a.extra.filter(function(e){ return e.tipo === 'abierta' || e.tipo === 'tardia'; })[0];

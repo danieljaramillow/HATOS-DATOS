@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-03T23:05:29.895Z",
+ "actualizado": "2026-11-13T20:18:23.148Z",
  "edits": [
   {
    "id": 1560,
@@ -1919,6 +1919,27 @@
    },
    "detalle_texto": "2026-10-21 · Vacía · UCT",
    "fecha": "2026-10-21"
+  },
+  {
+   "id": 179460109761737,
+   "tipo": "cria",
+   "numero": "54/C",
+   "detalle": {
+    "nombre": "",
+    "fecha": "2026-10-29",
+    "sexo": "H",
+    "raza": "BR",
+    "finca": "CACHO",
+    "lote": "",
+    "padre": "436/2C",
+    "madre": "599/1C",
+    "peso_nac": "30",
+    "tipo_parto": "NORMAL",
+    "receptora": "",
+    "gemelo_de": ""
+   },
+   "detalle_texto": "Parto normal · Hembra · 2026-10-29 · 30 kg · Madre: 599/1C · Padre: 436/2C",
+   "fecha": "2026-11-13"
   }
  ],
  "visita": null,
@@ -4703,6 +4724,16 @@
    "ref": "e:1405:comentario",
    "finca": "OK",
    "ts": 1793186001438,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "cria",
+   "numero": "54/C",
+   "texto": "Parto normal · Hembra · 2026-10-29 · 30 kg · Madre: 599/1C · Padre: 436/2C",
+   "origen": "Modo guiado",
+   "ref": "u:179460109761737",
+   "finca": "CACHO",
+   "ts": 1794601097618,
    "equipo": "Computador"
   }
  ],

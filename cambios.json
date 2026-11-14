@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-13T20:20:19.938Z",
+ "actualizado": "2026-11-14T00:37:35.658Z",
  "edits": [
   {
    "id": 1560,
@@ -1961,6 +1961,18 @@
    },
    "detalle_texto": "Parto normal · Macho · 2026-11-12 · 30 kg · Madre: 843/1C · Padre: 436/2C",
    "fecha": "2026-11-13"
+  },
+  {
+   "id": 179461665104018,
+   "tipo": "correccion",
+   "numero": "54/C",
+   "detalle": {
+    "campo": "PADRE",
+    "valor": "963/2",
+    "obs": "Modo guiado"
+   },
+   "detalle_texto": "PADRE → 963/2",
+   "fecha": "2026-11-14"
   }
  ],
  "visita": null,
@@ -4765,6 +4777,16 @@
    "ref": "u:179460121674200",
    "finca": "CACHO",
    "ts": 1794601216742,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "correccion",
+   "numero": "54/C",
+   "texto": "PADRE → 963/2",
+   "origen": "Modo guiado",
+   "ref": "u:179461665104018",
+   "finca": "CACHO",
+   "ts": 1794616651040,
    "equipo": "Computador"
   }
  ],

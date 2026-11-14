@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-14T00:37:35.658Z",
+ "actualizado": "2026-11-14T00:38:32.681Z",
  "edits": [
   {
    "id": 1560,
@@ -1972,6 +1972,18 @@
     "obs": "Modo guiado"
    },
    "detalle_texto": "PADRE → 963/2",
+   "fecha": "2026-11-14"
+  },
+  {
+   "id": 179461670723539,
+   "tipo": "correccion",
+   "numero": "55/C",
+   "detalle": {
+    "campo": "PADRE",
+    "valor": "963/1",
+    "obs": "Modo guiado"
+   },
+   "detalle_texto": "PADRE → 963/1",
    "fecha": "2026-11-14"
   }
  ],
@@ -4787,6 +4799,16 @@
    "ref": "u:179461665104018",
    "finca": "CACHO",
    "ts": 1794616651040,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "correccion",
+   "numero": "55/C",
+   "texto": "PADRE → 963/1",
+   "origen": "Modo guiado",
+   "ref": "u:179461670723539",
+   "finca": "CACHO",
+   "ts": 1794616707235,
    "equipo": "Computador"
   }
  ],

@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-23T23:21:08.797Z",
+ "actualizado": "2026-11-23T23:31:36.000Z",
  "edits": [
   {
    "id": 1560,
@@ -2134,10 +2134,10 @@
    "numero": "823/21",
    "detalle": {
     "fecha": "2026-11-08",
-    "peso": "537",
+    "peso": "507",
     "nota": "PARTO"
    },
-   "detalle_texto": "2026-11-08 · 537 kg · PARTO",
+   "detalle_texto": "2026-11-08 · 507 kg · PARTO",
    "fecha": "2026-11-23"
   },
   {
@@ -2204,10 +2204,10 @@
    "numero": "63/23",
    "detalle": {
     "fecha": "2026-11-11",
-    "peso": "431",
+    "peso": "432",
     "nota": "PARTO"
    },
-   "detalle_texto": "2026-11-11 · 431 kg · PARTO",
+   "detalle_texto": "2026-11-11 · 432 kg · PARTO",
    "fecha": "2026-11-23"
   },
   {
@@ -2336,6 +2336,78 @@
     "gemelo_de": ""
    },
    "detalle_texto": "Parto normal · Macho · 2026-11-20 · 37 kg · Madre: 801/1 · Padre: 34/2",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547669621300,
+   "tipo": "peso",
+   "numero": "741/18",
+   "detalle": {
+    "fecha": "2026-10-19",
+    "peso": "487",
+    "nota": "PARTO"
+   },
+   "detalle_texto": "2026-10-19 · 487 kg · PARTO",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547669621301,
+   "tipo": "peso",
+   "numero": "917/1",
+   "detalle": {
+    "fecha": "2026-10-22",
+    "peso": "555",
+    "nota": "PARTO"
+   },
+   "detalle_texto": "2026-10-22 · 555 kg · PARTO",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547669621302,
+   "tipo": "peso",
+   "numero": "720/1",
+   "detalle": {
+    "fecha": "2026-10-26",
+    "peso": "536",
+    "nota": "PARTO"
+   },
+   "detalle_texto": "2026-10-26 · 536 kg · PARTO",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547669621303,
+   "tipo": "peso",
+   "numero": "582/1",
+   "detalle": {
+    "fecha": "2026-10-30",
+    "peso": "550",
+    "nota": "PARTO"
+   },
+   "detalle_texto": "2026-10-30 · 550 kg · PARTO",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547669621304,
+   "tipo": "peso",
+   "numero": "811/20",
+   "detalle": {
+    "fecha": "2026-11-01",
+    "peso": "490",
+    "nota": "PARTO"
+   },
+   "detalle_texto": "2026-11-01 · 490 kg · PARTO",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547669621305,
+   "tipo": "peso",
+   "numero": "819/1",
+   "detalle": {
+    "fecha": "2026-11-05",
+    "peso": "542",
+    "nota": "PARTO"
+   },
+   "detalle_texto": "2026-11-05 · 542 kg · PARTO",
    "fecha": "2026-11-23"
   }
  ],

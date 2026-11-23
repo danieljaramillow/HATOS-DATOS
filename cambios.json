@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-23T23:09:09.798Z",
+ "actualizado": "2026-11-23T23:10:27.805Z",
  "edits": [
   {
    "id": 1560,
@@ -2082,6 +2082,28 @@
     "gemelo_de": ""
    },
    "detalle_texto": "Parto normal · Hembra · 2026-10-30 · 43 kg · Madre: 582/1 · Padre: 34/2",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547542235215,
+   "tipo": "cria",
+   "numero": "380/2",
+   "detalle": {
+    "nombre": "",
+    "fecha": "2026-11-01",
+    "sexo": "H",
+    "raza": "BR",
+    "finca": "OK",
+    "lote": "",
+    "padre": "35/2",
+    "madre": "811/20",
+    "peso_nac": "35",
+    "tipo_parto": "NORMAL",
+    "obs": "",
+    "receptora": "",
+    "gemelo_de": ""
+   },
+   "detalle_texto": "Parto normal · Hembra · 2026-11-01 · 35 kg · Madre: 811/20 · Padre: 35/2",
    "fecha": "2026-11-23"
   }
  ],
@@ -4957,6 +4979,16 @@
    "ref": "u:179547534425291",
    "finca": "OK",
    "ts": 1795475344253,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "cria",
+   "numero": "380/2",
+   "texto": "Parto normal · Hembra · 2026-11-01 · 35 kg · Madre: 811/20 · Padre: 35/2",
+   "origen": "Modo guiado",
+   "ref": "u:179547542235215",
+   "finca": "OK",
+   "ts": 1795475422353,
    "equipo": "Computador"
   }
  ],

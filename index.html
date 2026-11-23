@@ -750,6 +750,12 @@ window.__BN = (function(){
   #guia .g-paso{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:#A9481A; margin-bottom:6px; }
   #guia .g-q{ font-family:'Fraunces',Georgia,serif; font-size:30px; line-height:1.15; margin:0 0 6px; color:#1E3626; }
   #guia .g-hint{ font-size:15px; color:#6b6250; margin:0 0 18px; line-height:1.45; }
+  #guia .g-tipobar{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:0 0 14px; }
+  #guia .g-tipobar-lab{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#7a6f58; margin-right:2px; }
+  #guia .g-tipobtn{ border:1px solid #d9cfb8; background:#fff; color:#3d3a2e; border-radius:999px; padding:6px 12px; font-size:14px; cursor:pointer; }
+  #guia .g-tipobtn:hover{ border-color:#1f3a2b; }
+  #guia .g-tipobtn.on{ background:#1f3a2b; border-color:#1f3a2b; color:#fff; font-weight:600; }
+  #guia .g-tipobtn.abo.on{ background:#A9481A; border-color:#A9481A; }
   #guia .g-ultimos{ background:#fff; border:1px solid #e3dccb; border-radius:14px; padding:10px 14px; margin:0 0 16px; }
   #guia .g-ult-tit{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#7a6f58; margin:2px 0 6px; }
   #guia .g-ult-fila{ display:flex; align-items:center; gap:12px; padding:7px 0; }
@@ -8469,7 +8475,7 @@ window.__renderReproHead = function(o){
         if(u.tipo==='peso'){ row[2]=d.fecha; row[3]=d.peso; row[4]=d.nota; }
         else if(u.tipo==='salida'){ row[2]=d.fecha; row[5]=d.causa; row[6]=d.obs; }
         else if(u.tipo==='correccion'){ row[7]=d.campo; row[8]=d.valor; row[9]=d.obs; }
-        else if(u.tipo==='cria'){ row[10]=d.nombre; row[11]=d.sexo; row[12]=d.raza; row[13]=d.finca; row[14]=d.lote; row[15]=d.padre; row[16]=d.madre; row[2]=d.fecha; }
+        else if(u.tipo==='cria'){ row[10]=d.nombre; row[11]=d.sexo; row[12]=d.raza; row[13]=d.finca; row[14]=d.lote; row[15]=d.padre; row[16]=d.madre; row[2]=d.fecha; row[4]=d.obs||''; }
         var ext = ['','','','','','','','','','',''];
         if(u.tipo==='cria'){ ext[0]=d.peso_nac||''; ext[7]=d.tipo_parto||'NORMAL'; ext[8]=d.receptora||''; ext[9]=d.gemelo_de||''; }
         else if(u.tipo==='aborto'){ row[2]=d.fecha; row[4]=d.obs||''; ext[7]='ABORTO'; ext[10]=d.meses||''; }
@@ -11386,7 +11392,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   // ---------- NACIMIENTO (normal · gemelar · TE · aborto) ----------
   var TIPOS_PARTO = { NORMAL:'Parto normal', GEMELAR:'Parto gemelar', TE:'Transferencia de embrión (TE)', ABORTO:'Aborto' };
-  function totalPasos(){ return ctx.tipo==='GEMELAR' ? 10 : (ctx.tipo==='TE' ? 8 : 7); }
+  function totalPasos(){ return ctx.tipo==='GEMELAR' ? 11 : (ctx.tipo==='TE' ? 9 : 8); }
   function paso(n){ return 'Paso '+n+' de '+totalPasos(); }
   function cajaUltimos(el, finca){
     if(!window.__ultimosPorSexo || !finca) return;
@@ -11401,6 +11407,48 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     box.innerHTML = '<div class="g-ult-tit">Últimos nacimientos registrados en '+esc(finca)+'</div>'+fila(u.M,'M')+fila(u.H,'H');
     el.appendChild(box);
   }
+  // Barra para cambiar el tipo de parto en cualquier paso, sin perder lo ya ingresado
+  function barraTipo(el){
+    var actual = ctx.tipo || 'NORMAL';
+    var w = document.createElement('div'); w.className='g-tipobar';
+    w.innerHTML = '<span class="g-tipobar-lab">Tipo:</span>';
+    [['NORMAL','🐮 Normal'],['GEMELAR','👯 Gemelar'],['TE','🧬 TE'],['ABORTO','⚠ Aborto']].forEach(function(t){
+      var b = document.createElement('button'); b.type='button';
+      b.className = 'g-tipobtn'+(t[0]===actual?' on':'')+(t[0]==='ABORTO'?' abo':'');
+      b.textContent = t[1];
+      b.onclick = function(){ if(t[0]!==actual) cambiarTipo(t[0]); };
+      w.appendChild(b);
+    });
+    el.appendChild(w);
+  }
+  function cambiarTipo(tipo){
+    var finca = ctx.finca, madre = ctx.madre || ctx.vaca, fecha = ctx.fecha, padre = ctx.padre, obs = ctx.obs;
+    var crias0 = (ctx.crias && ctx.crias[0]) ? ctx.crias[0] : {};
+    var i = -1; hist.forEach(function(h, k){ if(h.fn===nacTipo) i = k; });
+    if(i < 0) return;
+    hist = hist.slice(0, i+1);
+    var pasos = [];
+    if(tipo==='ABORTO'){
+      ctx = {tipo:'ABORTO', finca:finca, vaca:madre, fecha:fecha, obs:obs};
+      pasos.push([abo1, 'Aborto']);
+      if(finca){ pasos.push([abo2, 'Finca '+finca]);
+        if(madre){ pasos.push([abo3, 'Vaca '+madre.numero]);
+          if(fecha) pasos.push([abo4, fechaBonita(fecha)]); } }
+    } else {
+      var n = tipo==='GEMELAR' ? 2 : 1;
+      var c0 = {sexo:crias0.sexo, peso:crias0.peso};
+      if(tipo==='TE'){ if(crias0.numero && /\bTE\b/i.test(crias0.numero)) c0.numero = crias0.numero; }
+      else if(crias0.numero) c0.numero = String(crias0.numero).replace(/\s*TE\s*$/i,'');
+      ctx = {tipo:tipo, n:n, crias: n>1 ? [c0, {}] : [c0], finca:finca, madre:madre, fecha:fecha, padre:padre, obs:obs};
+      var etq = {NORMAL:'Normal', GEMELAR:'Gemelar', TE:'TE'}[tipo];
+      pasos.push([nac1, etq]);
+      if(finca){ pasos.push([nac2, 'Finca '+finca]);
+        if(madre){ pasos.push([nac3, (tipo==='TE'?'Receptora ':'Madre ')+madre.numero]);
+          if(fecha) pasos.push([nacSexo(0), fechaBonita(fecha)]); } }
+    }
+    pasos.forEach(function(x, k){ hist.push({fn:x[0], crumb:x[1], tipo:'resp'}); });
+    draw();
+  }
   function nacTipo(el){
     var c = pregunta(el, '¿Qué pasó?', 'Elija el tipo de parto. Las crías TE y los gemelos se manejan aparte para no dañar el IEP, el ARA ni el ARLA de la vaca.');
     opciones(c, [
@@ -11410,7 +11458,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       {icon:'⚠', label:'Aborto', sub:'La vaca perdió la preñez — no hay cría', tono:'rust', onClick:function(){ ctx={tipo:'ABORTO'}; go(abo1, 'Aborto'); }}
     ]);
   }
-  function nac1(el){ elegirFinca(pregunta(el, '¿En qué finca nació?', '', paso(1)), function(f){ ctx.finca=f; go(nac2, 'Finca '+f); }); }
+  function nac1(el){ barraTipo(el); elegirFinca(pregunta(el, '¿En qué finca nació?', '', paso(1)), function(f){ ctx.finca=f; go(nac2, 'Finca '+f); }); }
   function sugerenciasParir(){
     var h = iso(hoy());
     return vacasPrenadas(ctx.finca).filter(function(x){ return !x.parto || (diasEntre(x.parto, h) > -60 && diasEntre(x.parto, h) < 120); }).map(function(x){
@@ -11419,17 +11467,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       return {r:x.r, nota:nota};
     });
   }
-  function nac2(el){
+  function nac2(el){ barraTipo(el);
     var te = ctx.tipo==='TE';
     var c = pregunta(el, te ? '¿Qué vaca parió? (receptora)' : '¿Quién es la madre?', te ? 'La vaca que llevó el embrión. Más adelante le preguntamos por la donante.' : 'Abajo están las vacas preñadas de la finca '+ctx.finca+' que ya deberían estar pariendo.', paso(2));
     cajaUltimos(c, ctx.finca);
     elegirAnimal(c, { sugeridos:sugerenciasParir(), tituloSug:'Vacas por parir', filtro:function(r){ return r.sexo==='H'; },
       onPick:function(r){ ctx.madre=r; go(nac3, (te?'Receptora ':'Madre ')+r.numero); } });
   }
-  function nac3(el){ elegirFecha(pregunta(el, '¿Cuándo nació?', '', paso(3)), function(f){ ctx.fecha=f; go(nacSexo(0), fechaBonita(f)); }); }
+  function nac3(el){ barraTipo(el); elegirFecha(pregunta(el, '¿Cuándo nació?', '', paso(3)), function(f){ ctx.fecha=f; go(nacSexo(0), fechaBonita(f)); }); }
   function etqCria(k){ return ctx.n>1 ? 'Cría '+(k+1)+': ' : ''; }
   function nacSexo(k){
-    return function(el){
+    return function(el){ barraTipo(el);
       var c = pregunta(el, etqCria(k)+'¿Es macho o hembra?', '', paso(4 + k*2));
       opciones(c, [
         {icon:'♂', label:'Macho', onClick:function(){ ctx.crias[k].sexo='M'; go(nacPeso(k), etqCria(k)+'Macho'); }},
@@ -11438,7 +11486,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     };
   }
   function nacPeso(k){
-    return function(el){
+    return function(el){ barraTipo(el);
       var c = pregunta(el, etqCria(k)+'¿Cuánto pesó al nacer?', 'En kilos. Si no la pesaron, toque “No se pesó”.', paso(5 + k*2));
       function sig(v, crumb){ ctx.crias[k].peso = v; if(k+1 < ctx.n) go(nacSexo(k+1), crumb); else go(ctx.tipo==='TE' ? nacDonante : nac6, crumb); }
       campo(c, 'number', ctx.crias[k].peso, 'Ej: 32', function(v){ sig(v.replace(',','.'), v+' kg'); },
@@ -11446,13 +11494,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       botonGrande(c, 'No se pesó', function(){ sig('', 'Sin peso'); }, true);
     };
   }
-  function nacDonante(el){
+  function nacDonante(el){ barraTipo(el);
     var c = pregunta(el, '¿Quién es la donante?', 'La madre genética del embrión. Si no está en la base, escriba su nombre y toque “Usar…”.', paso(6));
     elegirAnimal(c, { filtro:function(r){ return r.sexo==='H'; }, permitirNuevo:'Donante que no está en la base',
       onPick:function(r){ ctx.donante=r.numero; go(nac6, 'Donante '+r.numero); } });
     botonGrande(c, 'No sé quién es la donante', function(){ ctx.donante=''; go(nac6, 'Donante desconocida'); }, true);
   }
-  function nac6(el){
+  function nac6(el){ barraTipo(el);
     var te = ctx.tipo==='TE';
     var c = pregunta(el, te ? '¿Quién es el padre del embrión?' : '¿Quién es el padre?', 'Le sugerimos según la palpación y los servicios de la vaca.', paso(te ? 7 : (ctx.n>1 ? 8 : 6)));
     var cand = [];
@@ -11481,13 +11529,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return ctx.tipo==='TE' ? base+' TE' : base;
   }
   function nacNum(k){
-    return function(el){
+    return function(el){ barraTipo(el);
       var hint = ctx.tipo==='TE' ? 'Le sugerimos el siguiente número de la finca con la sigla <b>TE</b>. Déjela: así la cría no cuenta en el IEP ni el ARA de las vacas.' : 'Le sugerimos el siguiente número de la finca '+ctx.finca+'. Puede cambiarlo.';
-      var c = pregunta(el, etqCria(k)+'¿Qué número le va a poner?', hint, paso(totalPasos()-(ctx.n-1-k)));
+      var c = pregunta(el, etqCria(k)+'¿Qué número le va a poner?', hint, paso(totalPasos()-1-(ctx.n-1-k)));
       cajaUltimos(c, ctx.finca);
       campo(c, 'text', ctx.crias[k].numero || sugerirNumero(k), 'Número de la cría', function(v){
         ctx.crias[k].numero = v;
-        if(k+1 < ctx.n) go(nacNum(k+1), etqCria(k)+'N.º '+v); else go(nacConf, (ctx.n>1?etqCria(k):'')+'N.º '+v);
+        if(k+1 < ctx.n) go(nacNum(k+1), etqCria(k)+'N.º '+v); else go(nacObs, (ctx.n>1?etqCria(k):'')+'N.º '+v);
       }, {validar:function(v){
         if(rec(v)) return 'Ya existe un animal con el número '+v+'. Use otro.';
         if(enPendientes(v)) return 'El número '+v+' ya está en los registros pendientes. Use otro.';
@@ -11497,7 +11545,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }});
     };
   }
-  function nacConf(el){
+  function nacObs(el){ barraTipo(el);
+    var c = pregunta(el, '¿Alguna observación del parto?', 'Parto difícil, cría débil, nació muerta, la vaca no la aceptó, color, defecto… (opcional).', paso(totalPasos()));
+    campo(c, 'text', ctx.obs||'', 'Observación', function(v){ ctx.obs=v; go(nacConf, v ? 'Obs.: '+(v.length>18?v.slice(0,18)+'…':v) : 'Sin observación'); }, {opcional:true});
+  }
+  function nacConf(el){ barraTipo(el);
     var c = pregunta(el, '¿Está todo bien?', 'Revise antes de guardar.');
     var te = ctx.tipo==='TE', raza = ctx.madre.raza || '';
     var filas = [['Registro', TIPOS_PARTO[ctx.tipo]], ['Finca', ctx.finca], ['Fecha', fechaBonita(ctx.fecha)]];
@@ -11511,14 +11563,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if(!te) filas.push(['Raza', raza]);
     if(ctx.tipo==='GEMELAR') filas.push(['Cálculos', 'Cuenta como UN solo parto de '+ctx.madre.numero]);
     if(te) filas.push(['Cálculos', 'No cuenta en IEP / ARA / ARLA']);
+    filas.push(['Observación', ctx.obs||'—']);
     resumen(c, filas, function(){
       var madreGen = te ? (ctx.donante||'') : ctx.madre.numero;
       ctx.crias.forEach(function(x, k){
         var d = {nombre:'', fecha:ctx.fecha, sexo:x.sexo, raza: te ? '' : raza, finca:ctx.finca, lote:'', padre:ctx.padre||'', madre:madreGen, peso_nac:x.peso||'',
-          tipo_parto:ctx.tipo, receptora: te ? ctx.madre.numero : '', gemelo_de: ctx.tipo==='GEMELAR' ? ctx.crias[1-k].numero : ''};
+          tipo_parto:ctx.tipo, obs:ctx.obs||'', receptora: te ? ctx.madre.numero : '', gemelo_de: ctx.tipo==='GEMELAR' ? ctx.crias[1-k].numero : ''};
         var txt = TIPOS_PARTO[ctx.tipo]+' · '+(x.sexo==='H'?'Hembra':'Macho')+' · '+ctx.fecha+(x.peso?' · '+x.peso+' kg':'')+
           (te ? ' · Receptora: '+ctx.madre.numero+(ctx.donante?' · Donante: '+ctx.donante:'') : ' · Madre: '+ctx.madre.numero)+(ctx.padre?' · Padre: '+ctx.padre:'')+
-          (ctx.tipo==='GEMELAR' ? ' · Gemelo de '+ctx.crias[1-k].numero : '');
+          (ctx.tipo==='GEMELAR' ? ' · Gemelo de '+ctx.crias[1-k].numero : '')+(ctx.obs ? ' · Obs.: '+ctx.obs : '');
         if(k < ctx.crias.length-1){ if(window.__updAdd) window.__updAdd('cria', x.numero, d, txt); }
         else guardar('cria', x.numero, d, txt, ctx.tipo==='GEMELAR' ? '¡Parto gemelar registrado!' : (te ? '¡Cría TE registrada!' : '¡Nacimiento registrado!'),
           {txt:'🐮  Registrar otro nacimiento', fn:function(){ var f=ctx.finca, tp=ctx.tipo, n=ctx.n; ctx={finca:f, tipo:tp, n:n, crias:n>1?[{},{}]:[{}]}; hist=hist.slice(0,4); go(nac2, 'Finca '+f); }});
@@ -11526,24 +11579,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     });
   }
   // ---------- ABORTO ----------
-  function abo1(el){ elegirFinca(pregunta(el, '¿En qué finca está la vaca?', '', 'Paso 1 de 5'), function(f){ ctx.finca=f; go(abo2, 'Finca '+f); }); }
-  function abo2(el){
+  function abo1(el){ barraTipo(el); elegirFinca(pregunta(el, '¿En qué finca está la vaca?', '', 'Paso 1 de 5'), function(f){ ctx.finca=f; go(abo2, 'Finca '+f); }); }
+  function abo2(el){ barraTipo(el);
     var c = pregunta(el, '¿Qué vaca abortó?', '', 'Paso 2 de 5');
     var sug = vacasPrenadas(ctx.finca).map(function(x){ return {r:x.r, nota:'Preñada según palpación del '+fechaBonita(x.p.fecha)+(x.p.toro?' · Toro '+x.p.toro:'')}; });
     elegirAnimal(c, { sugeridos:sug, tituloSug:'Vacas preñadas', filtro:function(r){ return r.sexo==='H'; }, onPick:function(r){ ctx.vaca=r; go(abo3, 'Vaca '+r.numero); } });
   }
-  function abo3(el){ elegirFecha(pregunta(el, '¿Cuándo abortó?', 'Si no sabe el día exacto, ponga el día en que lo notó.', 'Paso 3 de 5'), function(f){ ctx.fecha=f; go(abo4, fechaBonita(f)); }); }
-  function abo4(el){
+  function abo3(el){ barraTipo(el); elegirFecha(pregunta(el, '¿Cuándo abortó?', 'Si no sabe el día exacto, ponga el día en que lo notó.', 'Paso 3 de 5'), function(f){ ctx.fecha=f; go(abo4, fechaBonita(f)); }); }
+  function abo4(el){ barraTipo(el);
     var c = pregunta(el, '¿De cuántos meses estaba preñada?', 'Aproximado.', 'Paso 4 de 5');
     var ops = [2,3,4,5,6,7,8].map(function(m){ return {label:m+' meses', onClick:function(){ ctx.meses=m; go(abo5, m+' meses'); }}; });
     ops.push({label:'No sé', onClick:function(){ ctx.meses=''; go(abo5, 'Meses: no sé'); }});
     opciones(c, ops, 'g-opts-4');
   }
-  function abo5(el){
+  function abo5(el){ barraTipo(el);
     var c = pregunta(el, '¿Alguna observación?', 'Causa probable, si se encontró el feto, tratamiento… (opcional).', 'Paso 5 de 5');
     campo(c, 'text', '', 'Observación', function(v){ ctx.obs=v; go(aboConf, v||'Sin observación'); }, {opcional:true});
   }
-  function aboConf(el){
+  function aboConf(el){ barraTipo(el);
     var c = pregunta(el, '¿Está todo bien?', 'El aborto no crea una cría ni cuenta como parto.');
     resumen(c, [['Registro','Aborto'], ['Vaca', ctx.vaca.numero], ['Finca', ctx.finca], ['Fecha', fechaBonita(ctx.fecha)], ['Meses de preñez', ctx.meses?ctx.meses+' meses':'No se sabe'], ['Observación', ctx.obs]], function(){
       guardar('aborto', ctx.vaca.numero, {fecha:ctx.fecha, meses:ctx.meses, obs:ctx.obs||''}, ctx.fecha+' · Aborto'+(ctx.meses?' de '+ctx.meses+' meses':'')+(ctx.obs?' · '+ctx.obs:''), 'Aborto registrado', null);

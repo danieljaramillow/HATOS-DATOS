@@ -11399,8 +11399,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }
 
   // ---------- NACIMIENTO (normal · gemelar · TE · aborto) ----------
-  var TIPOS_PARTO = { NORMAL:'Parto normal', GEMELAR:'Parto gemelar', TE:'Transferencia de embrión (TE)', ABORTO:'Aborto' };
-  function totalPasos(){ return ctx.tipo==='GEMELAR' ? 11 : (ctx.tipo==='TE' ? 9 : 8); }
+  var TIPOS_PARTO = { NORMAL:'Parto normal', GEMELAR:'Parto gemelar', TE:'Transferencia de embrión (TE)', MUERTO:'Parto — la cría murió al nacer', ABORTO:'Aborto' };
+  function totalPasos(){ return ctx.tipo==='GEMELAR' ? 11 : (ctx.tipo==='TE' || ctx.tipo==='MUERTO' ? 9 : 8); }
   function paso(n){ return 'Paso '+n+' de '+totalPasos(); }
   function cajaUltimos(el, finca){
     if(!window.__ultimosPorSexo || !finca) return;
@@ -11420,9 +11420,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var actual = ctx.tipo || 'NORMAL';
     var w = document.createElement('div'); w.className='g-tipobar';
     w.innerHTML = '<span class="g-tipobar-lab">Tipo:</span>';
-    [['NORMAL','🐮 Normal'],['GEMELAR','👯 Gemelar'],['TE','🧬 TE'],['ABORTO','⚠ Aborto']].forEach(function(t){
+    [['NORMAL','🐮 Normal'],['GEMELAR','👯 Gemelar'],['TE','🧬 TE'],['MUERTO','✝ Murió al nacer'],['ABORTO','⚠ Aborto']].forEach(function(t){
       var b = document.createElement('button'); b.type='button';
-      b.className = 'g-tipobtn'+(t[0]===actual?' on':'')+(t[0]==='ABORTO'?' abo':'');
+      b.className = 'g-tipobtn'+(t[0]===actual?' on':'')+(t[0]==='ABORTO'||t[0]==='MUERTO'?' abo':'');
       b.textContent = t[1];
       b.onclick = function(){ if(t[0]!==actual) cambiarTipo(t[0]); };
       w.appendChild(b);
@@ -11430,7 +11430,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     el.appendChild(w);
   }
   function cambiarTipo(tipo){
-    var finca = ctx.finca, madre = ctx.madre || ctx.vaca, fecha = ctx.fecha, padre = ctx.padre, obs = ctx.obs;
+    var finca = ctx.finca, madre = ctx.madre || ctx.vaca, fecha = ctx.fecha, padre = ctx.padre, obs = ctx.obs, muerte = tipo==='MUERTO' ? ctx.muerte : null;
     var crias0 = (ctx.crias && ctx.crias[0]) ? ctx.crias[0] : {};
     var i = -1; hist.forEach(function(h, k){ if(h.fn===nacTipo) i = k; });
     if(i < 0) return;
@@ -11447,8 +11447,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       var c0 = {sexo:crias0.sexo, peso:crias0.peso};
       if(tipo==='TE'){ if(crias0.numero && /\bTE\b/i.test(crias0.numero)) c0.numero = crias0.numero; }
       else if(crias0.numero) c0.numero = String(crias0.numero).replace(/\s*TE\s*$/i,'');
-      ctx = {tipo:tipo, n:n, crias: n>1 ? [c0, {}] : [c0], finca:finca, madre:madre, fecha:fecha, padre:padre, obs:obs};
-      var etq = {NORMAL:'Normal', GEMELAR:'Gemelar', TE:'TE'}[tipo];
+      ctx = {tipo:tipo, n:n, crias: n>1 ? [c0, {}] : [c0], finca:finca, madre:madre, fecha:fecha, padre:padre, obs:obs, muerte:muerte};
+      var etq = {NORMAL:'Normal', GEMELAR:'Gemelar', TE:'TE', MUERTO:'Murió al nacer'}[tipo];
       pasos.push([nac1, etq]);
       if(finca){ pasos.push([nac2, 'Finca '+finca]);
         if(madre){ pasos.push([nac3, (tipo==='TE'?'Receptora ':'Madre ')+madre.numero]);
@@ -11463,6 +11463,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       {icon:'🐮', label:'Parto normal', sub:'Una cría', onClick:function(){ ctx={tipo:'NORMAL', n:1, crias:[{}]}; go(nac1, 'Normal'); }},
       {icon:'👯', label:'Parto gemelar', sub:'Dos crías de la misma vaca — cuenta como un solo parto', onClick:function(){ ctx={tipo:'GEMELAR', n:2, crias:[{},{}]}; go(nac1, 'Gemelar'); }},
       {icon:'🧬', label:'Transferencia de embrión (TE)', sub:'La cría queda marcada "TE": no cuenta en IEP ni ARA de la receptora ni de la donante', onClick:function(){ ctx={tipo:'TE', n:1, crias:[{}]}; go(nac1, 'TE'); }},
+      {icon:'✝', label:'Murió al nacer', sub:'Parto a término pero la cría nació muerta o murió enseguida — cuenta como parto de la vaca', onClick:function(){ ctx={tipo:'MUERTO', n:1, crias:[{}]}; go(nac1, 'Murió al nacer'); }},
       {icon:'⚠', label:'Aborto', sub:'La vaca perdió la preñez — no hay cría', tono:'rust', onClick:function(){ ctx={tipo:'ABORTO'}; go(abo1, 'Aborto'); }}
     ]);
   }
@@ -11539,11 +11540,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function nacNum(k){
     return function(el){ barraTipo(el);
       var hint = ctx.tipo==='TE' ? 'Le sugerimos el siguiente número de la finca con la sigla <b>TE</b>. Déjela: así la cría no cuenta en el IEP ni el ARA de las vacas.' : 'Le sugerimos el siguiente número de la finca '+ctx.finca+'. Puede cambiarlo.';
-      var c = pregunta(el, etqCria(k)+'¿Qué número le va a poner?', hint, paso(totalPasos()-1-(ctx.n-1-k)));
+      var c = pregunta(el, etqCria(k)+'¿Qué número le va a poner?', hint, paso(totalPasos()-1-(ctx.tipo==='MUERTO'?1:0)-(ctx.n-1-k)));
       cajaUltimos(c, ctx.finca);
       campo(c, 'text', ctx.crias[k].numero || sugerirNumero(k), 'Número de la cría', function(v){
         ctx.crias[k].numero = v;
-        if(k+1 < ctx.n) go(nacNum(k+1), etqCria(k)+'N.º '+v); else go(nacObs, (ctx.n>1?etqCria(k):'')+'N.º '+v);
+        if(k+1 < ctx.n) go(nacNum(k+1), etqCria(k)+'N.º '+v); else go(ctx.tipo==='MUERTO' ? nacMuerte : nacObs, (ctx.n>1?etqCria(k):'')+'N.º '+v);
       }, {validar:function(v){
         if(rec(v)) return 'Ya existe un animal con el número '+v+'. Use otro.';
         if(enPendientes(v)) return 'El número '+v+' ya está en los registros pendientes. Use otro.';
@@ -11552,6 +11553,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         return '';
       }});
     };
+  }
+  var CAUSAS_MUERTE = [
+    {c:'NACIÓ MUERTA', l:'Nació muerta', i:'✝', culpa:false},
+    {c:'PARTO DISTÓCICO', l:'Parto difícil (distócico)', i:'⚠', culpa:false},
+    {c:'NACIÓ DÉBIL', l:'Nació débil — no se paró o no mamó', i:'🍼', culpa:false},
+    {c:'PICADO GOLERO', l:'La picaron goleros / chulos', i:'🦅', culpa:false},
+    {c:'AHOGADO', l:'Se ahogó (charco, caño, barro)', i:'💧', culpa:false},
+    {c:'MADRE NO LA CRIÓ', l:'La madre la abandonó o no le dio leche', i:'🐄', culpa:true},
+    {c:'CAUSA DESCONOCIDA', l:'No se sabe', i:'❓', culpa:false}
+  ];
+  function nacMuerte(el){ barraTipo(el);
+    var c = pregunta(el, '¿Por qué murió la cría?', 'Sirve para saber si fue culpa de la madre. Que la piquen los goleros o se ahogue <b>no</b> es culpa de ella.', paso(totalPasos()-1));
+    opciones(c, CAUSAS_MUERTE.map(function(m){ return {icon:m.i, label:m.l, sub: m.culpa ? 'Cuenta como culpa de la madre' : '', tono: m.culpa ? 'rust' : '', onClick:function(){ ctx.muerte=m; go(nacObs, m.l); }}; }), 'g-opts-2');
   }
   function nacObs(el){ barraTipo(el);
     var c = pregunta(el, '¿Alguna observación del parto?', 'Parto difícil, cría débil, nació muerta, la vaca no la aceptó, color, defecto… (opcional).', paso(totalPasos()));
@@ -11571,15 +11585,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if(!te) filas.push(['Raza', raza]);
     if(ctx.tipo==='GEMELAR') filas.push(['Cálculos', 'Cuenta como UN solo parto de '+ctx.madre.numero]);
     if(te) filas.push(['Cálculos', 'No cuenta en IEP / ARA / ARLA']);
+    var mu = ctx.tipo==='MUERTO' ? (ctx.muerte || CAUSAS_MUERTE[CAUSAS_MUERTE.length-1]) : null;
+    if(mu){ filas.push(['Causa de muerte', mu.l]); filas.push(['¿Culpa de la madre?', mu.culpa ? 'Sí' : 'No']); filas.push(['Cálculos', 'Cuenta como parto de '+ctx.madre.numero+' (IEP). La cría queda INACTIVA por muerte']); }
     filas.push(['Observación', ctx.obs||'—']);
     resumen(c, filas, function(){
       var madreGen = te ? (ctx.donante||'') : ctx.madre.numero;
       ctx.crias.forEach(function(x, k){
         var d = {nombre:'', fecha:ctx.fecha, sexo:x.sexo, raza: te ? '' : raza, finca:ctx.finca, lote:'', padre:ctx.padre||'', madre:madreGen, peso_nac:x.peso||'',
-          tipo_parto:ctx.tipo, obs:ctx.obs||'', receptora: te ? ctx.madre.numero : '', gemelo_de: ctx.tipo==='GEMELAR' ? ctx.crias[1-k].numero : ''};
+          tipo_parto: mu ? 'NORMAL' : ctx.tipo, murio_al_nacer: mu ? mu.c : '', obs:ctx.obs||'', receptora: te ? ctx.madre.numero : '', gemelo_de: ctx.tipo==='GEMELAR' ? ctx.crias[1-k].numero : ''};
         var txt = TIPOS_PARTO[ctx.tipo]+' · '+(x.sexo==='H'?'Hembra':'Macho')+' · '+ctx.fecha+(x.peso?' · '+x.peso+' kg':'')+
           (te ? ' · Receptora: '+ctx.madre.numero+(ctx.donante?' · Donante: '+ctx.donante:'') : ' · Madre: '+ctx.madre.numero)+(ctx.padre?' · Padre: '+ctx.padre:'')+
           (ctx.tipo==='GEMELAR' ? ' · Gemelo de '+ctx.crias[1-k].numero : '')+(ctx.obs ? ' · Obs.: '+ctx.obs : '');
+        if(mu){
+          if(window.__updAdd) window.__updAdd('cria', x.numero, d, txt+' · Murió al nacer: '+mu.l);
+          var obsS = 'MURIÓ AL NACER · '+mu.c+(mu.culpa?' · CULPA DE LA MADRE':' · NO ES CULPA DE LA MADRE')+(ctx.obs?' · '+ctx.obs.toUpperCase():'');
+          guardar('salida', x.numero, {fecha:ctx.fecha, causa:'MUERTE', obs:obsS}, ctx.fecha+' · MUERTE · '+obsS, 'Parto registrado — la cría murió al nacer',
+            {txt:'🐮  Registrar otro nacimiento', fn:function(){ var f=ctx.finca; ctx={finca:f, tipo:'NORMAL', n:1, crias:[{}]}; hist=hist.slice(0,4); hist[3]={fn:hist[3].fn, crumb:'Normal', tipo:hist[3].tipo}; go(nac2, 'Finca '+f); }});
+          return;
+        }
         if(k < ctx.crias.length-1){ if(window.__updAdd) window.__updAdd('cria', x.numero, d, txt); }
         else guardar('cria', x.numero, d, txt, ctx.tipo==='GEMELAR' ? '¡Parto gemelar registrado!' : (te ? '¡Cría TE registrada!' : '¡Nacimiento registrado!'),
           {txt:'🐮  Registrar otro nacimiento', fn:function(){ var f=ctx.finca, tp=ctx.tipo, n=ctx.n; ctx={finca:f, tipo:tp, n:n, crias:n>1?[{},{}]:[{}]}; hist=hist.slice(0,4); go(nac2, 'Finca '+f); }});

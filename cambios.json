@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-23T23:02:48.921Z",
+ "actualizado": "2026-11-23T23:06:12.127Z",
  "edits": [
   {
    "id": 1560,
@@ -2048,6 +2048,18 @@
     "gemelo_de": ""
    },
    "detalle_texto": "Parto normal · Hembra · 2026-10-26 · 34 kg · Madre: 720/1 · Padre: 34/2",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547516930832,
+   "tipo": "aborto",
+   "numero": "382/1 BB",
+   "detalle": {
+    "fecha": "2026-10-30",
+    "meses": "",
+    "obs": "NACIO DEBIL Y MURIO PICADA DE GOLERO"
+   },
+   "detalle_texto": "2026-10-30 · Aborto · NACIO DEBIL Y MURIO PICADA DE GOLERO",
    "fecha": "2026-11-23"
   }
  ],
@@ -4903,6 +4915,16 @@
    "ref": "u:179547496352000",
    "finca": "OK",
    "ts": 1795474963520,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "aborto",
+   "numero": "382/1 BB",
+   "texto": "2026-10-30 · Aborto · NACIO DEBIL Y MURIO PICADA DE GOLERO",
+   "origen": "Modo guiado",
+   "ref": "u:179547516930832",
+   "finca": "OK",
+   "ts": 1795475169308,
    "equipo": "Computador"
   }
  ],

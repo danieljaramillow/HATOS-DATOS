@@ -750,6 +750,17 @@ window.__BN = (function(){
   #guia .g-paso{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:#A9481A; margin-bottom:6px; }
   #guia .g-q{ font-family:'Fraunces',Georgia,serif; font-size:30px; line-height:1.15; margin:0 0 6px; color:#1E3626; }
   #guia .g-hint{ font-size:15px; color:#6b6250; margin:0 0 18px; line-height:1.45; }
+  #guia .g-ultimos{ background:#fff; border:1px solid #e3dccb; border-radius:14px; padding:10px 14px; margin:0 0 16px; }
+  #guia .g-ult-tit{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#7a6f58; margin:2px 0 6px; }
+  #guia .g-ult-fila{ display:flex; align-items:center; gap:12px; padding:7px 0; }
+  #guia .g-ult-fila + .g-ult-fila{ border-top:1px dashed #e3dccb; }
+  #guia .g-ult-ico{ font-style:normal; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:700; flex:none; }
+  #guia .g-ult-M .g-ult-ico{ background:#e4ecf5; color:#2c5b8a; }
+  #guia .g-ult-H .g-ult-ico{ background:#f7e6e2; color:#a8442e; }
+  #guia .g-ult-fila small{ display:block; font-size:12px; color:#7a6f58; }
+  #guia .g-ult-fila small em{ color:#a8442e; font-style:normal; font-weight:600; }
+  #guia .g-ult-fila b{ font-size:18px; color:#1f3a2b; margin-right:8px; }
+  #guia .g-ult-fila span{ font-size:13px; color:#6b6250; }
   #guia .g-subt{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:#7a6f58; margin:22px 2px 8px; }
   #guia .g-opts{ display:grid; grid-template-columns:1fr; gap:10px; }
   #guia .g-opts-2{ grid-template-columns:1fr 1fr; }
@@ -1875,7 +1886,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 12 nov 2026 · 9:30 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 23 nov 2026 · 6:00 p.m.</b>
     </div>
   </header>
 
@@ -8179,6 +8190,27 @@ window.__renderReproHead = function(o){
     return items.slice(0, cuantos||2);
   }
   window.__ultimosNumerosFinca = ultimosNumerosFinca;
+  /* Últimos nacimientos registrados en la finca, uno por sexo (macho y hembra), incluyendo los pendientes */
+  function numOrden(n){ var m = String(n||'').match(/^(\d+)/); return m ? parseInt(m[1],10) : -1; }
+  function ultimosPorSexo(finca){
+    finca = String(finca||'').trim().toUpperCase();
+    var out = { M:null, H:null };
+    if(!finca) return out;
+    var items = [];
+    BD.forEach(function(r){
+      if(r.numero && String(r.finca||'').toUpperCase()===finca && r.fecha_nac && (r.sexo==='M'||r.sexo==='H'))
+        items.push({ numero:r.numero.trim(), sexo:r.sexo, fecha:r.fecha_nac, madre:r.madre||'', padre:r.padre||'', peso:r.peso_nacimiento, pendiente:false });
+    });
+    UPDATES.forEach(function(u){
+      var d = u.detalle;
+      if(u.tipo==='cria' && d && String(d.finca||'').trim().toUpperCase()===finca && (d.sexo==='M'||d.sexo==='H'))
+        items.push({ numero:String(u.numero).trim(), sexo:d.sexo, fecha:d.fecha||u.fecha, madre:d.madre||d.receptora||'', padre:d.padre||'', peso:d.peso_nac, pendiente:true, orden:u.id });
+    });
+    items.sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||'') || ((b.orden||0)-(a.orden||0)) || (numOrden(b.numero)-numOrden(a.numero)); });
+    items.forEach(function(x){ if(!out[x.sexo]) out[x.sexo] = x; });
+    return out;
+  }
+  window.__ultimosPorSexo = ultimosPorSexo;
   function fechaCorta(iso){ if(!iso) return ''; var d = new Date(iso+'T12:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('es-CO', {day:'numeric', month:'short', year:'numeric'}); }
   function guiaNumerosHtml(finca){
     var u = ultimosNumerosFinca(finca, 2);
@@ -11356,6 +11388,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   var TIPOS_PARTO = { NORMAL:'Parto normal', GEMELAR:'Parto gemelar', TE:'Transferencia de embrión (TE)', ABORTO:'Aborto' };
   function totalPasos(){ return ctx.tipo==='GEMELAR' ? 10 : (ctx.tipo==='TE' ? 8 : 7); }
   function paso(n){ return 'Paso '+n+' de '+totalPasos(); }
+  function cajaUltimos(el, finca){
+    if(!window.__ultimosPorSexo || !finca) return;
+    var u = window.__ultimosPorSexo(finca);
+    var box = document.createElement('div'); box.className='g-ultimos';
+    function fila(x, sexo){
+      var icon = sexo==='M' ? '♂' : '♀', lab = sexo==='M' ? 'Último macho' : 'Última hembra';
+      if(!x) return '<div class="g-ult-fila g-ult-'+sexo+'"><i class="g-ult-ico">'+icon+'</i><div><small>'+lab+'</small><b>—</b><span>Sin registros en '+esc(finca)+'</span></div></div>';
+      return '<div class="g-ult-fila g-ult-'+sexo+'"><i class="g-ult-ico">'+icon+'</i><div><small>'+lab+(x.pendiente?' · <em>pendiente</em>':'')+'</small><b>'+esc(x.numero)+'</b>'+
+        '<span>Nació '+fechaBonita(x.fecha)+(x.madre?' · Madre '+esc(x.madre):'')+(x.padre?' · Padre '+esc(x.padre):'')+'</span></div></div>';
+    }
+    box.innerHTML = '<div class="g-ult-tit">Últimos nacimientos registrados en '+esc(finca)+'</div>'+fila(u.M,'M')+fila(u.H,'H');
+    el.appendChild(box);
+  }
   function nacTipo(el){
     var c = pregunta(el, '¿Qué pasó?', 'Elija el tipo de parto. Las crías TE y los gemelos se manejan aparte para no dañar el IEP, el ARA ni el ARLA de la vaca.');
     opciones(c, [
@@ -11377,6 +11422,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function nac2(el){
     var te = ctx.tipo==='TE';
     var c = pregunta(el, te ? '¿Qué vaca parió? (receptora)' : '¿Quién es la madre?', te ? 'La vaca que llevó el embrión. Más adelante le preguntamos por la donante.' : 'Abajo están las vacas preñadas de la finca '+ctx.finca+' que ya deberían estar pariendo.', paso(2));
+    cajaUltimos(c, ctx.finca);
     elegirAnimal(c, { sugeridos:sugerenciasParir(), tituloSug:'Vacas por parir', filtro:function(r){ return r.sexo==='H'; },
       onPick:function(r){ ctx.madre=r; go(nac3, (te?'Receptora ':'Madre ')+r.numero); } });
   }
@@ -11437,9 +11483,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function nacNum(k){
     return function(el){
       var hint = ctx.tipo==='TE' ? 'Le sugerimos el siguiente número de la finca con la sigla <b>TE</b>. Déjela: así la cría no cuenta en el IEP ni el ARA de las vacas.' : 'Le sugerimos el siguiente número de la finca '+ctx.finca+'. Puede cambiarlo.';
-      var ult = window.__ultimosNumerosFinca ? window.__ultimosNumerosFinca(ctx.finca, 2) : [];
-      if(ult.length) hint += '<br>Últimos registrados en '+ctx.finca+': '+ult.map(function(x){ return '<b>'+x.numero+'</b>'+(x.pendiente?' (pendiente)':''); }).join(' y ')+'.';
       var c = pregunta(el, etqCria(k)+'¿Qué número le va a poner?', hint, paso(totalPasos()-(ctx.n-1-k)));
+      cajaUltimos(c, ctx.finca);
       campo(c, 'text', ctx.crias[k].numero || sugerirNumero(k), 'Número de la cría', function(v){
         ctx.crias[k].numero = v;
         if(k+1 < ctx.n) go(nacNum(k+1), etqCria(k)+'N.º '+v); else go(nacConf, (ctx.n>1?etqCria(k):'')+'N.º '+v);

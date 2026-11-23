@@ -1897,7 +1897,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 23 nov 2026 · 6:15 p.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 23 nov 2026 · 6:35 p.m.</b>
     </div>
   </header>
 
@@ -11348,7 +11348,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     el.appendChild(bar);
   }
   function guardar(tipo, numero, detalle, texto, tituloListo, repetir){
-    if(window.__updAdd) window.__updAdd(tipo, numero, detalle, texto);
+    if(tipo && window.__updAdd) window.__updAdd(tipo, numero, detalle, texto);
     go(function(el){
       el.innerHTML = '<div class="g-listo"><div class="g-check">✔</div><h2 class="g-q">'+tituloListo+'</h2>'+
         '<p class="g-hint">Quedó guardado en este dispositivo, en la lista de pendientes ('+pendientes()+' en total). Cuando termine, entre a <b>“Enviar lo registrado”</b> para descargar el resumen y pasarlo al Excel.</p></div>';
@@ -11597,7 +11597,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     filas.push([(te?'Peso de la receptora':'Peso de la vaca')+' al parto', ctx.pesoVaca ? ctx.pesoVaca+' kg' : 'No se pesó']);
     filas.push(['Observación', ctx.obs||'—']);
     resumen(c, filas, function(){
-      if(ctx.pesoVaca && window.__updAdd) window.__updAdd('peso', ctx.madre.numero, {fecha:ctx.fecha, peso:ctx.pesoVaca, nota:'PARTO'}, ctx.fecha+' · '+ctx.pesoVaca+' kg · PARTO');
+      var pv = ctx.pesoVaca, vacaPv = ctx.madre.numero;
+      function pesoVacaAlFinal(){ if(pv && window.__updAdd) window.__updAdd('peso', vacaPv, {fecha:ctx.fecha, peso:pv, nota:'PARTO'}, ctx.fecha+' · '+pv+' kg · PARTO'); }
+      var guardarParto = function(){ var a = arguments; if(window.__updAdd) window.__updAdd(a[0], a[1], a[2], a[3]); pesoVacaAlFinal();
+        guardar(null, a[1], a[2], a[3], a[4], a[5]); };
       var madreGen = te ? (ctx.donante||'') : ctx.madre.numero;
       ctx.crias.forEach(function(x, k){
         var d = {nombre:'', fecha:ctx.fecha, sexo:x.sexo, raza: te ? '' : raza, finca:ctx.finca, lote:'', padre:ctx.padre||'', madre:madreGen, peso_nac:x.peso||'',
@@ -11608,12 +11611,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         if(mu){
           if(window.__updAdd) window.__updAdd('cria', x.numero, d, txt+' · Murió al nacer: '+mu.l);
           var obsS = 'MURIÓ AL NACER · '+mu.c+(mu.culpa?' · CULPA DE LA MADRE':' · NO ES CULPA DE LA MADRE')+(ctx.obs?' · '+ctx.obs.toUpperCase():'');
-          guardar('salida', x.numero, {fecha:ctx.fecha, causa:'MUERTE', obs:obsS}, ctx.fecha+' · MUERTE · '+obsS, 'Parto registrado — la cría murió al nacer',
+          guardarParto('salida', x.numero, {fecha:ctx.fecha, causa:'MUERTE', obs:obsS}, ctx.fecha+' · MUERTE · '+obsS, 'Parto registrado — la cría murió al nacer',
             {txt:'🐮  Registrar otro nacimiento', fn:function(){ var f=ctx.finca; ctx={finca:f, tipo:'NORMAL', n:1, crias:[{}]}; hist=hist.slice(0,4); hist[3]={fn:hist[3].fn, crumb:'Normal', tipo:hist[3].tipo}; go(nac2, 'Finca '+f); }});
           return;
         }
         if(k < ctx.crias.length-1){ if(window.__updAdd) window.__updAdd('cria', x.numero, d, txt); }
-        else guardar('cria', x.numero, d, txt, ctx.tipo==='GEMELAR' ? '¡Parto gemelar registrado!' : (te ? '¡Cría TE registrada!' : '¡Nacimiento registrado!'),
+        else guardarParto('cria', x.numero, d, txt, ctx.tipo==='GEMELAR' ? '¡Parto gemelar registrado!' : (te ? '¡Cría TE registrada!' : '¡Nacimiento registrado!'),
           {txt:'🐮  Registrar otro nacimiento', fn:function(){ var f=ctx.finca, tp=ctx.tipo, n=ctx.n; ctx={finca:f, tipo:tp, n:n, crias:n>1?[{},{}]:[{}]}; hist=hist.slice(0,4); go(nac2, 'Finca '+f); }});
       });
     });
@@ -17570,7 +17573,11 @@ window.__irAFicha = function(id, soloSiHayVentana){
   }
   function todasAlertas(s, kinds){
     var out = [];
-    s.eventos.forEach(function(e){ if(e.borrado) return; e.alertas.forEach(function(a){ if(kinds.indexOf(a.k) >= 0) out.push({ e:e, a:a }); }); });
+    var vistos = {};
+    s.eventos.forEach(function(e){ if(e.borrado) return; e.alertas.forEach(function(a){
+      if(kinds.indexOf(a.k) < 0) return;
+      if(a.k === 'mejora'){ if(vistos[a.texto]) return; vistos[a.texto] = 1; }   // la misma bandera quitada no se repite
+      out.push({ e:e, a:a }); }); });
     return out;
   }
   function porTipo(E){ var t = {}; E.forEach(function(e){ t[e.tipo] = (t[e.tipo]||0)+1; }); return t; }

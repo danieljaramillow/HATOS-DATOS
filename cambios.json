@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-14T00:38:32.681Z",
+ "actualizado": "2026-11-23T22:53:32.758Z",
  "edits": [
   {
    "id": 1560,
@@ -1985,6 +1985,27 @@
    },
    "detalle_texto": "PADRE → 963/1",
    "fecha": "2026-11-14"
+  },
+  {
+   "id": 179547440696889,
+   "tipo": "cria",
+   "numero": "374/2",
+   "detalle": {
+    "nombre": "",
+    "fecha": "2026-10-19",
+    "sexo": "M",
+    "raza": "BR",
+    "finca": "OK",
+    "lote": "",
+    "padre": "701/20",
+    "madre": "741/18",
+    "peso_nac": "35",
+    "tipo_parto": "NORMAL",
+    "receptora": "",
+    "gemelo_de": ""
+   },
+   "detalle_texto": "Parto normal · Macho · 2026-10-19 · 35 kg · Madre: 741/18 · Padre: 701/20",
+   "fecha": "2026-11-23"
   }
  ],
  "visita": null,
@@ -4809,6 +4830,16 @@
    "ref": "u:179461670723539",
    "finca": "CACHO",
    "ts": 1794616707235,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "cria",
+   "numero": "374/2",
+   "texto": "Parto normal · Macho · 2026-10-19 · 35 kg · Madre: 741/18 · Padre: 701/20",
+   "origen": "Modo guiado",
+   "ref": "u:179547440696889",
+   "finca": "OK",
+   "ts": 1795474406969,
    "equipo": "Computador"
   }
  ],

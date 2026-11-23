@@ -872,6 +872,11 @@ window.__BN = (function(){
   #guia .g-resumen{ background:#fff; border:2px solid #E0D7C2; border-radius:14px; padding:6px 16px; }
   #guia .g-rf{ display:flex; justify-content:space-between; gap:14px; padding:11px 0; border-bottom:1px solid #F0EADB; font-size:16px; }
   #guia .g-rf:last-child{ border-bottom:none; }
+  #guia .g-confbar{ position:sticky; bottom:0; z-index:5; display:grid; grid-template-columns:1fr 2fr; gap:10px; margin:14px -16px 0; padding:10px 16px 12px; background:linear-gradient(to bottom, rgba(242,237,226,.85), #F2EDE2 30%); border-top:1px solid #E0D7C2; }
+  #guia .g-confbar .g-btn{ margin-top:0; white-space:nowrap; padding-left:8px; padding-right:8px; }
+  #guia .g-resumen .g-rf{ padding:8px 0; font-size:15.5px; }
+  @media (min-width:701px){ #guia .g-resumen{ display:grid; grid-template-columns:1fr 1fr; column-gap:28px; } #guia .g-resumen .g-rf:nth-last-child(2):nth-child(odd){ border-bottom:none; } }
+  @media (max-width:700px){ #guia .g-confbar{ margin:14px -12px 0; padding:10px 12px 12px; } #guia .g-confbar .g-btn{ font-size:16px; padding-top:15px; padding-bottom:15px; } }
   #guia .g-rf span{ color:#7a705c; }
   #guia .g-rf b{ text-align:right; }
   #guia .g-listo{ text-align:center; padding:20px 0 6px; }
@@ -11336,8 +11341,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       return '<div class="g-rf"><span>'+esc(f[0])+'</span><b>'+esc(f[1])+'</b></div>';
     }).join('');
     el.appendChild(t);
-    botonGrande(el, '✔  Sí, guardar', onGuardar);
-    botonGrande(el, '✏  Corregir algo', back, true);
+    // botones fijos abajo: siempre a la vista sin tener que bajar
+    var bar = document.createElement('div'); bar.className='g-confbar';
+    botonGrande(bar, '✏  Corregir', back, true);
+    botonGrande(bar, '✔  Sí, guardar', onGuardar);
+    el.appendChild(bar);
   }
   function guardar(tipo, numero, detalle, texto, tituloListo, repetir){
     if(window.__updAdd) window.__updAdd(tipo, numero, detalle, texto);

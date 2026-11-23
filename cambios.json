@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-23T23:31:36.000Z",
+ "actualizado": "2026-11-23T23:33:40.000Z",
  "edits": [
   {
    "id": 1560,
@@ -2408,6 +2408,112 @@
     "nota": "PARTO"
    },
    "detalle_texto": "2026-11-05 · 542 kg · PARTO",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547682022800,
+   "tipo": "cria",
+   "numero": "376/2",
+   "detalle": {
+    "nombre": "",
+    "fecha": "2026-10-26",
+    "sexo": "M",
+    "raza": "BR",
+    "finca": "OK",
+    "lote": "",
+    "padre": "64/2",
+    "madre": "633/1",
+    "peso_nac": "25",
+    "tipo_parto": "NORMAL",
+    "murio_al_nacer": "NACIÓ MUERTA",
+    "obs": "",
+    "receptora": "",
+    "gemelo_de": ""
+   },
+   "detalle_texto": "Parto normal · Macho · 2026-10-26 · 25 kg · Madre: 633/1 · Padre: 64/2",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547682022801,
+   "tipo": "salida",
+   "numero": "376/2",
+   "detalle": {
+    "fecha": "2026-10-26",
+    "causa": "MUERTE",
+    "obs": "MURIÓ AL NACER · NACIÓ MUERTA · NO ES CULPA DE LA MADRE"
+   },
+   "detalle_texto": "2026-10-26 · MUERTE · MURIÓ AL NACER · NACIÓ MUERTA · NO ES CULPA DE LA MADRE",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547682022802,
+   "tipo": "peso",
+   "numero": "633/1",
+   "detalle": {
+    "fecha": "2026-10-26",
+    "peso": "545",
+    "nota": "PARTO"
+   },
+   "detalle_texto": "2026-10-26 · 545 kg · PARTO",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547682022803,
+   "tipo": "cria",
+   "numero": "378/2",
+   "detalle": {
+    "nombre": "",
+    "fecha": "2026-10-30",
+    "sexo": "H",
+    "raza": "BR",
+    "finca": "OK",
+    "lote": "",
+    "padre": "34/2",
+    "madre": "382/1",
+    "peso_nac": "26",
+    "tipo_parto": "NORMAL",
+    "murio_al_nacer": "",
+    "obs": "",
+    "receptora": "",
+    "gemelo_de": ""
+   },
+   "detalle_texto": "Parto normal · Hembra · 2026-10-30 · 26 kg · Madre: 382/1 · Padre: 34/2",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547682022804,
+   "tipo": "salida",
+   "numero": "378/2",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "causa": "MUERTE",
+    "obs": "PICADO GOLERO · MURIÓ PICADA POR GALLINAZO, POR DÉBIL · NO ES CULPA DE LA MADRE"
+   },
+   "detalle_texto": "2026-11-04 · MUERTE · PICADO GOLERO · MURIÓ PICADA POR GALLINAZO, POR DÉBIL · NO ES CULPA DE LA MADRE",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547682022805,
+   "tipo": "peso",
+   "numero": "382/1",
+   "detalle": {
+    "fecha": "2026-10-30",
+    "peso": "470",
+    "nota": "PARTO"
+   },
+   "detalle_texto": "2026-10-30 · 470 kg · PARTO",
+   "fecha": "2026-11-23"
+  },
+  {
+   "id": 179547682022806,
+   "tipo": "salida",
+   "numero": "374/2",
+   "detalle": {
+    "fecha": "2026-10-21",
+    "causa": "MUERTE",
+    "obs": "AMANECIÓ MUERTO"
+   },
+   "detalle_texto": "2026-10-21 · MUERTE · AMANECIÓ MUERTO",
    "fecha": "2026-11-23"
   }
  ],
@@ -5430,6 +5536,14 @@
   "172/2": {
    "culpa": "madre",
    "ts": 1792602049103
+  },
+  "376/2": {
+   "culpa": "ajena",
+   "ts": 1795476820228
+  },
+  "378/2": {
+   "culpa": "ajena",
+   "ts": 1795476820228
   }
  },
  "qa": null,

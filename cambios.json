@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-25T15:10:51.000Z",
+ "actualizado": "2026-11-25T20:05:43.693Z",
  "edits": [
   {
    "id": 1560,
@@ -2526,6 +2526,421 @@
    },
    "detalle_texto": "2026-10-21 · MUERTE · AMANECIÓ MUERTO",
    "fecha": "2026-11-23"
+  },
+  {
+   "id": 179563165894737,
+   "tipo": "destete",
+   "numero": "312/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 233,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 4.5,
+     "caract": 5,
+     "conf": 4,
+     "musc": 5,
+     "aplo": 5,
+     "tamano_fs": 5,
+     "dorso": 5,
+     "longitud_corp": 4
+    },
+    "obs": "",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 233 kg · lote 151 · aj. 8 m 251 kg · conf. 94.0",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563177775005,
+   "tipo": "destete",
+   "numero": "317/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 240,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 3,
+     "caract": 4,
+     "conf": 4,
+     "musc": 5,
+     "aplo": 4,
+     "tamano_fs": 3,
+     "dorso": 4,
+     "longitud_corp": 3.5
+    },
+    "obs": "",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 240 kg · lote 151 · aj. 8 m 271 kg · conf. 80.0",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563195311979,
+   "tipo": "destete",
+   "numero": "308/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 237,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 5,
+     "caract": 5,
+     "conf": 5,
+     "musc": 5,
+     "aplo": 4,
+     "tamano_fs": 4,
+     "dorso": 5,
+     "longitud_corp": 4.5
+    },
+    "obs": "",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 237 kg · lote 151 · aj. 8 m 248 kg · conf. 95.0",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563205926138,
+   "tipo": "destete",
+   "numero": "302/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 215,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 5,
+     "caract": 3.5,
+     "conf": 3.5,
+     "musc": 3.5,
+     "aplo": 5,
+     "tamano_fs": 4.5,
+     "dorso": 4,
+     "longitud_corp": 5
+    },
+    "obs": "",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 215 kg · lote 151 · aj. 8 m 218 kg · conf. 85.0",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563225573297,
+   "tipo": "destete",
+   "numero": "300/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 235,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 5,
+     "caract": 2,
+     "conf": 4.5,
+     "musc": 5,
+     "aplo": 5,
+     "tamano_fs": 4.5,
+     "dorso": 4.5,
+     "longitud_corp": 5
+    },
+    "obs": "SHANFRO TORTO",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 235 kg · lote 151 · aj. 8 m 236 kg · conf. 90.5 · SHANFRO TORTO",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563236963889,
+   "tipo": "destete",
+   "numero": "305/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 186,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 5,
+     "caract": 3.5,
+     "conf": 4,
+     "musc": 3.5,
+     "aplo": 5,
+     "tamano_fs": 4,
+     "dorso": 5,
+     "longitud_corp": 4
+    },
+    "obs": "OJO LECHE DE LA MADRE",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 186 kg · lote 151 · aj. 8 m 192 kg · conf. 85.5 · OJO LECHE DE LA MADRE",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563248052485,
+   "tipo": "destete",
+   "numero": "314/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 217,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 5,
+     "caract": 4,
+     "conf": 5,
+     "musc": 4.5,
+     "aplo": 5,
+     "tamano_fs": 5,
+     "dorso": 4.5,
+     "longitud_corp": 5
+    },
+    "obs": "",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 217 kg · lote 151 · aj. 8 m 235 kg · conf. 95.5",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563259608735,
+   "tipo": "destete",
+   "numero": "315/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 190,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 5,
+     "caract": 5,
+     "conf": 4.5,
+     "musc": 4,
+     "aplo": 5,
+     "tamano_fs": 4,
+     "dorso": 4.5,
+     "longitud_corp": 5
+    },
+    "obs": "",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 190 kg · lote 151 · aj. 8 m 211 kg · conf. 92.5",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563279314922,
+   "tipo": "destete",
+   "numero": "310/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 215,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 3.5,
+     "caract": 5,
+     "conf": 4,
+     "musc": 4.5,
+     "aplo": 5,
+     "tamano_fs": 2,
+     "dorso": 4,
+     "longitud_corp": 5
+    },
+    "obs": "PATIANO",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 215 kg · lote 151 · aj. 8 m 228 kg · conf. 84.5 · PATIANO",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563293500026,
+   "tipo": "destete",
+   "numero": "299/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 205,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 5,
+     "caract": 4,
+     "conf": 4.5,
+     "musc": 5,
+     "aplo": 5,
+     "tamano_fs": 4,
+     "dorso": 4.5,
+     "longitud_corp": 4
+    },
+    "obs": "",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 205 kg · lote 151 · aj. 8 m 185 kg · conf. 91.5",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563303529875,
+   "tipo": "destete",
+   "numero": "301/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 190,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 5,
+     "caract": 2.5,
+     "conf": 3.5,
+     "musc": 3,
+     "aplo": 4,
+     "tamano_fs": 4.5,
+     "dorso": 5,
+     "longitud_corp": 5
+    },
+    "obs": "",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 190 kg · lote 151 · aj. 8 m 192 kg · conf. 81.5",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563320269847,
+   "tipo": "destete",
+   "numero": "307/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 262,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 5,
+     "caract": 5,
+     "conf": 5,
+     "musc": 5,
+     "aplo": 5,
+     "tamano_fs": 4.5,
+     "dorso": 5,
+     "longitud_corp": 5
+    },
+    "obs": "MB POSIBLE RESERVA",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 262 kg · lote 151 · aj. 8 m 274 kg · conf. 99.0 · MB POSIBLE RESERVA",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563332055392,
+   "tipo": "destete",
+   "numero": "306/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 263,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 4.5,
+     "caract": 5,
+     "conf": 5,
+     "musc": 5,
+     "aplo": 5,
+     "tamano_fs": 5,
+     "dorso": 5,
+     "longitud_corp": 5
+    },
+    "obs": "MB RESERVA",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 263 kg · lote 151 · aj. 8 m 272 kg · conf. 99.0 · MB RESERVA",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563609786122,
+   "tipo": "destete",
+   "numero": "304/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 182,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 5,
+     "caract": 5,
+     "conf": 5,
+     "musc": 5,
+     "aplo": 5,
+     "dorso": 4.5,
+     "longitud_corp": 5
+    },
+    "obs": "",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 182 kg · lote 151 · aj. 8 m 188 kg · conf. 98.9",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563622092986,
+   "tipo": "destete",
+   "numero": "316/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 215,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 4,
+     "caract": 4.5,
+     "conf": 4,
+     "musc": 5,
+     "aplo": 5,
+     "tamano_fs": 4.5,
+     "dorso": 5,
+     "longitud_corp": 5
+    },
+    "obs": "",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 215 kg · lote 151 · aj. 8 m 242 kg · conf. 93.0",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952904,
+   "tipo": "destete",
+   "numero": "296/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 221,
+    "lote": "151",
+    "finca": "OK",
+    "scores": {
+     "temp": 5,
+     "ombligo": 4,
+     "caract": 1,
+     "conf": 2,
+     "musc": 2.5,
+     "aplo": 2.5,
+     "tamano_fs": 2,
+     "dorso": 3,
+     "longitud_corp": 3
+    },
+    "obs": "GOL GZ X BR DESCARTE",
+    "nota": "DESTETE"
+   },
+   "detalle_texto": "2026-11-25 · DESTETE 221 kg · lote 151 · aj. 8 m 187 kg · conf. 54.5 · GOL GZ X BR DESCARTE",
+   "fecha": "2026-11-25"
   }
  ],
  "visita": null,
@@ -5551,6 +5966,326 @@
    "finca": "OK",
    "ts": 1795618637587,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "312/2",
+   "texto": "2026-11-25 · DESTETE 233 kg · lote 151 · aj. 8 m 251 kg · conf. 94.0",
+   "origen": "Visita: Destete",
+   "ref": "u:179563165894737",
+   "finca": "OK",
+   "ts": 1795631658948,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "312/2",
+   "texto": "Destete (25/11/2026): 233 kg · ajustado 8 m 251 kg · conformación 94.0 /100",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwgq75yop39",
+   "finca": "OK",
+   "ts": 1795631658959,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "317/2",
+   "texto": "2026-11-25 · DESTETE 240 kg · lote 151 · aj. 8 m 271 kg · conf. 80.0",
+   "origen": "Visita: Destete",
+   "ref": "u:179563177775005",
+   "finca": "OK",
+   "ts": 1795631777751,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "317/2",
+   "texto": "Destete (25/11/2026): 240 kg · ajustado 8 m 271 kg · conformación 80.0 /100",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwgsqud52fi",
+   "finca": "OK",
+   "ts": 1795631777762,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "308/2",
+   "texto": "2026-11-25 · DESTETE 237 kg · lote 151 · aj. 8 m 248 kg · conf. 95.0",
+   "origen": "Visita: Destete",
+   "ref": "u:179563195311979",
+   "finca": "OK",
+   "ts": 1795631953121,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "308/2",
+   "texto": "Destete (25/11/2026): 237 kg · ajustado 8 m 248 kg · conformación 95.0 /100",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwgwi63zshs",
+   "finca": "OK",
+   "ts": 1795631953133,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "302/2",
+   "texto": "2026-11-25 · DESTETE 215 kg · lote 151 · aj. 8 m 218 kg · conf. 85.0",
+   "origen": "Visita: Destete",
+   "ref": "u:179563205926138",
+   "finca": "OK",
+   "ts": 1795632059262,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "302/2",
+   "texto": "Destete (25/11/2026): 215 kg · ajustado 8 m 218 kg · conformación 85.0 /100",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwgys1idizi",
+   "finca": "OK",
+   "ts": 1795632059272,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "300/2",
+   "texto": "2026-11-25 · DESTETE 235 kg · lote 151 · aj. 8 m 236 kg · conf. 90.5 · SHANFRO TORTO",
+   "origen": "Visita: Destete",
+   "ref": "u:179563225573297",
+   "finca": "OK",
+   "ts": 1795632255733,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "300/2",
+   "texto": "Destete (25/11/2026): 235 kg · ajustado 8 m 236 kg · conformación 90.5 /100 · SHANFRO TORTO",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwh2zl4wibj",
+   "finca": "OK",
+   "ts": 1795632255755,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "305/2",
+   "texto": "2026-11-25 · DESTETE 186 kg · lote 151 · aj. 8 m 192 kg · conf. 85.5 · OJO LECHE DE LA MADRE",
+   "origen": "Visita: Destete",
+   "ref": "u:179563236963889",
+   "finca": "OK",
+   "ts": 1795632369639,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "305/2",
+   "texto": "Destete (25/11/2026): 186 kg · ajustado 8 m 192 kg · conformación 85.5 /100 · OJO LECHE DE LA MADRE",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwh5fh5q3v7",
+   "finca": "OK",
+   "ts": 1795632369652,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "314/2",
+   "texto": "2026-11-25 · DESTETE 217 kg · lote 151 · aj. 8 m 235 kg · conf. 95.5",
+   "origen": "Visita: Destete",
+   "ref": "u:179563248052485",
+   "finca": "OK",
+   "ts": 1795632480526,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "314/2",
+   "texto": "Destete (25/11/2026): 217 kg · ajustado 8 m 235 kg · conformación 95.5 /100",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwh7t1ldedn",
+   "finca": "OK",
+   "ts": 1795632480542,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "315/2",
+   "texto": "2026-11-25 · DESTETE 190 kg · lote 151 · aj. 8 m 211 kg · conf. 92.5",
+   "origen": "Visita: Destete",
+   "ref": "u:179563259608735",
+   "finca": "OK",
+   "ts": 1795632596088,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "315/2",
+   "texto": "Destete (25/11/2026): 190 kg · ajustado 8 m 211 kg · conformación 92.5 /100",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwhaa8po8ys",
+   "finca": "OK",
+   "ts": 1795632596100,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "310/2",
+   "texto": "2026-11-25 · DESTETE 215 kg · lote 151 · aj. 8 m 228 kg · conf. 84.5 · PATIANO",
+   "origen": "Visita: Destete",
+   "ref": "u:179563279314922",
+   "finca": "OK",
+   "ts": 1795632793150,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "310/2",
+   "texto": "Destete (25/11/2026): 215 kg · ajustado 8 m 228 kg · conformación 84.5 /100 · PATIANO",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwheia517zx",
+   "finca": "OK",
+   "ts": 1795632793166,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "299/2",
+   "texto": "2026-11-25 · DESTETE 205 kg · lote 151 · aj. 8 m 185 kg · conf. 91.5",
+   "origen": "Visita: Destete",
+   "ref": "u:179563293500026",
+   "finca": "OK",
+   "ts": 1795632935002,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "299/2",
+   "texto": "Destete (25/11/2026): 205 kg · ajustado 8 m 185 kg · conformación 91.5 /100",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwhhjptu76u",
+   "finca": "OK",
+   "ts": 1795632935015,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "301/2",
+   "texto": "2026-11-25 · DESTETE 190 kg · lote 151 · aj. 8 m 192 kg · conf. 81.5",
+   "origen": "Visita: Destete",
+   "ref": "u:179563303529875",
+   "finca": "OK",
+   "ts": 1795633035299,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "301/2",
+   "texto": "Destete (25/11/2026): 190 kg · ajustado 8 m 192 kg · conformación 81.5 /100",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwhjp2zoux6",
+   "finca": "OK",
+   "ts": 1795633035316,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "307/2",
+   "texto": "2026-11-25 · DESTETE 262 kg · lote 151 · aj. 8 m 274 kg · conf. 99.0 · MB POSIBLE RESERVA",
+   "origen": "Visita: Destete",
+   "ref": "u:179563320269847",
+   "finca": "OK",
+   "ts": 1795633202699,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "307/2",
+   "texto": "Destete (25/11/2026): 262 kg · ajustado 8 m 274 kg · conformación 99.0 /100 · MB POSIBLE RESERVA",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwhnab1osb5",
+   "finca": "OK",
+   "ts": 1795633202713,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "306/2",
+   "texto": "2026-11-25 · DESTETE 263 kg · lote 151 · aj. 8 m 272 kg · conf. 99.0 · MB RESERVA",
+   "origen": "Visita: Destete",
+   "ref": "u:179563332055392",
+   "finca": "OK",
+   "ts": 1795633320555,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "306/2",
+   "texto": "Destete (25/11/2026): 263 kg · ajustado 8 m 272 kg · conformación 99.0 /100 · MB RESERVA",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwhpt6iouud",
+   "finca": "OK",
+   "ts": 1795633320580,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "304/2",
+   "texto": "2026-11-25 · DESTETE 182 kg · lote 151 · aj. 8 m 188 kg · conf. 98.9",
+   "origen": "Visita: Destete",
+   "ref": "u:179563609786122",
+   "finca": "OK",
+   "ts": 1795636097862,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "304/2",
+   "texto": "Destete (25/11/2026): 182 kg · ajustado 8 m 188 kg · conformación 98.9 /100",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwjdc70csea",
+   "finca": "OK",
+   "ts": 1795636097888,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "316/2",
+   "texto": "2026-11-25 · DESTETE 215 kg · lote 151 · aj. 8 m 242 kg · conf. 93.0",
+   "origen": "Visita: Destete",
+   "ref": "u:179563622092986",
+   "finca": "OK",
+   "ts": 1795636220930,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "316/2",
+   "texto": "Destete (25/11/2026): 215 kg · ajustado 8 m 242 kg · conformación 93.0 /100",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwjfz5g033r",
+   "finca": "OK",
+   "ts": 1795636220948,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "destete",
+   "numero": "296/2",
+   "texto": "2026-11-25 · DESTETE 221 kg · lote 151 · aj. 8 m 187 kg · conf. 54.5 · GOL GZ X BR DESCARTE",
+   "origen": "Visita: Destete",
+   "ref": "u:179563630952904",
+   "finca": "OK",
+   "ts": 1795636309531,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "visita",
+   "numero": "296/2",
+   "texto": "Destete (25/11/2026): 221 kg · ajustado 8 m 187 kg · conformación 54.5 /100 · GOL GZ X BR DESCARTE",
+   "origen": "Visita Destete",
+   "ref": "w:rmwwjhvifjo97",
+   "finca": "OK",
+   "ts": 1795636309556,
+   "equipo": "Computador"
   }
  ],
  "muertes": {
@@ -5581,6 +6316,21 @@
     },
     "obs": "",
     "ts": 1792604125572,
+    "equipo": "Computador",
+    "cerrada": true
+   },
+   "vmwwgj7iil525": {
+    "id": "vmwwgj7iil525",
+    "tipo": "destete",
+    "ts0": 1795631332554,
+    "fecha": "2026-11-25",
+    "finca": "OK",
+    "extra": {
+     "lote": "151",
+     "grupo": "sexo"
+    },
+    "obs": "DJW CALIFICA",
+    "ts": 1795636654432,
     "equipo": "Computador",
     "cerrada": true
    }
@@ -7856,6 +8606,437 @@
     "deleted": false,
     "updIds": [
      179260408649047
+    ]
+   },
+   "rmwwgq75yop39": {
+    "id": "rmwwgq75yop39",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1714,
+    "numero": "312/2",
+    "ts0": 1795631658694,
+    "datos": {
+     "peso": "233",
+     "scores": {
+      "temp": 5,
+      "ombligo": 4.5,
+      "caract": 5,
+      "conf": 4,
+      "musc": 5,
+      "aplo": 5,
+      "tamano_fs": 5,
+      "dorso": 5,
+      "longitud_corp": 4
+     },
+     "obs": ""
+    },
+    "ts": 1795631658694,
+    "deleted": false,
+    "updIds": [
+     179563165894737
+    ]
+   },
+   "rmwwgsqud52fi": {
+    "id": "rmwwgsqud52fi",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1719,
+    "numero": "317/2",
+    "ts0": 1795631777509,
+    "datos": {
+     "peso": "240",
+     "scores": {
+      "temp": 5,
+      "ombligo": 3,
+      "caract": 4,
+      "conf": 4,
+      "musc": 5,
+      "aplo": 4,
+      "tamano_fs": 3,
+      "dorso": 4,
+      "longitud_corp": 3.5
+     },
+     "obs": ""
+    },
+    "ts": 1795631777509,
+    "deleted": false,
+    "updIds": [
+     179563177775005
+    ]
+   },
+   "rmwwgwi63zshs": {
+    "id": "rmwwgwi63zshs",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1710,
+    "numero": "308/2",
+    "ts0": 1795631952891,
+    "datos": {
+     "peso": "237",
+     "scores": {
+      "temp": 5,
+      "ombligo": 5,
+      "caract": 5,
+      "conf": 5,
+      "musc": 5,
+      "aplo": 4,
+      "tamano_fs": 4,
+      "dorso": 5,
+      "longitud_corp": 4.5
+     },
+     "obs": ""
+    },
+    "ts": 1795631952891,
+    "deleted": false,
+    "updIds": [
+     179563195311979
+    ]
+   },
+   "rmwwgys1idizi": {
+    "id": "rmwwgys1idizi",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1703,
+    "numero": "302/2",
+    "ts0": 1795632058998,
+    "datos": {
+     "peso": "215",
+     "scores": {
+      "temp": 5,
+      "ombligo": 5,
+      "caract": 3.5,
+      "conf": 3.5,
+      "musc": 3.5,
+      "aplo": 5,
+      "tamano_fs": 4.5,
+      "dorso": 4,
+      "longitud_corp": 5
+     },
+     "obs": ""
+    },
+    "ts": 1795632058998,
+    "deleted": false,
+    "updIds": [
+     179563205926138
+    ]
+   },
+   "rmwwh2zl4wibj": {
+    "id": "rmwwh2zl4wibj",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1701,
+    "numero": "300/2",
+    "ts0": 1795632255400,
+    "datos": {
+     "peso": "235",
+     "scores": {
+      "temp": 5,
+      "ombligo": 5,
+      "caract": 2,
+      "conf": 4.5,
+      "musc": 5,
+      "aplo": 5,
+      "tamano_fs": 4.5,
+      "dorso": 4.5,
+      "longitud_corp": 5
+     },
+     "obs": "SHANFRO TORTO"
+    },
+    "ts": 1795632255400,
+    "deleted": false,
+    "updIds": [
+     179563225573297
+    ]
+   },
+   "rmwwh5fh5q3v7": {
+    "id": "rmwwh5fh5q3v7",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1707,
+    "numero": "305/2",
+    "ts0": 1795632369305,
+    "datos": {
+     "peso": "186",
+     "scores": {
+      "temp": 5,
+      "ombligo": 5,
+      "caract": 3.5,
+      "conf": 4,
+      "musc": 3.5,
+      "aplo": 5,
+      "tamano_fs": 4,
+      "dorso": 5,
+      "longitud_corp": 4
+     },
+     "obs": "OJO LECHE DE LA MADRE"
+    },
+    "ts": 1795632369305,
+    "deleted": false,
+    "updIds": [
+     179563236963889
+    ]
+   },
+   "rmwwh7t1ldedn": {
+    "id": "rmwwh7t1ldedn",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1716,
+    "numero": "314/2",
+    "ts0": 1795632480201,
+    "datos": {
+     "peso": "217",
+     "scores": {
+      "temp": 5,
+      "ombligo": 5,
+      "caract": 4,
+      "conf": 5,
+      "musc": 4.5,
+      "aplo": 5,
+      "tamano_fs": 5,
+      "dorso": 4.5,
+      "longitud_corp": 5
+     },
+     "obs": ""
+    },
+    "ts": 1795632480201,
+    "deleted": false,
+    "updIds": [
+     179563248052485
+    ]
+   },
+   "rmwwhaa8po8ys": {
+    "id": "rmwwhaa8po8ys",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1717,
+    "numero": "315/2",
+    "ts0": 1795632595801,
+    "datos": {
+     "peso": "190",
+     "scores": {
+      "temp": 5,
+      "ombligo": 5,
+      "caract": 5,
+      "conf": 4.5,
+      "musc": 4,
+      "aplo": 5,
+      "tamano_fs": 4,
+      "dorso": 4.5,
+      "longitud_corp": 5
+     },
+     "obs": ""
+    },
+    "ts": 1795632595801,
+    "deleted": false,
+    "updIds": [
+     179563259608735
+    ]
+   },
+   "rmwwheia517zx": {
+    "id": "rmwwheia517zx",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1712,
+    "numero": "310/2",
+    "ts0": 1795632792845,
+    "datos": {
+     "peso": "215",
+     "scores": {
+      "temp": 5,
+      "ombligo": 3.5,
+      "caract": 5,
+      "conf": 4,
+      "musc": 4.5,
+      "aplo": 5,
+      "tamano_fs": 2,
+      "dorso": 4,
+      "longitud_corp": 5
+     },
+     "obs": "PATIANO"
+    },
+    "ts": 1795632792845,
+    "deleted": false,
+    "updIds": [
+     179563279314922
+    ]
+   },
+   "rmwwhhjptu76u": {
+    "id": "rmwwhhjptu76u",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1696,
+    "numero": "299/2",
+    "ts0": 1795632934673,
+    "datos": {
+     "peso": "205",
+     "scores": {
+      "temp": 5,
+      "ombligo": 5,
+      "caract": 4,
+      "conf": 4.5,
+      "musc": 5,
+      "aplo": 5,
+      "tamano_fs": 4,
+      "dorso": 4.5,
+      "longitud_corp": 4
+     },
+     "obs": ""
+    },
+    "ts": 1795632934673,
+    "deleted": false,
+    "updIds": [
+     179563293500026
+    ]
+   },
+   "rmwwhjp2zoux6": {
+    "id": "rmwwhjp2zoux6",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1702,
+    "numero": "301/2",
+    "ts0": 1795633034939,
+    "datos": {
+     "peso": "190",
+     "scores": {
+      "temp": 5,
+      "ombligo": 5,
+      "caract": 2.5,
+      "conf": 3.5,
+      "musc": 3,
+      "aplo": 4,
+      "tamano_fs": 4.5,
+      "dorso": 5,
+      "longitud_corp": 5
+     },
+     "obs": ""
+    },
+    "ts": 1795633034939,
+    "deleted": false,
+    "updIds": [
+     179563303529875
+    ]
+   },
+   "rmwwhnab1osb5": {
+    "id": "rmwwhnab1osb5",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1709,
+    "numero": "307/2",
+    "ts0": 1795633202413,
+    "datos": {
+     "peso": "262",
+     "scores": {
+      "temp": 5,
+      "ombligo": 5,
+      "caract": 5,
+      "conf": 5,
+      "musc": 5,
+      "aplo": 5,
+      "tamano_fs": 4.5,
+      "dorso": 5,
+      "longitud_corp": 5
+     },
+     "obs": "MB POSIBLE RESERVA"
+    },
+    "ts": 1795633202413,
+    "deleted": false,
+    "updIds": [
+     179563320269847
+    ]
+   },
+   "rmwwhpt6iouud": {
+    "id": "rmwwhpt6iouud",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1708,
+    "numero": "306/2",
+    "ts0": 1795633320186,
+    "datos": {
+     "peso": "263",
+     "scores": {
+      "temp": 5,
+      "ombligo": 4.5,
+      "caract": 5,
+      "conf": 5,
+      "musc": 5,
+      "aplo": 5,
+      "tamano_fs": 5,
+      "dorso": 5,
+      "longitud_corp": 5
+     },
+     "obs": "MB RESERVA"
+    },
+    "ts": 1795633320186,
+    "deleted": false,
+    "updIds": [
+     179563332055392
+    ]
+   },
+   "rmwwjdc70csea": {
+    "id": "rmwwjdc70csea",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1706,
+    "numero": "304/2",
+    "ts0": 1795636097532,
+    "datos": {
+     "peso": "182",
+     "scores": {
+      "temp": 5,
+      "ombligo": 5,
+      "caract": 5,
+      "conf": 5,
+      "musc": 5,
+      "aplo": 5,
+      "dorso": 4.5,
+      "longitud_corp": 5
+     },
+     "obs": ""
+    },
+    "ts": 1795636097532,
+    "deleted": false,
+    "updIds": [
+     179563609786122
+    ]
+   },
+   "rmwwjfz5g033r": {
+    "id": "rmwwjfz5g033r",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1718,
+    "numero": "316/2",
+    "ts0": 1795636220596,
+    "datos": {
+     "peso": "215",
+     "scores": {
+      "temp": 5,
+      "ombligo": 4,
+      "caract": 4.5,
+      "conf": 4,
+      "musc": 5,
+      "aplo": 5,
+      "tamano_fs": 4.5,
+      "dorso": 5,
+      "longitud_corp": 5
+     },
+     "obs": ""
+    },
+    "ts": 1795636220596,
+    "deleted": false,
+    "updIds": [
+     179563622092986
+    ]
+   },
+   "rmwwjhvifjo97": {
+    "id": "rmwwjhvifjo97",
+    "visitaId": "vmwwgj7iil525",
+    "animalId": 1693,
+    "numero": "296/2",
+    "ts0": 1795636309191,
+    "datos": {
+     "peso": "221",
+     "scores": {
+      "temp": 5,
+      "ombligo": 4,
+      "caract": 1,
+      "conf": 2,
+      "musc": 2.5,
+      "aplo": 2.5,
+      "tamano_fs": 2,
+      "dorso": 3,
+      "longitud_corp": 3
+     },
+     "obs": "GOL GZ X BR DESCARTE"
+    },
+    "ts": 1795636309191,
+    "deleted": false,
+    "updIds": [
+     179563630952904
     ]
    }
   }

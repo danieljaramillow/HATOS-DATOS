@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-25T20:11:15.000Z",
+ "actualizado": "2026-11-25T22:26:42.000Z",
  "edits": [
   {
    "id": 1560,
@@ -76,1860 +76,1830 @@
    "tipo": "palpacion",
    "numero": "520/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 120,
-    "parto_probable": "2027-04-02",
+    "parto_probable": "2027-04-01",
     "hallazgo": "120",
-    "toro": ""
+    "toro": "112/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 120 días · parto probable 2027-04-01 · Toro: 112/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258763621949,
    "tipo": "palpacion",
    "numero": "807/20",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": 150,
-    "parto_probable": "2027-03-03",
-    "hallazgo": "150",
-    "toro": ""
+    "dias": 249,
+    "parto_probable": "2026-11-23",
+    "hallazgo": "249",
+    "toro": "34/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 150 días · parto probable 2027-03-03",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 249 días · parto probable 2026-11-23 · Toro: 34/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258767387855,
    "tipo": "palpacion",
    "numero": "883/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": 95,
-    "parto_probable": "2027-04-27",
-    "hallazgo": "95",
-    "toro": "112/2"
+    "dias": 55,
+    "parto_probable": "2027-06-05",
+    "hallazgo": "55",
+    "toro": "54/0"
    },
-   "detalle_texto": "2026-10-21 · Preñada 95 días · parto probable 2027-04-27 · Toro: 112/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 55 días · parto probable 2027-06-05 · Toro: 54/0",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258773512919,
    "tipo": "palpacion",
    "numero": "803/20",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "CLOD",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · CLOD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258775196942,
    "tipo": "palpacion",
    "numero": "924/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258780066945,
    "tipo": "palpacion",
    "numero": "60/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "FOD",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · FOD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · FOD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258786445972,
    "tipo": "palpacion",
    "numero": "780/20",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": 110,
-    "parto_probable": "2027-04-12",
-    "hallazgo": "110",
+    "dias": 120,
+    "parto_probable": "2027-04-01",
+    "hallazgo": "120",
     "toro": "112/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 110 días · parto probable 2027-04-12 · Toro: 112/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 120 días · parto probable 2027-04-01 · Toro: 112/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258792724638,
    "tipo": "palpacion",
    "numero": "753/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 72,
-    "parto_probable": "2027-05-20",
+    "parto_probable": "2027-05-19",
     "hallazgo": "72",
     "toro": "112/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 72 días · parto probable 2027-05-20 · Toro: 112/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 72 días · parto probable 2027-05-19 · Toro: 112/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258809932968,
    "tipo": "palpacion",
    "numero": "964/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "CLOD",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · CLOD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258817417867,
    "tipo": "palpacion",
    "numero": "551/4",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA · Descarte",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258825033351,
    "tipo": "palpacion",
    "numero": "37/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "FOD",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · FOD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · FOD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258828046703,
    "tipo": "palpacion",
    "numero": "803/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258838624623,
    "tipo": "palpacion",
    "numero": "962/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258845642868,
    "tipo": "palpacion",
    "numero": "951/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "CLOD",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · CLOD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258857854972,
    "tipo": "palpacion",
    "numero": "761/18",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
-    "hallazgo": "UCT",
+    "hallazgo": "NORMAL",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT · DESCARTE FERTILIDAD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · NORMAL · DESCARTE FERTILIDAD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258862876018,
    "tipo": "palpacion",
    "numero": "451/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT · CORREGIR, APARECE COMO INACTIVA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT · CORREGIR, APARECE COMO INACTIVA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258871268848,
    "tipo": "palpacion",
    "numero": "984/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 48,
-    "parto_probable": "2027-06-13",
+    "parto_probable": "2027-06-12",
     "hallazgo": "48",
     "toro": "112/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 48 días · parto probable 2027-06-13 · Toro: 112/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 48 días · parto probable 2027-06-12 · Toro: 112/2 · En la palpación del 19/06/26 salió preñada para parir 23/11/26 (34/2)",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258879052682,
    "tipo": "palpacion",
    "numero": "60/24",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258890244848,
    "tipo": "palpacion",
    "numero": "720/17",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 70,
-    "parto_probable": "2027-05-22",
+    "parto_probable": "2027-05-21",
     "hallazgo": "70",
     "toro": "112/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 70 días · parto probable 2027-05-22 · Toro: 112/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 70 días · parto probable 2027-05-21 · Toro: 112/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258896742067,
    "tipo": "palpacion",
    "numero": "69/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 95,
-    "parto_probable": "2027-04-27",
+    "parto_probable": "2027-04-26",
     "hallazgo": "95",
     "toro": "112/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 95 días · parto probable 2027-04-27 · Toro: 112/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 95 días · parto probable 2027-04-26 · Toro: 112/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258905820856,
    "tipo": "palpacion",
    "numero": "57/22",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258913943074,
    "tipo": "palpacion",
    "numero": "783/19",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258922075963,
    "tipo": "palpacion",
    "numero": "45/22",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258928364620,
    "tipo": "palpacion",
    "numero": "135/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 120,
-    "parto_probable": "2027-04-02",
+    "parto_probable": "2027-04-01",
     "hallazgo": "120",
     "toro": "646"
    },
-   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 646",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 120 días · parto probable 2027-04-01 · Toro: 646",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258932902554,
    "tipo": "palpacion",
    "numero": "109/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258944689599,
    "tipo": "palpacion",
    "numero": "907/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 68,
-    "parto_probable": "2027-05-24",
+    "parto_probable": "2027-05-23",
     "hallazgo": "68",
     "toro": "112/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 68 días · parto probable 2027-05-24 · Toro: 112/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 68 días · parto probable 2027-05-23 · Toro: 112/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258966955053,
    "tipo": "palpacion",
    "numero": "938/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 120,
-    "parto_probable": "2027-04-02",
+    "parto_probable": "2027-04-01",
     "hallazgo": "120",
     "toro": "646"
    },
-   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 646",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 120 días · parto probable 2027-04-01 · Toro: 646",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258968315156,
    "tipo": "palpacion",
    "numero": "133/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
-    "hallazgo": "ESTATICA",
+    "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179258973125641,
    "tipo": "palpacion",
    "numero": "813/20",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 45,
-    "parto_probable": "2027-06-16",
+    "parto_probable": "2027-06-15",
     "hallazgo": "45",
     "toro": "112/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 45 días · parto probable 2027-06-16 · Toro: 112/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 45 días · parto probable 2027-06-15 · Toro: 112/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259178029808,
    "tipo": "palpacion",
    "numero": "77/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 130,
-    "parto_probable": "2027-03-23",
+    "parto_probable": "2027-03-22",
     "hallazgo": "130",
-    "toro": ""
+    "toro": "112/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 130 días · parto probable 2027-03-23",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 130 días · parto probable 2027-03-22 · Toro: 112/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259180169817,
    "tipo": "palpacion",
    "numero": "950/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 65,
-    "parto_probable": "2027-05-27",
+    "parto_probable": "2027-05-26",
     "hallazgo": "65",
     "toro": "34/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 65 días · parto probable 2027-05-27 · Toro: 34/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 65 días · parto probable 2027-05-26 · Toro: 34/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259182173866,
    "tipo": "palpacion",
    "numero": "752/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
-    "hallazgo": "CLOI",
+    "hallazgo": "CLOD",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · CLOI",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259191927495,
    "tipo": "palpacion",
    "numero": "801/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 220,
-    "parto_probable": "2026-12-23",
+    "parto_probable": "2026-12-22",
     "hallazgo": "220",
-    "toro": ""
+    "toro": "34/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 220 días · parto probable 2026-12-23",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 220 días · parto probable 2026-12-22 · Toro: 34/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259193832992,
    "tipo": "palpacion",
-   "numero": "819/20",
+   "numero": "818/20",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259195865883,
    "tipo": "palpacion",
    "numero": "59/24",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259197401662,
    "tipo": "palpacion",
    "numero": "38/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259202775365,
    "tipo": "palpacion",
    "numero": "677/10",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 120,
-    "parto_probable": "2027-04-02",
+    "parto_probable": "2027-04-01",
     "hallazgo": "120",
     "toro": "646"
    },
-   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 646 · OJO BAJO RENDIMIENTO DE FERTILIDAD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 120 días · parto probable 2027-04-01 · Toro: 646 · OJO BAJO RENDIMIENTO DE FERTILIDAD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259205921558,
    "tipo": "palpacion",
    "numero": "546/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 130,
-    "parto_probable": "2027-03-23",
+    "parto_probable": "2027-03-22",
     "hallazgo": "130",
-    "toro": ""
+    "toro": "34/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 130 días · parto probable 2027-03-23",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 130 días · parto probable 2027-03-22 · Toro: 34/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259216660219,
    "tipo": "palpacion",
    "numero": "50/24",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259222965132,
    "tipo": "palpacion",
    "numero": "1/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT · DESCARTE",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT · DESCARTE",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259224901232,
    "tipo": "palpacion",
    "numero": "56/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
-    "hallazgo": "FOI",
+    "hallazgo": "FOD",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · FOI",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · FOD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259227802315,
    "tipo": "palpacion",
    "numero": "59/23",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259240216817,
    "tipo": "palpacion",
    "numero": "637/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT · Queda venta",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259254857475,
    "tipo": "palpacion",
    "numero": "990/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259256159436,
    "tipo": "palpacion",
    "numero": "161/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259258640510,
    "tipo": "palpacion",
    "numero": "511/3 BB",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 90,
-    "parto_probable": "2027-05-02",
+    "parto_probable": "2027-05-01",
     "hallazgo": "90",
     "toro": "34/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 90 días · parto probable 2027-05-02 · Toro: 34/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 90 días · parto probable 2027-05-01 · Toro: 34/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259270576830,
    "tipo": "palpacion",
    "numero": "980/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 165,
-    "parto_probable": "2027-02-16",
+    "parto_probable": "2027-02-15",
     "hallazgo": "165",
-    "toro": ""
+    "toro": "34/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 165 días · parto probable 2027-02-16",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 165 días · parto probable 2027-02-15 · Toro: 34/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259282584644,
    "tipo": "palpacion",
    "numero": "669/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": 58,
-    "parto_probable": "2027-06-03",
-    "hallazgo": "58",
+    "dias": 68,
+    "parto_probable": "2027-05-23",
+    "hallazgo": "68",
     "toro": "34/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 58 días · parto probable 2027-06-03 · Toro: 34/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 68 días · parto probable 2027-05-23 · Toro: 34/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259294105738,
    "tipo": "palpacion",
    "numero": "118/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT · IA 27/06/2026 (646)",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259302563161,
    "tipo": "palpacion",
    "numero": "128/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259468065762,
    "tipo": "palpacion",
    "numero": "855/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 55,
-    "parto_probable": "2027-06-06",
+    "parto_probable": "2027-06-05",
     "hallazgo": "55",
     "toro": "54/0"
    },
-   "detalle_texto": "2026-10-21 · Preñada 55 días · parto probable 2027-06-06 · Toro: 54/0 · POSIBLE DESCARTE POR RENDIEMNETO (PERÑADA)",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 55 días · parto probable 2027-06-05 · Toro: 54/0 · POSIBLE DESCARTE POR RENDIEMNETO (PERÑADA)",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259471388110,
    "tipo": "palpacion",
    "numero": "455/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": 50,
-    "parto_probable": "2027-06-11",
-    "hallazgo": "50",
+    "dias": 40,
+    "parto_probable": "2027-06-20",
+    "hallazgo": "40",
     "toro": "54/0"
    },
-   "detalle_texto": "2026-10-21 · Preñada 50 días · parto probable 2027-06-11 · Toro: 54/0",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 40 días · parto probable 2027-06-20 · Toro: 54/0",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259478054347,
    "tipo": "palpacion",
    "numero": "986/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 80,
-    "parto_probable": "2027-05-12",
+    "parto_probable": "2027-05-11",
     "hallazgo": "80",
-    "toro": "34/2"
+    "toro": "54/0"
    },
-   "detalle_texto": "2026-10-21 · Preñada 80 días · parto probable 2027-05-12 · Toro: 34/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 80 días · parto probable 2027-05-11 · Toro: 54/0",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259486428298,
    "tipo": "palpacion",
    "numero": "136/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 60,
-    "parto_probable": "2027-06-01",
+    "parto_probable": "2027-05-31",
     "hallazgo": "60",
     "toro": "34/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada 60 días · parto probable 2027-06-01 · Toro: 34/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 60 días · parto probable 2027-05-31 · Toro: 34/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259488924660,
    "tipo": "palpacion",
    "numero": "68/23",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 85,
-    "parto_probable": "2027-05-07",
+    "parto_probable": "2027-05-06",
     "hallazgo": "85",
     "toro": "54/0"
    },
-   "detalle_texto": "2026-10-21 · Preñada 85 días · parto probable 2027-05-07 · Toro: 54/0",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 85 días · parto probable 2027-05-06 · Toro: 54/0",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259493395032,
    "tipo": "palpacion",
    "numero": "56/24",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA · DEVOLVER A DR DOMINGUEZ",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA · DEVOLVER A DR DOMINGUEZ",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259499641244,
    "tipo": "palpacion",
    "numero": "873/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259507843742,
    "tipo": "palpacion",
    "numero": "735/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "CLOI",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · CLOI · DESCARTE FERTILIDAD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOI · DESCARTE FERTILIDAD · Descarte",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259510903898,
    "tipo": "palpacion",
    "numero": "467/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259533232785,
    "tipo": "palpacion",
    "numero": "771/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "CLOD",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · CLOD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259567892750,
    "tipo": "palpacion",
    "numero": "113/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259570505364,
    "tipo": "palpacion",
    "numero": "558/13",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259576842478,
    "tipo": "palpacion",
    "numero": "793/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "CLOI",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · CLOI · DESCRATE POR FERTILIDAD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOI · DESCRATE POR FERTILIDAD · Queda descarte",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259578962027,
    "tipo": "palpacion",
    "numero": "439/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259582486126,
    "tipo": "palpacion",
    "numero": "110/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259588760449,
    "tipo": "palpacion",
    "numero": "30/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "CLOD",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · CLOD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259606303887,
    "tipo": "palpacion",
    "numero": "167/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259613983718,
    "tipo": "palpacion",
    "numero": "711/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 120,
-    "parto_probable": "2027-04-02",
+    "parto_probable": "2027-04-01",
     "hallazgo": "120",
     "toro": "646"
    },
-   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 646",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 120 días · parto probable 2027-04-01 · Toro: 646",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259617505891,
    "tipo": "palpacion",
    "numero": "120/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 120,
-    "parto_probable": "2027-04-02",
+    "parto_probable": "2027-04-01",
     "hallazgo": "120",
     "toro": "03/5"
    },
-   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 03/5",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 120 días · parto probable 2027-04-01 · Toro: 03/5",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259628027443,
    "tipo": "palpacion",
    "numero": "928/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 68,
-    "parto_probable": "2027-05-24",
+    "parto_probable": "2027-05-23",
     "hallazgo": "68",
     "toro": "54/0"
    },
-   "detalle_texto": "2026-10-21 · Preñada 68 días · parto probable 2027-05-24 · Toro: 54/0",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 68 días · parto probable 2027-05-23 · Toro: 54/0",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259634365012,
    "tipo": "palpacion",
    "numero": "61/24",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 85,
-    "parto_probable": "2027-05-07",
+    "parto_probable": "2027-05-06",
     "hallazgo": "85",
     "toro": "54/0"
    },
-   "detalle_texto": "2026-10-21 · Preñada 85 días · parto probable 2027-05-07 · Toro: 54/0",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 85 días · parto probable 2027-05-06 · Toro: 54/0",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259660173410,
    "tipo": "palpacion",
    "numero": "62/24",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259668391370,
    "tipo": "palpacion",
    "numero": "558/4",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
-    "hallazgo": "ESTATICA",
+    "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA · OJO FERTILIDAD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT · OJO FERTILIDAD · Descarte — se pasa las cercas",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259673183558,
    "tipo": "palpacion",
    "numero": "55/24",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259733880482,
    "tipo": "palpacion",
    "numero": "62/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259753204972,
    "tipo": "palpacion",
    "numero": "338/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259760894823,
    "tipo": "palpacion",
    "numero": "722/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259765577035,
    "tipo": "palpacion",
    "numero": "689/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259785919002,
    "tipo": "palpacion",
    "numero": "123/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 115,
-    "parto_probable": "2027-04-07",
+    "parto_probable": "2027-04-06",
     "hallazgo": "115",
     "toro": "IA"
    },
-   "detalle_texto": "2026-10-21 · Preñada 115 días · parto probable 2027-04-07 · Toro: IA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 115 días · parto probable 2027-04-06 · Toro: IA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259788424932,
    "tipo": "palpacion",
    "numero": "570/4 BB",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259791644415,
    "tipo": "palpacion",
    "numero": "966/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": 95,
-    "parto_probable": "2027-04-27",
-    "hallazgo": "95",
+    "dias": 100,
+    "parto_probable": "2027-04-21",
+    "hallazgo": "100",
     "toro": "7141/3"
    },
-   "detalle_texto": "2026-10-21 · Preñada 95 días · parto probable 2027-04-27 · Toro: 7141/3",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 100 días · parto probable 2027-04-21 · Toro: 7141/3",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259798417315,
    "tipo": "palpacion",
    "numero": "994/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "CLOD",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · CLOD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOD · Descarte",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259825037382,
    "tipo": "palpacion",
    "numero": "67/2",
    "detalle": {
-    "fecha": "2026-10-21",
-    "resultado": "PREÑADA",
-    "dias": 70,
-    "parto_probable": "2027-05-22",
-    "hallazgo": "70",
-    "toro": "7141/3"
+    "fecha": "2026-10-20",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "UCT",
+    "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Preñada 70 días · parto probable 2027-05-22 · Toro: 7141/3",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259827274971,
    "tipo": "palpacion",
    "numero": "73/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 70,
-    "parto_probable": "2027-05-22",
+    "parto_probable": "2027-05-21",
     "hallazgo": "70",
     "toro": "7141/3"
    },
-   "detalle_texto": "2026-10-21 · Preñada 70 días · parto probable 2027-05-22 · Toro: 7141/3",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 70 días · parto probable 2027-05-21 · Toro: 7141/3",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259829258749,
    "tipo": "palpacion",
    "numero": "125/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259831875072,
    "tipo": "palpacion",
    "numero": "148/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": 125,
-    "parto_probable": "2027-03-28",
-    "hallazgo": "125",
+    "dias": 120,
+    "parto_probable": "2027-04-01",
+    "hallazgo": "120",
     "toro": "FENOL S"
    },
-   "detalle_texto": "2026-10-21 · Preñada 125 días · parto probable 2027-03-28 · Toro: FENOL S",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 120 días · parto probable 2027-04-01 · Toro: FENOL S",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259837367872,
    "tipo": "palpacion",
    "numero": "686/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "CLOD",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · CLOD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259851983287,
    "tipo": "palpacion",
    "numero": "114/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259870689231,
    "tipo": "palpacion",
    "numero": "126/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 120,
-    "parto_probable": "2027-04-02",
+    "parto_probable": "2027-04-01",
     "hallazgo": "120",
     "toro": "FENOL S"
    },
-   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: FENOL S",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 120 días · parto probable 2027-04-01 · Toro: FENOL S",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259901328801,
    "tipo": "palpacion",
    "numero": "618/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 120,
-    "parto_probable": "2027-04-02",
+    "parto_probable": "2027-04-01",
     "hallazgo": "120",
-    "toro": "7141/3"
+    "toro": "20/0"
    },
-   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: 7141/3",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 120 días · parto probable 2027-04-01 · Toro: 20/0 · Toro con duda en el libro (20/0?)",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259923648784,
    "tipo": "palpacion",
    "numero": "895/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "CLOD",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · CLOD",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259926011547,
    "tipo": "palpacion",
    "numero": "144/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259939075053,
    "tipo": "palpacion",
    "numero": "806/1",
    "detalle": {
-    "fecha": "2026-10-21",
-    "resultado": "VACIA",
-    "dias": "",
-    "parto_probable": "",
-    "hallazgo": "CLOD",
-    "toro": ""
-   },
-   "detalle_texto": "2026-10-21 · Vacía · CLOD",
-   "fecha": "2026-10-21"
-  },
-  {
-   "id": 179259940992276,
-   "tipo": "palpacion",
-   "numero": "16/0",
-   "detalle": {
-    "fecha": "2026-10-21",
-    "resultado": "VACIA",
-    "dias": "",
-    "parto_probable": "",
-    "hallazgo": "CLOD",
-    "toro": ""
-   },
-   "detalle_texto": "2026-10-21 · Vacía · CLOD",
-   "fecha": "2026-10-21"
-  },
-  {
-   "id": 179259945610385,
-   "tipo": "palpacion",
-   "numero": "31/0",
-   "detalle": {
-    "fecha": "2026-10-21",
-    "resultado": "VACIA",
-    "dias": "",
-    "parto_probable": "",
-    "hallazgo": "",
-    "toro": ""
-   },
-   "detalle_texto": "2026-10-21 · Vacía ·  · HACER PRUEBA DE FERTILIDAD",
-   "fecha": "2026-10-21"
-  },
-  {
-   "id": 179259948850706,
-   "tipo": "palpacion",
-   "numero": "86/2",
-   "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "CLOI",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · CLOI",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOI",
+   "fecha": "2026-10-20"
+  },
+  {
+   "id": 179259940992276,
+   "tipo": "palpacion",
+   "numero": "16/2",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "CLOI",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-20 · Vacía · CLOI",
+   "fecha": "2026-10-20"
+  },
+  {
+   "id": 179259945610385,
+   "tipo": "palpacion",
+   "numero": "31/0",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-20 · Vacía ·  · HACER PRUEBA DE FERTILIDAD",
+   "fecha": "2026-10-20"
+  },
+  {
+   "id": 179259948850706,
+   "tipo": "palpacion",
+   "numero": "86/2",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "CLOI",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-20 · Vacía · CLOI",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259952281719,
    "tipo": "palpacion",
    "numero": "751/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259961460987,
    "tipo": "palpacion",
    "numero": "701/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": 120,
-    "parto_probable": "2027-04-02",
+    "parto_probable": "2027-04-01",
     "hallazgo": "120",
     "toro": "FENOL S"
    },
-   "detalle_texto": "2026-10-21 · Preñada 120 días · parto probable 2027-04-02 · Toro: FENOL S",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 120 días · parto probable 2027-04-01 · Toro: FENOL S",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259966099092,
    "tipo": "palpacion",
    "numero": "478/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179259983277055,
    "tipo": "palpacion",
    "numero": "712/1",
    "detalle": {
-    "fecha": "2026-10-21",
-    "resultado": "PREÑADA",
-    "dias": 95,
-    "parto_probable": "2027-04-27",
-    "hallazgo": "95",
-    "toro": "31/0"
+    "fecha": "2026-10-20",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "CLOD",
+    "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Preñada 95 días · parto probable 2027-04-27 · Toro: 31/0",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · CLOD",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260127966372,
    "tipo": "palpacion",
    "numero": "763/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": "",
-    "parto_probable": "",
-    "hallazgo": "",
+    "dias": 229,
+    "parto_probable": "2026-12-13",
+    "hallazgo": "229",
     "toro": "64/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada · Toro: 64/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 229 días · parto probable 2026-12-13 · Toro: 64/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260129363160,
    "tipo": "palpacion",
    "numero": "195/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260149805587,
    "tipo": "palpacion",
    "numero": "653/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": "",
-    "parto_probable": "",
-    "hallazgo": "",
+    "dias": 229,
+    "parto_probable": "2026-12-13",
+    "hallazgo": "229",
     "toro": "64/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada · Toro: 64/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 229 días · parto probable 2026-12-13 · Toro: 64/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260154181027,
    "tipo": "palpacion",
    "numero": "988/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": "",
-    "parto_probable": "",
-    "hallazgo": "",
-    "toro": ""
+    "dias": 229,
+    "parto_probable": "2026-12-13",
+    "hallazgo": "229",
+    "toro": "64/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada",
-   "fecha": "2026-10-21"
-  },
-  {
-   "id": 179260155364755,
-   "tipo": "palpacion",
-   "numero": "67/23",
-   "detalle": {
-    "fecha": "2026-10-21",
-    "resultado": "PREÑADA",
-    "dias": "",
-    "parto_probable": "",
-    "hallazgo": "",
-    "toro": ""
-   },
-   "detalle_texto": "2026-10-21 · Preñada",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 229 días · parto probable 2026-12-13 · Toro: 64/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260160312341,
    "tipo": "palpacion",
    "numero": "823/21",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": "",
-    "parto_probable": "",
-    "hallazgo": "",
+    "dias": 265,
+    "parto_probable": "2026-11-07",
+    "hallazgo": "265",
     "toro": "34/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada · Toro: 34/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 265 días · parto probable 2026-11-07 · Toro: 34/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260165288248,
    "tipo": "palpacion",
    "numero": "91/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": "",
-    "parto_probable": "",
-    "hallazgo": "",
-    "toro": ""
+    "dias": 229,
+    "parto_probable": "2026-12-13",
+    "hallazgo": "229",
+    "toro": "35/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 229 días · parto probable 2026-12-13 · Toro: 35/2 · Posible preñez",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260180932954,
    "tipo": "palpacion",
    "numero": "633/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Preñada",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260193753232,
    "tipo": "palpacion",
    "numero": "98/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
-    "dias": "",
-    "parto_probable": "",
-    "hallazgo": "",
-    "toro": ""
+    "dias": 259,
+    "parto_probable": "2026-11-13",
+    "hallazgo": "259",
+    "toro": "34/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada 259 días · parto probable 2026-11-13 · Toro: 34/2",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260201890359,
    "tipo": "palpacion",
    "numero": "384/1 BB",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Preñada",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260206600756,
    "tipo": "palpacion",
    "numero": "826/1",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "PREÑADA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "",
     "toro": "35/2"
    },
-   "detalle_texto": "2026-10-21 · Preñada · Toro: 35/2",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Preñada · Toro: 35/2 · El libro dice \"parir 24/09/2026\", fecha ya pasada",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260355201449,
    "tipo": "palpacion",
    "numero": "602/5",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260366280979,
    "tipo": "palpacion",
    "numero": "180/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260372776027,
    "tipo": "palpacion",
    "numero": "143/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260374123780,
    "tipo": "palpacion",
    "numero": "170/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260375418037,
    "tipo": "palpacion",
    "numero": "193/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260377445885,
    "tipo": "palpacion",
    "numero": "163/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260379470656,
    "tipo": "palpacion",
    "numero": "176/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
-  },
-  {
-   "id": 179260382155897,
-   "tipo": "palpacion",
-   "numero": "597/5",
-   "detalle": {
-    "fecha": "2026-10-21",
-    "resultado": "VACIA",
-    "dias": "",
-    "parto_probable": "",
-    "hallazgo": "ESTATICA",
-    "toro": ""
-   },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260385636546,
    "tipo": "palpacion",
    "numero": "162/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260388651142,
    "tipo": "palpacion",
    "numero": "173/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260401652198,
    "tipo": "palpacion",
    "numero": "190/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "INFANTIL",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · INFANTIL · DESCARTE FERTILIDAD Y DESARROLLO SEXUAL",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · INFANTIL · DESCARTE FERTILIDAD Y DESARROLLO SEXUAL · Ovarios pequeños",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260406907758,
    "tipo": "palpacion",
    "numero": "177/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "ESTATICA",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · ESTATICA",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · ESTATICA",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179260408649047,
    "tipo": "palpacion",
    "numero": "71/2",
    "detalle": {
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "resultado": "VACIA",
     "dias": "",
     "parto_probable": "",
     "hallazgo": "UCT",
     "toro": ""
    },
-   "detalle_texto": "2026-10-21 · Vacía · UCT",
-   "fecha": "2026-10-21"
+   "detalle_texto": "2026-10-20 · Vacía · UCT",
+   "fecha": "2026-10-20"
   },
   {
    "id": 179460109761737,
@@ -3085,6 +3055,186 @@
    },
    "detalle_texto": "2026-11-25 · 353 kg · DESTETE de su cría 304/2",
    "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952917,
+   "tipo": "palpacion",
+   "numero": "105/2",
+   "fecha": "2026-10-20",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "PREÑADA",
+    "dias": 249,
+    "parto_probable": "2026-11-23",
+    "hallazgo": "249",
+    "toro": "35/2"
+   },
+   "detalle_texto": "2026-10-20 · Preñada 249 días · parto probable 2026-11-23 · Toro: 35/2"
+  },
+  {
+   "id": 179563630952918,
+   "tipo": "palpacion",
+   "numero": "382/1 BB",
+   "fecha": "2026-10-20",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "PREÑADA",
+    "dias": 229,
+    "parto_probable": "2026-12-13",
+    "hallazgo": "229",
+    "toro": "34/2"
+   },
+   "detalle_texto": "2026-10-20 · Preñada 229 días · parto probable 2026-12-13 · Toro: 34/2"
+  },
+  {
+   "id": 179563630952919,
+   "tipo": "palpacion",
+   "numero": "441/2",
+   "fecha": "2026-10-20",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "PREÑADA",
+    "dias": 259,
+    "parto_probable": "2026-11-13",
+    "hallazgo": "259",
+    "toro": "701/20"
+   },
+   "detalle_texto": "2026-10-20 · Preñada 259 días · parto probable 2026-11-13 · Toro: 701/20"
+  },
+  {
+   "id": 179563630952920,
+   "tipo": "palpacion",
+   "numero": "582/1",
+   "fecha": "2026-10-20",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "PREÑADA",
+    "dias": 270,
+    "parto_probable": "2026-11-02",
+    "hallazgo": "270",
+    "toro": "34/2"
+   },
+   "detalle_texto": "2026-10-20 · Preñada 270 días · parto probable 2026-11-02 · Toro: 34/2"
+  },
+  {
+   "id": 179563630952921,
+   "tipo": "palpacion",
+   "numero": "63/23",
+   "fecha": "2026-10-20",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "PREÑADA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "",
+    "toro": "34/2"
+   },
+   "detalle_texto": "2026-10-20 · Preñada · Toro: 34/2 · El libro dice \"parir 24/09/2026\", fecha ya pasada"
+  },
+  {
+   "id": 179563630952922,
+   "tipo": "palpacion",
+   "numero": "657/1",
+   "fecha": "2026-10-20",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "PREÑADA",
+    "dias": 229,
+    "parto_probable": "2026-12-13",
+    "hallazgo": "229",
+    "toro": "35/2"
+   },
+   "detalle_texto": "2026-10-20 · Preñada 229 días · parto probable 2026-12-13 · Toro: 35/2"
+  },
+  {
+   "id": 179563630952923,
+   "tipo": "palpacion",
+   "numero": "760/18",
+   "fecha": "2026-10-20",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "VACIA",
+    "dias": "",
+    "parto_probable": "",
+    "hallazgo": "",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-20 · Vacía · "
+  },
+  {
+   "id": 179563630952924,
+   "tipo": "palpacion",
+   "numero": "809/20",
+   "fecha": "2026-10-20",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "PREÑADA",
+    "dias": 50,
+    "parto_probable": "2027-06-10",
+    "hallazgo": "50",
+    "toro": "112/2"
+   },
+   "detalle_texto": "2026-10-20 · Preñada 50 días · parto probable 2027-06-10 · Toro: 112/2"
+  },
+  {
+   "id": 179563630952925,
+   "tipo": "palpacion",
+   "numero": "811/20",
+   "fecha": "2026-10-20",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "PREÑADA",
+    "dias": 270,
+    "parto_probable": "2026-11-02",
+    "hallazgo": "270",
+    "toro": "35/2"
+   },
+   "detalle_texto": "2026-10-20 · Preñada 270 días · parto probable 2026-11-02 · Toro: 35/2"
+  },
+  {
+   "id": 179563630952926,
+   "tipo": "palpacion",
+   "numero": "819/1",
+   "fecha": "2026-10-20",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "PREÑADA",
+    "dias": 265,
+    "parto_probable": "2026-11-07",
+    "hallazgo": "265",
+    "toro": "34/2"
+   },
+   "detalle_texto": "2026-10-20 · Preñada 265 días · parto probable 2026-11-07 · Toro: 34/2"
+  },
+  {
+   "id": 179563630952927,
+   "tipo": "palpacion",
+   "numero": "916/1",
+   "fecha": "2026-10-20",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "PREÑADA",
+    "dias": 270,
+    "parto_probable": "2026-11-02",
+    "hallazgo": "270",
+    "toro": ""
+   },
+   "detalle_texto": "2026-10-20 · Preñada 270 días · parto probable 2026-11-02 · No reconfirmó; falta padre"
+  },
+  {
+   "id": 179563630952928,
+   "tipo": "palpacion",
+   "numero": "971/1",
+   "fecha": "2026-10-20",
+   "detalle": {
+    "fecha": "2026-10-20",
+    "resultado": "PREÑADA",
+    "dias": 95,
+    "parto_probable": "2027-04-26",
+    "hallazgo": "95",
+    "toro": "31/0"
+   },
+   "detalle_texto": "2026-10-20 · Preñada 95 días · parto probable 2027-04-26 · Toro: 31/0"
   }
  ],
  "visita": null,
@@ -6453,13 +6603,13 @@
     "id": "vmvi41oqdret3",
     "tipo": "palpacion",
     "ts0": 1792587050869,
-    "fecha": "2026-10-21",
+    "fecha": "2026-10-20",
     "finca": "OK",
     "extra": {
      "veterinario": "DR MARCO GONSALEZ"
     },
-    "obs": "",
-    "ts": 1792604125572,
+    "obs": "Fotos del libro: github.com/danieljaramillow/hatos-datos/tree/main/libro-de-campo/2026-10-20_palpacion",
+    "ts": 1795645602163,
     "equipo": "Computador",
     "cerrada": true
    },
@@ -6491,10 +6641,10 @@
      "obs": "",
      "unidad": "dias",
      "dias": 120,
-     "toro": "",
-     "parto": "2027-04-02"
+     "toro": "112/2",
+     "parto": "2027-04-01"
     },
-    "ts": 1792587274930,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258727493015
@@ -6510,11 +6660,11 @@
      "estado": "PREÑADA",
      "obs": "",
      "unidad": "dias",
-     "dias": 150,
-     "toro": "",
-     "parto": "2027-03-03"
+     "dias": 249,
+     "toro": "34/2",
+     "parto": "2026-11-23"
     },
-    "ts": 1792587636219,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258763621949
@@ -6530,11 +6680,11 @@
      "estado": "PREÑADA",
      "obs": "",
      "unidad": "dias",
-     "dias": 95,
-     "toro": "112/2",
-     "parto": "2027-04-27"
+     "dias": 55,
+     "toro": "54/0",
+     "parto": "2027-06-05"
     },
-    "ts": 1792587673878,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258767387855
@@ -6551,7 +6701,7 @@
      "obs": "",
      "diag": "CLOD"
     },
-    "ts": 1792587735129,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258773512919
@@ -6568,7 +6718,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792587751969,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258775196942
@@ -6585,7 +6735,7 @@
      "obs": "",
      "diag": "FOD"
     },
-    "ts": 1792587800669,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258780066945
@@ -6601,11 +6751,11 @@
      "estado": "PREÑADA",
      "obs": "",
      "unidad": "dias",
-     "dias": 110,
+     "dias": 120,
      "toro": "112/2",
-     "parto": "2027-04-12"
+     "parto": "2027-04-01"
     },
-    "ts": 1792587864459,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258786445972
@@ -6623,9 +6773,9 @@
      "unidad": "dias",
      "dias": 72,
      "toro": "112/2",
-     "parto": "2027-05-20"
+     "parto": "2027-05-19"
     },
-    "ts": 1792587927246,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258792724638
@@ -6642,7 +6792,7 @@
      "obs": "",
      "diag": "CLOD"
     },
-    "ts": 1792588099329,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258809932968
@@ -6656,10 +6806,10 @@
     "ts0": 1792588174178,
     "datos": {
      "estado": "VACIA",
-     "obs": "",
+     "obs": "Descarte",
      "diag": "ESTATICA"
     },
-    "ts": 1792588174178,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258817417867
@@ -6676,7 +6826,7 @@
      "obs": "",
      "diag": "FOD"
     },
-    "ts": 1792588250333,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258825033351
@@ -6693,7 +6843,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792588280467,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258828046703
@@ -6710,7 +6860,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792588386246,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258838624623
@@ -6727,7 +6877,7 @@
      "obs": "",
      "diag": "CLOD"
     },
-    "ts": 1792588456428,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258845642868
@@ -6742,9 +6892,9 @@
     "datos": {
      "estado": "VACIA",
      "obs": "DESCARTE FERTILIDAD",
-     "diag": "UCT"
+     "diag": "NORMAL"
     },
-    "ts": 1792588578549,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258857854972
@@ -6761,7 +6911,7 @@
      "obs": "CORREGIR, APARECE COMO INACTIVA",
      "diag": "UCT"
     },
-    "ts": 1792588628760,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258862876018
@@ -6775,13 +6925,13 @@
     "ts0": 1792588712688,
     "datos": {
      "estado": "PREÑADA",
-     "obs": "",
+     "obs": "En la palpación del 19/06/26 salió preñada para parir 23/11/26 (34/2)",
      "unidad": "dias",
      "dias": 48,
      "toro": "112/2",
-     "parto": "2027-06-13"
+     "parto": "2027-06-12"
     },
-    "ts": 1792588712688,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258871268848
@@ -6798,7 +6948,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792588790526,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258879052682
@@ -6816,9 +6966,9 @@
      "unidad": "dias",
      "dias": 70,
      "toro": "112/2",
-     "parto": "2027-05-22"
+     "parto": "2027-05-21"
     },
-    "ts": 1792588902448,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258890244848
@@ -6836,9 +6986,9 @@
      "unidad": "dias",
      "dias": 95,
      "toro": "112/2",
-     "parto": "2027-04-27"
+     "parto": "2027-04-26"
     },
-    "ts": 1792588967420,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258896742067
@@ -6855,7 +7005,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792589058208,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258905820856
@@ -6872,7 +7022,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792589139430,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258913943074
@@ -6889,7 +7039,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792589220759,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258922075963
@@ -6907,9 +7057,9 @@
      "unidad": "dias",
      "dias": 120,
      "toro": "646",
-     "parto": "2027-04-02"
+     "parto": "2027-04-01"
     },
-    "ts": 1792589283646,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258928364620
@@ -6926,7 +7076,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792589329025,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258932902554
@@ -6944,9 +7094,9 @@
      "unidad": "dias",
      "dias": 68,
      "toro": "112/2",
-     "parto": "2027-05-24"
+     "parto": "2027-05-23"
     },
-    "ts": 1792589446895,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258944689599
@@ -6964,9 +7114,9 @@
      "unidad": "dias",
      "dias": 120,
      "toro": "646",
-     "parto": "2027-04-02"
+     "parto": "2027-04-01"
     },
-    "ts": 1792589669550,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258966955053
@@ -6981,9 +7131,9 @@
     "datos": {
      "estado": "VACIA",
      "obs": "",
-     "diag": "ESTATICA"
+     "diag": "UCT"
     },
-    "ts": 1792589683151,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258968315156
@@ -7001,9 +7151,9 @@
      "unidad": "dias",
      "dias": 45,
      "toro": "112/2",
-     "parto": "2027-06-16"
+     "parto": "2027-06-15"
     },
-    "ts": 1792589731256,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179258973125641
@@ -7021,12 +7171,13 @@
      "unidad": "dias",
      "dias": 50,
      "toro": "112/2",
-     "parto": "2027-06-11"
+     "parto": "2027-06-10"
     },
-    "ts": 1792589796443,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
-     179258979644305
+     179258979644305,
+     179563630952924
     ]
    },
    "rmvi6v1zee9v4": {
@@ -7040,10 +7191,10 @@
      "obs": "",
      "unidad": "dias",
      "dias": 130,
-     "toro": "",
-     "parto": "2027-03-23"
+     "toro": "112/2",
+     "parto": "2027-03-22"
     },
-    "ts": 1792591780298,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259178029808
@@ -7061,9 +7212,9 @@
      "unidad": "dias",
      "dias": 65,
      "toro": "34/2",
-     "parto": "2027-05-27"
+     "parto": "2027-05-26"
     },
-    "ts": 1792591801698,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259180169817
@@ -7078,9 +7229,9 @@
     "datos": {
      "estado": "VACIA",
      "obs": "",
-     "diag": "CLOI"
+     "diag": "CLOD"
     },
-    "ts": 1792591821738,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259182173866
@@ -7098,9 +7249,9 @@
      "unidad": "dias",
      "dias": 120,
      "toro": "646",
-     "parto": "2027-04-02"
+     "parto": "2027-04-01"
     },
-    "ts": 1792592027740,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259202775365
@@ -7117,10 +7268,10 @@
      "obs": "",
      "unidad": "dias",
      "dias": 220,
-     "toro": "",
-     "parto": "2026-12-23"
+     "toro": "34/2",
+     "parto": "2026-12-22"
     },
-    "ts": 1792591919274,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259191927495
@@ -7129,15 +7280,15 @@
    "rmvi6yfx5ma8y": {
     "id": "rmvi6yfx5ma8y",
     "visitaId": "vmvi41oqdret3",
-    "animalId": 1135,
-    "numero": "819/20",
+    "animalId": 1134,
+    "numero": "818/20",
     "ts0": 1792591938329,
     "datos": {
      "estado": "VACIA",
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792591938329,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259193832992
@@ -7154,7 +7305,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792591958658,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259195865883
@@ -7171,7 +7322,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792591974016,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259197401662
@@ -7188,10 +7339,10 @@
      "obs": "",
      "unidad": "dias",
      "dias": 130,
-     "toro": "",
-     "parto": "2027-03-23"
+     "toro": "34/2",
+     "parto": "2027-03-22"
     },
-    "ts": 1792592059215,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259205921558
@@ -7208,7 +7359,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792592166602,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259216660219
@@ -7225,7 +7376,7 @@
      "obs": "DESCARTE",
      "diag": "UCT"
     },
-    "ts": 1792592229641,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259222965132
@@ -7240,9 +7391,9 @@
     "datos": {
      "estado": "VACIA",
      "obs": "",
-     "diag": "FOI"
+     "diag": "FOD"
     },
-    "ts": 1792592249012,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259224901232
@@ -7259,7 +7410,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792592278023,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259227802315
@@ -7273,10 +7424,10 @@
     "ts0": 1792592402168,
     "datos": {
      "estado": "VACIA",
-     "obs": "",
+     "obs": "Queda venta",
      "diag": "UCT"
     },
-    "ts": 1792592402168,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259240216817
@@ -7293,7 +7444,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792592548574,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259254857475
@@ -7310,7 +7461,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792592561594,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259256159436
@@ -7328,9 +7479,9 @@
      "unidad": "dias",
      "dias": 90,
      "toro": "34/2",
-     "parto": "2027-05-02"
+     "parto": "2027-05-01"
     },
-    "ts": 1792592586405,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259258640510
@@ -7347,10 +7498,10 @@
      "obs": "",
      "unidad": "dias",
      "dias": 165,
-     "toro": "",
-     "parto": "2027-02-16"
+     "toro": "34/2",
+     "parto": "2027-02-15"
     },
-    "ts": 1792592705768,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259270576830
@@ -7366,11 +7517,11 @@
      "estado": "PREÑADA",
      "obs": "",
      "unidad": "dias",
-     "dias": 58,
+     "dias": 68,
      "toro": "34/2",
-     "parto": "2027-06-03"
+     "parto": "2027-05-23"
     },
-    "ts": 1792592825845,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259282584644
@@ -7384,10 +7535,10 @@
     "ts0": 1792592941057,
     "datos": {
      "estado": "VACIA",
-     "obs": "",
+     "obs": "IA 27/06/2026 (646)",
      "diag": "UCT"
     },
-    "ts": 1792592941057,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259294105738
@@ -7404,7 +7555,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792593025631,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259302563161
@@ -7422,9 +7573,9 @@
      "unidad": "dias",
      "dias": 55,
      "toro": "54/0",
-     "parto": "2027-06-06"
+     "parto": "2027-06-05"
     },
-    "ts": 1792594680657,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259468065762
@@ -7440,11 +7591,11 @@
      "estado": "PREÑADA",
      "obs": "",
      "unidad": "dias",
-     "dias": 50,
+     "dias": 40,
      "toro": "54/0",
-     "parto": "2027-06-11"
+     "parto": "2027-06-20"
     },
-    "ts": 1792594713881,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259471388110
@@ -7461,10 +7612,10 @@
      "obs": "",
      "unidad": "dias",
      "dias": 80,
-     "toro": "34/2",
-     "parto": "2027-05-12"
+     "toro": "54/0",
+     "parto": "2027-05-11"
     },
-    "ts": 1792594780543,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259478054347
@@ -7482,9 +7633,9 @@
      "unidad": "dias",
      "dias": 60,
      "toro": "34/2",
-     "parto": "2027-06-01"
+     "parto": "2027-05-31"
     },
-    "ts": 1792594864272,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259486428298
@@ -7502,9 +7653,9 @@
      "unidad": "dias",
      "dias": 85,
      "toro": "54/0",
-     "parto": "2027-05-07"
+     "parto": "2027-05-06"
     },
-    "ts": 1792594889246,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259488924660
@@ -7521,7 +7672,7 @@
      "obs": "DEVOLVER A DR DOMINGUEZ",
      "diag": "ESTATICA"
     },
-    "ts": 1792594933950,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259493395032
@@ -7538,7 +7689,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792594996412,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259499641244
@@ -7552,10 +7703,10 @@
     "ts0": 1792595078437,
     "datos": {
      "estado": "VACIA",
-     "obs": "DESCARTE FERTILIDAD",
+     "obs": "DESCARTE FERTILIDAD · Descarte",
      "diag": "CLOI"
     },
-    "ts": 1792595078437,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259507843742
@@ -7572,7 +7723,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792595109038,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259510903898
@@ -7589,7 +7740,7 @@
      "obs": "",
      "diag": "CLOD"
     },
-    "ts": 1792595332327,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259533232785
@@ -7606,7 +7757,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792595678927,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259567892750
@@ -7623,7 +7774,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792595705053,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259570505364
@@ -7637,10 +7788,10 @@
     "ts0": 1792595768424,
     "datos": {
      "estado": "VACIA",
-     "obs": "DESCRATE POR FERTILIDAD",
+     "obs": "DESCRATE POR FERTILIDAD · Queda descarte",
      "diag": "CLOI"
     },
-    "ts": 1792595768424,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259576842478
@@ -7657,7 +7808,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792595789620,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259578962027
@@ -7674,7 +7825,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792595824861,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259582486126
@@ -7691,7 +7842,7 @@
      "obs": "",
      "diag": "CLOD"
     },
-    "ts": 1792595887603,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259588760449
@@ -7708,7 +7859,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792596063038,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259606303887
@@ -7726,9 +7877,9 @@
      "unidad": "dias",
      "dias": 120,
      "toro": "646",
-     "parto": "2027-04-02"
+     "parto": "2027-04-01"
     },
-    "ts": 1792596139837,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259613983718
@@ -7746,9 +7897,9 @@
      "unidad": "dias",
      "dias": 120,
      "toro": "03/5",
-     "parto": "2027-04-02"
+     "parto": "2027-04-01"
     },
-    "ts": 1792596175058,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259617505891
@@ -7766,9 +7917,9 @@
      "unidad": "dias",
      "dias": 68,
      "toro": "54/0",
-     "parto": "2027-05-24"
+     "parto": "2027-05-23"
     },
-    "ts": 1792596280274,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259628027443
@@ -7786,9 +7937,9 @@
      "unidad": "dias",
      "dias": 85,
      "toro": "54/0",
-     "parto": "2027-05-07"
+     "parto": "2027-05-06"
     },
-    "ts": 1792596343650,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259634365012
@@ -7805,7 +7956,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792596601733,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259660173410
@@ -7819,10 +7970,10 @@
     "ts0": 1792596634451,
     "datos": {
      "estado": "VACIA",
-     "obs": "OJO FERTILIDAD",
-     "diag": "ESTATICA"
+     "obs": "OJO FERTILIDAD · Descarte — se pasa las cercas",
+     "diag": "UCT"
     },
-    "ts": 1792596683901,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259668391370
@@ -7839,7 +7990,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792596731835,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259673183558
@@ -7856,7 +8007,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792597338803,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259733880482
@@ -7870,13 +8021,13 @@
     "ts0": 1792597415997,
     "datos": {
      "estado": "PREÑADA",
-     "obs": "",
+     "obs": "Toro con duda en el libro (20/0?)",
      "unidad": "dias",
      "dias": 120,
-     "toro": "7141/3",
-     "parto": "2027-04-02"
+     "toro": "20/0",
+     "parto": "2027-04-01"
     },
-    "ts": 1792599013275,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259901328801
@@ -7893,7 +8044,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792597532039,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259753204972
@@ -7910,7 +8061,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792597608948,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259760894823
@@ -7927,7 +8078,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792597655770,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259765577035
@@ -7945,9 +8096,9 @@
      "unidad": "dias",
      "dias": 115,
      "toro": "IA",
-     "parto": "2027-04-07"
+     "parto": "2027-04-06"
     },
-    "ts": 1792597859190,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259785919002
@@ -7964,7 +8115,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792597884249,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259788424932
@@ -7980,11 +8131,11 @@
      "estado": "PREÑADA",
      "obs": "",
      "unidad": "dias",
-     "dias": 95,
+     "dias": 100,
      "toro": "7141/3",
-     "parto": "2027-04-27"
+     "parto": "2027-04-21"
     },
-    "ts": 1792597916444,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259791644415
@@ -7998,10 +8149,10 @@
     "ts0": 1792597984172,
     "datos": {
      "estado": "VACIA",
-     "obs": "",
+     "obs": "Descarte",
      "diag": "CLOD"
     },
-    "ts": 1792597984172,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259798417315
@@ -8014,14 +8165,12 @@
     "numero": "67/2",
     "ts0": 1792598132391,
     "datos": {
-     "estado": "PREÑADA",
+     "estado": "VACIA",
      "obs": "",
      "unidad": "dias",
-     "dias": 70,
-     "toro": "7141/3",
-     "parto": "2027-05-22"
+     "diag": "UCT"
     },
-    "ts": 1792598250362,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259825037382
@@ -8039,9 +8188,9 @@
      "unidad": "dias",
      "dias": 70,
      "toro": "7141/3",
-     "parto": "2027-05-22"
+     "parto": "2027-05-21"
     },
-    "ts": 1792598272749,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259827274971
@@ -8058,7 +8207,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792598292587,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259829258749
@@ -8074,11 +8223,11 @@
      "estado": "PREÑADA",
      "obs": "",
      "unidad": "dias",
-     "dias": 125,
+     "dias": 120,
      "toro": "FENOL S",
-     "parto": "2027-03-28"
+     "parto": "2027-04-01"
     },
-    "ts": 1792598318750,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259831875072
@@ -8095,7 +8244,7 @@
      "obs": "",
      "diag": "CLOD"
     },
-    "ts": 1792598373678,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259837367872
@@ -8112,7 +8261,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792598519832,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259851983287
@@ -8130,9 +8279,9 @@
      "unidad": "dias",
      "dias": 120,
      "toro": "FENOL S",
-     "parto": "2027-04-02"
+     "parto": "2027-04-01"
     },
-    "ts": 1792598706892,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259870689231
@@ -8149,7 +8298,7 @@
      "obs": "",
      "diag": "CLOD"
     },
-    "ts": 1792599236487,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259923648784
@@ -8166,7 +8315,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792599260115,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259926011547
@@ -8181,9 +8330,9 @@
     "datos": {
      "estado": "VACIA",
      "obs": "",
-     "diag": "CLOD"
+     "diag": "CLOI"
     },
-    "ts": 1792599390750,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259939075053
@@ -8192,15 +8341,15 @@
    "rmvibel1eeqxr": {
     "id": "rmvibel1eeqxr",
     "visitaId": "vmvi41oqdret3",
-    "animalId": 898,
-    "numero": "16/0",
+    "animalId": 1276,
+    "numero": "16/2",
     "ts0": 1792599409922,
     "datos": {
      "estado": "VACIA",
      "obs": "",
-     "diag": "CLOD"
+     "diag": "CLOI"
     },
-    "ts": 1792599409922,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259940992276
@@ -8217,7 +8366,7 @@
      "obs": "HACER PRUEBA DE FERTILIDAD",
      "diag": ""
     },
-    "ts": 1792599456103,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259945610385
@@ -8234,7 +8383,7 @@
      "obs": "",
      "diag": "CLOI"
     },
-    "ts": 1792599488507,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259948850706
@@ -8251,7 +8400,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792599522817,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259952281719
@@ -8269,9 +8418,9 @@
      "unidad": "dias",
      "dias": 120,
      "toro": "FENOL S",
-     "parto": "2027-04-02"
+     "parto": "2027-04-01"
     },
-    "ts": 1792599614609,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259961460987
@@ -8288,7 +8437,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792599660990,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259966099092
@@ -8301,14 +8450,12 @@
     "numero": "712/1",
     "ts0": 1792599832769,
     "datos": {
-     "estado": "PREÑADA",
+     "estado": "VACIA",
      "obs": "",
      "unidad": "dias",
-     "dias": 95,
-     "toro": "31/0",
-     "parto": "2027-04-27"
+     "diag": "CLOD"
     },
-    "ts": 1792599832769,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179259983277055
@@ -8324,11 +8471,11 @@
      "estado": "PREÑADA",
      "obs": "",
      "unidad": "dias",
-     "dias": "",
+     "dias": 229,
      "toro": "64/2",
-     "parto": ""
+     "parto": "2026-12-13"
     },
-    "ts": 1792601279663,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260127966372
@@ -8345,7 +8492,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792601293631,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260129363160
@@ -8361,11 +8508,11 @@
      "estado": "PREÑADA",
      "obs": "",
      "unidad": "dias",
-     "dias": "",
-     "toro": "",
-     "parto": ""
+     "dias": 229,
+     "toro": "64/2",
+     "parto": "2026-12-13"
     },
-    "ts": 1792601541800,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260154181027
@@ -8381,11 +8528,11 @@
      "estado": "PREÑADA",
      "obs": "",
      "unidad": "dias",
-     "dias": "",
+     "dias": 229,
      "toro": "64/2",
-     "parto": ""
+     "parto": "2026-12-13"
     },
-    "ts": 1792601498055,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260149805587
@@ -8405,11 +8552,9 @@
      "toro": "",
      "parto": ""
     },
-    "ts": 1792601553647,
-    "deleted": false,
-    "updIds": [
-     179260155364755
-    ]
+    "ts": 1795645602163,
+    "deleted": true,
+    "updIds": []
    },
    "rmvicplbnbmrz": {
     "id": "rmvicplbnbmrz",
@@ -8421,11 +8566,11 @@
      "estado": "PREÑADA",
      "obs": "",
      "unidad": "dias",
-     "dias": "",
+     "dias": 265,
      "toro": "34/2",
-     "parto": ""
+     "parto": "2026-11-07"
     },
-    "ts": 1792601603123,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260160312341
@@ -8439,13 +8584,13 @@
     "ts0": 1792601652882,
     "datos": {
      "estado": "PREÑADA",
-     "obs": "",
+     "obs": "Posible preñez",
      "unidad": "dias",
-     "dias": "",
-     "toro": "",
-     "parto": ""
+     "dias": 229,
+     "toro": "35/2",
+     "parto": "2026-12-13"
     },
-    "ts": 1792601652882,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260165288248
@@ -8465,7 +8610,7 @@
      "toro": "",
      "parto": ""
     },
-    "ts": 1792601809329,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260180932954
@@ -8481,11 +8626,11 @@
      "estado": "PREÑADA",
      "obs": "",
      "unidad": "dias",
-     "dias": "",
-     "toro": "",
-     "parto": ""
+     "dias": 259,
+     "toro": "34/2",
+     "parto": "2026-11-13"
     },
-    "ts": 1792601937532,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260193753232
@@ -8505,7 +8650,7 @@
      "toro": "",
      "parto": ""
     },
-    "ts": 1792602018903,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260201890359
@@ -8519,13 +8664,13 @@
     "ts0": 1792602066007,
     "datos": {
      "estado": "PREÑADA",
-     "obs": "",
+     "obs": "El libro dice \"parir 24/09/2026\", fecha ya pasada",
      "unidad": "dias",
      "dias": "",
      "toro": "35/2",
      "parto": ""
     },
-    "ts": 1792602066007,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260206600756
@@ -8542,7 +8687,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792603552014,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260355201449
@@ -8559,7 +8704,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792603662809,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260366280979
@@ -8576,7 +8721,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792603727760,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260372776027
@@ -8593,7 +8738,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792603741237,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260374123780
@@ -8610,7 +8755,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792603754180,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260375418037
@@ -8627,7 +8772,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792603774458,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260377445885
@@ -8644,7 +8789,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792603794706,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260379470656
@@ -8661,11 +8806,9 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792603821558,
-    "deleted": false,
-    "updIds": [
-     179260382155897
-    ]
+    "ts": 1795645602163,
+    "deleted": true,
+    "updIds": []
    },
    "rmvie1vxp2yq6": {
     "id": "rmvie1vxp2yq6",
@@ -8678,7 +8821,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792603856365,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260385636546
@@ -8695,7 +8838,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792603886511,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260388651142
@@ -8709,10 +8852,10 @@
     "ts0": 1792604016521,
     "datos": {
      "estado": "VACIA",
-     "obs": "DESCARTE FERTILIDAD Y DESARROLLO SEXUAL",
+     "obs": "DESCARTE FERTILIDAD Y DESARROLLO SEXUAL · Ovarios pequeños",
      "diag": "INFANTIL"
     },
-    "ts": 1792604016521,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260401652198
@@ -8729,7 +8872,7 @@
      "obs": "",
      "diag": "ESTATICA"
     },
-    "ts": 1792604069076,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260406907758
@@ -8746,7 +8889,7 @@
      "obs": "",
      "diag": "UCT"
     },
-    "ts": 1792604086490,
+    "ts": 1795645602163,
     "deleted": false,
     "updIds": [
      179260408649047
@@ -9205,6 +9348,212 @@
     "deleted": false,
     "updIds": [
      179563630952904
+    ]
+   },
+   "rny8f78eyrcfo": {
+    "id": "rny8f78eyrcfo",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1415,
+    "numero": "105/2",
+    "ts0": 1795645602163,
+    "datos": {
+     "unidad": "dias",
+     "estado": "PREÑADA",
+     "dias": 249,
+     "toro": "35/2",
+     "parto": "2026-11-23"
+    },
+    "ts": 1795645602163,
+    "deleted": false,
+    "updIds": [
+     179563630952917
+    ]
+   },
+   "rs9np9pfi2sux": {
+    "id": "rs9np9pfi2sux",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1220,
+    "numero": "382/1 BB",
+    "ts0": 1795645602163,
+    "datos": {
+     "unidad": "dias",
+     "estado": "PREÑADA",
+     "dias": 229,
+     "toro": "34/2",
+     "parto": "2026-12-13"
+    },
+    "ts": 1795645602163,
+    "deleted": false,
+    "updIds": [
+     179563630952918
+    ]
+   },
+   "r1g09flkychv2": {
+    "id": "r1g09flkychv2",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1281,
+    "numero": "441/2",
+    "ts0": 1795645602163,
+    "datos": {
+     "unidad": "dias",
+     "estado": "PREÑADA",
+     "dias": 259,
+     "toro": "701/20",
+     "parto": "2026-11-13"
+    },
+    "ts": 1795645602163,
+    "deleted": false,
+    "updIds": [
+     179563630952919
+    ]
+   },
+   "r3lgm4ynf3rsj": {
+    "id": "r3lgm4ynf3rsj",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 804,
+    "numero": "582/1",
+    "ts0": 1795645602163,
+    "datos": {
+     "unidad": "dias",
+     "estado": "PREÑADA",
+     "dias": 270,
+     "toro": "34/2",
+     "parto": "2026-11-02"
+    },
+    "ts": 1795645602163,
+    "deleted": false,
+    "updIds": [
+     179563630952920
+    ]
+   },
+   "r58yqq26olf6u": {
+    "id": "r58yqq26olf6u",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1333,
+    "numero": "63/23",
+    "ts0": 1795645602163,
+    "datos": {
+     "unidad": "dias",
+     "estado": "PREÑADA",
+     "toro": "34/2",
+     "parto": "",
+     "obs": "El libro dice \"parir 24/09/2026\", fecha ya pasada"
+    },
+    "ts": 1795645602163,
+    "deleted": false,
+    "updIds": [
+     179563630952921
+    ]
+   },
+   "rx51ebab6nq6h": {
+    "id": "rx51ebab6nq6h",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 872,
+    "numero": "657/1",
+    "ts0": 1795645602163,
+    "datos": {
+     "unidad": "dias",
+     "estado": "PREÑADA",
+     "dias": 229,
+     "toro": "35/2",
+     "parto": "2026-12-13"
+    },
+    "ts": 1795645602163,
+    "deleted": false,
+    "updIds": [
+     179563630952922
+    ]
+   },
+   "rr148hyslzyk7": {
+    "id": "rr148hyslzyk7",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 878,
+    "numero": "760/18",
+    "ts0": 1795645602163,
+    "datos": {
+     "unidad": "dias",
+     "estado": "VACIA"
+    },
+    "ts": 1795645602163,
+    "deleted": false,
+    "updIds": [
+     179563630952923
+    ]
+   },
+   "r1zh5o7rlc8xb": {
+    "id": "r1zh5o7rlc8xb",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1111,
+    "numero": "811/20",
+    "ts0": 1795645602163,
+    "datos": {
+     "unidad": "dias",
+     "estado": "PREÑADA",
+     "dias": 270,
+     "toro": "35/2",
+     "parto": "2026-11-02"
+    },
+    "ts": 1795645602163,
+    "deleted": false,
+    "updIds": [
+     179563630952925
+    ]
+   },
+   "r2z1751o8xhpr": {
+    "id": "r2z1751o8xhpr",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1049,
+    "numero": "819/1",
+    "ts0": 1795645602163,
+    "datos": {
+     "unidad": "dias",
+     "estado": "PREÑADA",
+     "dias": 265,
+     "toro": "34/2",
+     "parto": "2026-11-07"
+    },
+    "ts": 1795645602163,
+    "deleted": false,
+    "updIds": [
+     179563630952926
+    ]
+   },
+   "r9h9w5nq6exd9": {
+    "id": "r9h9w5nq6exd9",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1142,
+    "numero": "916/1",
+    "ts0": 1795645602163,
+    "datos": {
+     "unidad": "dias",
+     "estado": "PREÑADA",
+     "dias": 270,
+     "parto": "2026-11-02",
+     "obs": "No reconfirmó; falta padre"
+    },
+    "ts": 1795645602163,
+    "deleted": false,
+    "updIds": [
+     179563630952927
+    ]
+   },
+   "rpi8mq31ha6yp": {
+    "id": "rpi8mq31ha6yp",
+    "visitaId": "vmvi41oqdret3",
+    "animalId": 1203,
+    "numero": "971/1",
+    "ts0": 1795645602163,
+    "datos": {
+     "unidad": "dias",
+     "estado": "PREÑADA",
+     "dias": 95,
+     "toro": "31/0",
+     "parto": "2027-04-26"
+    },
+    "ts": 1795645602163,
+    "deleted": false,
+    "updIds": [
+     179563630952928
     ]
    }
   }

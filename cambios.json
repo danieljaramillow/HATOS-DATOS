@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-23T23:33:40.000Z",
+ "actualizado": "2026-11-25T14:57:23.129Z",
  "edits": [
   {
    "id": 1560,
@@ -57,6 +57,17 @@
    "valor_nuevo": "P ADJUDICADO",
    "fecha": "2026-10-28",
    "ts": 1793186001438
+  },
+  {
+   "id": 1756,
+   "numero": "351/2",
+   "field": "madre",
+   "field_label": "Madre",
+   "col": "J",
+   "valor_anterior": "67/24",
+   "valor_nuevo": "67/2",
+   "fecha": "2026-11-25",
+   "ts": 1795618637586
   }
  ],
  "updates": [
@@ -5529,6 +5540,16 @@
    "ref": "u:179547606497828",
    "finca": "OK",
    "ts": 1795476064978,
+   "equipo": "Computador"
+  },
+  {
+   "tipo": "edicion",
+   "numero": "351/2",
+   "texto": "Madre: 67/24 → 67/2",
+   "origen": "Ficha (✏ Editar datos)",
+   "ref": "e:1756:madre",
+   "finca": "OK",
+   "ts": 1795618637587,
    "equipo": "Computador"
   }
  ],

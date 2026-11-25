@@ -1911,7 +1911,7 @@ body.vs-lock .sa-chip{display:none!important}
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 25 nov 2026 · 11:35 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 25 nov 2026 · 3:20 p.m.</b>
     </div>
   </header>
 
@@ -13888,7 +13888,9 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     var dias = fn ? Math.round((new Date(v.fecha) - new Date(fn)) / 864e5) : null;
     var aj = (p != null && dias > 60) ? p / dias * 235 : null;
     var def = ELIM.filter(function(e){ var x = num(d.scores && d.scores[e[0]]); return x != null && x <= 2; }).map(function(e){ return e[1]; });
+    var pm = num(d.pesoMadre);
     return { reg:reg, r:r, numero:reg.numero, sexo:r.sexo || '', peso:p, dias:dias, aj:aj, conf:califConfDest(d.scores), defectos:def,
+             pesoMadre:pm, pctMadre:(pm && p != null) ? p / pm * 100 : null,
              madre:r.madre || '', padre:r.padre || '', edadRara:(dias != null && (dias < 150 || dias > 330)) };
   }
   function rankingDestete(v, regs, extra){
@@ -13945,7 +13947,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     else if(v.tipo === 'palpacion'){ if(d.estado === 'PREÑADA'){ t.push('Preñada'+(d.dias?' '+d.dias+' días':'')+(d.toro?' · toro '+d.toro:'')+(d.parto?' · parto probable '+fmt(d.parto):'')); } else if(d.estado === 'VACIA'){ t.push('Vacía'+(d.diag?' · '+d.diag:'')); } }
     else if(v.tipo === 'pesaje'){ if(d.peso) t.push(d.peso+' kg'); if(d.nota) t.push(d.nota); }
     else if(v.tipo === 'cliente'){ if(d.interes) t.push('Interés '+d.interes); if(d.precioPedido) t.push('Pide $'+fmtPrecio(d.precioPedido)); if(d.precioOfrecido) t.push('Ofrece $'+fmtPrecio(d.precioOfrecido)); }
-    else if(v.tipo === 'destete'){ var o = calcDest(v, r); if(o.peso != null) t.push(o.peso+' kg'); if(o.aj != null) t.push('ajustado 8 m '+o.aj.toFixed(0)+' kg'); if(o.conf != null) t.push('conformación '+b100(o.conf)+' /100'); if(o.defectos.length) t.push('⚑ '+o.defectos.join(', ')+' ≤ 2'); }
+    else if(v.tipo === 'destete'){ var o = calcDest(v, r); if(o.peso != null) t.push(o.peso+' kg'); if(o.aj != null) t.push('ajustado 8 m '+o.aj.toFixed(0)+' kg'); if(o.pesoMadre) t.push('madre '+o.pesoMadre+' kg'); if(o.conf != null) t.push('conformación '+b100(o.conf)+' /100'); if(o.defectos.length) t.push('⚑ '+o.defectos.join(', ')+' ≤ 2'); }
     else if(v.tipo === 'inventario'){ t.push(d.presente === 'no' ? 'NO ESTÁ' : 'Presente'); if(d.lote) t.push('Lote '+d.lote); if(d.peso) t.push(d.peso+' kg'); if(d.cc) t.push('CC '+d.cc); if(d.descarte) t.push('⚑ marcado para descarte'+(d.motivo?' ('+d.motivo+')':'')); }
     return t.join(' · ');
   }
@@ -13980,6 +13982,12 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       var det = { fecha:f, peso:num(d.peso), lote:lt, finca:v.finca||'', scores:d.scores||{}, obs:d.obs||'', nota:'DESTETE' };
       add(reg, 'destete', det, f+' · DESTETE '+num(d.peso)+' kg'+(lt?' · lote '+lt:'')+(od.aj!=null?' · aj. 8 m '+od.aj.toFixed(0)+' kg':'')+(od.conf!=null?' · conf. '+b100(od.conf):'')+(d.obs?' · '+d.obs:''));
       if(window.__provisional) window.__provisional('peso', reg.numero, { fecha:f, peso:num(d.peso), nota:'DESTETE (visita '+fmt(f)+')', provisional:true, __key:reg.id });
+      var rm = byNum[N(reg.numero)], pmd = num(d.pesoMadre);
+      if(pmd != null && rm && rm.madre){
+        var regM = { id:reg.id, visitaId:reg.visitaId, numero:rm.madre, updIds:(reg.updIds = reg.updIds || []) };
+        add(regM, 'peso', { fecha:f, peso:pmd, nota:'DESTETE CRÍA '+reg.numero }, f+' · '+pmd+' kg · DESTETE de su cría '+reg.numero);
+        if(window.__provisional) window.__provisional('peso', rm.madre, { fecha:f, peso:pmd, nota:'DESTETE CRÍA '+reg.numero+' (pendiente)', provisional:true, __key:reg.id+'m' });
+      }
     }
     if(v.tipo === 'inventario' && d.lote){
       var r = byNum[N(reg.numero)];
@@ -14117,7 +14125,8 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
             (r.peso_dest != null && !(r.__prov && 'peso_dest' in r.__prov) ? ['Ya tiene destete', '<b style="color:var(--rust-deep)">'+r.peso_dest+' kg el '+fmt(r.fecha_dest)+'</b>'] : null)
           ].filter(Boolean).map(function(z){ return '<div><span>'+z[0]+'</span><b>'+z[1]+'</b></div>'; }).join('')+'</div>';
         var op2 = '<option value="">—</option>'+[1,1.5,2,2.5,3,3.5,4,4.5,5].map(function(n){ return '<option>'+n+'</option>'; }).join('');
-        H += '<div class="vs-grid vs-f"><div><label>Peso al destete (kg)</label><input id="vfPeso" inputmode="decimal" value="'+esc(d.peso||'')+'"></div><div></div></div>'+
+        H += '<div class="vs-grid vs-f"><div><label>Peso de la cría al destete (kg)</label><input id="vfPeso" inputmode="decimal" value="'+esc(d.peso||'')+'"></div>'+
+          '<div><label>Peso de la madre'+(r.madre?' '+esc(r.madre):'')+' (kg)</label><input id="vfPesoM" inputmode="decimal" value="'+esc(d.pesoMadre||'')+'"'+(r.madre?'':' disabled placeholder="sin madre registrada"')+'></div></div>'+
           '<div class="vs-eb">Calificación (1 a 5) — mismos rasgos y pesos del Excel</div><div class="vs-rasgos">'+RASGOS.map(function(x){ return '<div class="vs-rasgo"><span>'+x[1]+' <small style="color:var(--ink-soft)">'+Math.round(PESO_R[x[0]]*100)+' %</small></span><select data-r="'+x[0]+'">'+op2+'</select></div>'; }).join('')+'</div>'+
           '<div class="vs-score" id="vfDst"></div>'+
           '<div class="vs-grid vs-f"><div class="full"><label>Comentarios</label><textarea id="vfObs">'+esc(d.obs||'')+'</textarea></div></div>';
@@ -14190,15 +14199,16 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       if(v.tipo === 'cliente') wireSeg('vfInteres');
       if(v.tipo === 'destete'){
         c.querySelectorAll('select[data-r]').forEach(function(s){ var x = d.scores[s.getAttribute('data-r')]; if(x != null) s.value = String(x); s.onchange = vivo; });
-        $('vfPeso').oninput = vivo;
+        $('vfPeso').oninput = vivo; $('vfPesoM').oninput = vivo;
         function vivo(){
           var sc = {}; c.querySelectorAll('select[data-r]').forEach(function(s){ if(s.value) sc[s.getAttribute('data-r')] = +s.value; });
-          var datos = { peso:$('vfPeso').value.trim(), scores:sc };
+          var datos = { peso:$('vfPeso').value.trim(), pesoMadre:($('vfPesoM').value||'').trim(), scores:sc };
           var otros = regsDe(vid).filter(function(g){ return !reg || g.id !== reg.id; });
           var rk = rankingDestete(v, otros, { reg:{ id:'__nuevo', numero:r.numero }, datos:datos });
           var o = rk.rows[rk.rows.length-1], G = rk.grupos[o.grupo];
           var h = [];
           if(o.aj != null) h.push('Ajustado a 8 meses <b>'+o.aj.toFixed(0)+' kg</b>');
+          if(o.pctMadre != null) h.push('Destetó el <b>'+o.pctMadre.toFixed(0)+' %</b> del peso de la madre ('+o.pesoMadre+' kg)');
           if(o.conf != null) h.push('Conformación <b>'+b100(o.conf)+'</b> /100 '+letraTag(o.conf*20));
           if(o.indice != null && G.length > 1) h.push('Índice frente al grupo <b>'+o.indice.toFixed(0)+'</b> (promedio '+G.promAj.toFixed(0)+' kg aj.)');
           if(o.calif != null) h.push('Calificación de destete <b>'+b100(o.calif)+'</b> /100');
@@ -14220,6 +14230,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
         if(v.tipo === 'pesaje'){ o.peso = $('vfPeso').value.trim(); if(num(o.peso) == null){ toast('Escribe el peso.'); return null; } o.nota = $('vfNota').value.trim(); o.obs = $('vfObs').value.trim(); }
         if(v.tipo === 'cliente'){ o.interes = segVal('vfInteres'); o.precioPedido = $('vfPP').value.trim(); o.precioOfrecido = $('vfPO').value.trim(); o.obs = $('vfObs').value.trim(); }
         if(v.tipo === 'destete'){ o.peso = $('vfPeso').value.trim(); if(num(o.peso) == null){ toast('Escribe el peso al destete.'); return null; }
+          o.pesoMadre = ($('vfPesoM').value || '').trim();
           o.scores = {}; c.querySelectorAll('select[data-r]').forEach(function(s){ if(s.value) o.scores[s.getAttribute('data-r')] = +s.value; }); o.obs = $('vfObs').value.trim();
           if(d.reservaMarcada) o.reservaMarcada = d.reservaMarcada; }
         if(v.tipo === 'inventario'){ o.presente = segVal('vfPres') || 'si'; o.lote = $('vfLote').value.trim(); o.peso = $('vfPeso').value.trim(); o.cc = $('vfCC').value; o.obs = $('vfObs').value.trim(); o.descarte = $('vfDesc').checked; o.motivo = o.descarte ? $('vfMotivo').value.trim() : ''; }
@@ -14364,17 +14375,19 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
         '<div><span>Reserva y bandera negra</span><div class="vs-seg">'+[10,20,25,33].map(function(p){ return '<button type="button" data-pct="'+p+'" class="'+(pc===p?'on':'')+'">'+p+' %</button>'; }).join('')+'</div></div></div>';
       H += kpis([[regs.length,'destetados'],[RK.rows.filter(function(o){ return o.sexo==='M'; }).length+' ♂ · '+RK.rows.filter(function(o){ return o.sexo==='H'; }).length+' ♀','sexo'],
         [prom(pesos)!=null?Math.round(prom(pesos))+' kg':'—','peso prom.'],[prom(ajs)!=null?Math.round(prom(ajs))+' kg':'—','ajustado 8 m prom.'],[prom(cfs)!=null?b100(prom(cfs)):'—','conformación prom. /100'],
+        [prom(RK.rows.map(function(o){ return o.pesoMadre; }))!=null?Math.round(prom(RK.rows.map(function(o){ return o.pesoMadre; })))+' kg':'—','peso madres prom.'],
+        [prom(RK.rows.map(function(o){ return o.pctMadre; }))!=null?prom(RK.rows.map(function(o){ return o.pctMadre; })).toFixed(0)+' %':'—','destetado / peso madre'],
         [RK.rows.filter(function(o){ return o.estado==='reserva'; }).length,'⭐ posible reserva'],[RK.rows.filter(function(o){ return o.estado==='bandera'; }).length,'⚑ bandera negra']]);
       Object.keys(RK.grupos).sort().forEach(function(k){
         var G = RK.grupos[k];
         H += '<div class="vs-eb">'+nombreGrupo(k)+' ('+G.length+')'+(G.promAj!=null?' — promedio '+Math.round(G.promPeso)+' kg · ajustado 8 m '+Math.round(G.promAj)+' kg':'')+'</div>';
         if(G.k === 0) H += '<p class="vs-sub" style="margin:0 0 6px">Con menos de 3 crías calificadas todavía no se marca reserva ni bandera negra en este grupo.</p>';
         var orden = G.orden.concat(G.filter(function(o){ return o.calif == null; }));
-        H += tabla(['#','Cría','Calif. destete','Peso','Aj. 8 m','Índice','Conf.','Edad','Madre','Padre'], orden.map(function(o){
+        H += tabla(['#','Cría','Calif. destete','Peso','Aj. 8 m','Índice','Conf.','Edad','Madre','Peso madre','% madre','Padre'], orden.map(function(o){
           var ic = o.estado==='reserva' ? ' <span class="dst-ic res" title="Posible reserva">⭐</span>' : (o.estado==='bandera' ? ' <span class="dst-ic bn" title="Bandera negra">⚑</span>' : '');
           return [o.puesto||'', '<span style="white-space:nowrap">'+link(o.numero)+(o.sexo?' '+(o.sexo==='H'?'♀':'♂'):'')+ic+'</span>'+(o.motivo && o.estado==='bandera'?'<br><small style="color:var(--rust-deep)">'+esc(o.motivo)+'</small>':''),
             o.calif!=null?'<b>'+b100(o.calif)+'</b>':'', o.peso!=null?o.peso+' kg':'', o.aj!=null?o.aj.toFixed(0)+' kg':'', o.indice!=null?o.indice.toFixed(0):'',
-            o.conf!=null?'<span style="white-space:nowrap">'+b100(o.conf)+' '+letraTag(o.conf*20)+'</span>':'', o.dias!=null?(o.dias/30).toFixed(1)+' m'+(o.edadRara?' ⚠':''):'', esc(o.madre), esc(o.padre)]; }));
+            o.conf!=null?'<span style="white-space:nowrap">'+b100(o.conf)+' '+letraTag(o.conf*20)+'</span>':'', o.dias!=null?(o.dias/30).toFixed(1)+' m'+(o.edadRara?' ⚠':''):'', esc(o.madre), o.pesoMadre?o.pesoMadre+' kg':'', o.pctMadre!=null?o.pctMadre.toFixed(0)+' %':'', esc(o.padre)]; }));
       });
       var res = RK.rows.filter(function(o){ return o.estado==='reserva'; }).sort(function(a,b){ return b.calif - a.calif; });
       H += '<div class="vs-eb">⭐ Posible reserva — el '+pc+' % mejor de cada grupo</div>'+tabla(['Cría','Grupo','Calif.','Marcar'], res.map(function(o){ var mk = (o.reg.datos||{}).reservaMarcada || /RESERVA/i.test(o.r.comentario||'');
@@ -14384,6 +14397,7 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
       H += '<div class="vs-eb">Promedio por rasgo</div>'+tabla(['Rasgo','Peso en la nota','Promedio (1 a 5)','Calificados'], RASGOS.map(function(x){ var a = regs.map(function(g){ return num(g.datos && g.datos.scores && g.datos.scores[x[0]]); }).filter(function(z){ return z != null; });
         return [x[1], Math.round(PESO_R[x[0]]*100)+' %', a.length ? prom(a).toFixed(2) : '', a.length]; }));
       H += '<div class="dst-nota"><b>Cómo se calcula.</b> Peso ajustado a 8 meses = peso ÷ días de edad × 235, igual que en el Excel. '+
+        'El peso de la madre queda como pesaje de destete en CONTROL PESOS y el <b>% madre</b> = peso de la cría ÷ peso de la madre × 100. '+
         'Conformación = promedio de los rasgos calificados con los pesos del Excel (10 % cada uno; conformación y musculatura 15 %), en base 100. '+
         'El <b>índice</b> compara el peso ajustado de cada cría con el promedio de su grupo (100 = promedio). Cada 10 puntos de índice vale 1 punto de peso (promedio = 3, +20 % = 5). '+
         '<b>Calificación de destete</b> = mitad peso y mitad conformación. El '+pc+' % de arriba queda como ⭐ posible reserva y el '+pc+' % de abajo con ⚑ bandera negra; '+
@@ -14408,7 +14422,7 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
     if(v.tipo === 'pesaje') head = head.concat(['Peso','Nota']);
     if(v.tipo === 'cliente') head = head.concat(['Interes','Precio_pedido','Precio_ofrecido']);
     if(v.tipo === 'inventario') head = head.concat(['Presente','Lote','Peso','Condicion_corporal','Descarte','Motivo_descarte']);
-    if(v.tipo === 'destete') head = head.concat(['Lote','Sexo','Madre','Padre','Peso_destete','Edad_dias','Peso_aj_8m'].concat(RASGOS.map(function(x){ return x[1]; })).concat(['Conformacion_base100','Indice_grupo','Calif_destete_base100','Puesto','De','Ranking']));
+    if(v.tipo === 'destete') head = head.concat(['Lote','Sexo','Madre','Padre','Peso_destete','Peso_madre','Pct_peso_madre','Edad_dias','Peso_aj_8m'].concat(RASGOS.map(function(x){ return x[1]; })).concat(['Conformacion_base100','Indice_grupo','Calif_destete_base100','Puesto','De','Ranking']));
     var RKc = v.tipo === 'destete' ? rankingDestete(v, regs) : null;
     var rows = regs.map(function(r){ var d = r.datos||{}, b = [TIPOS[v.tipo].n, v.fecha, v.finca, r.numero, textoReg(v, r), d.obs||''];
       if(v.tipo === 'asocebu'){ var cal = califDe(d); b = b.concat(RASGOS.map(function(x){ return d.scores && d.scores[x[0]] != null ? d.scores[x[0]] : ''; })).concat([cal!=null?cal.toFixed(2):'', cal!=null?(cal*20).toFixed(1):'', cal!=null&&window.__asoc?window.__asoc.letra(cal*20):'', d.resultado||'', d.registro||'', d.peso||'']); }
@@ -14417,7 +14431,7 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
       if(v.tipo === 'cliente') b = b.concat([d.interes||'', d.precioPedido||'', d.precioOfrecido||'']);
       if(v.tipo === 'inventario') b = b.concat([d.presente==='no'?'NO':'SI', d.lote||'', d.peso||'', d.cc||'', d.descarte?'SI':'', d.motivo||'']);
       if(v.tipo === 'destete'){ var o = RKc.rows.filter(function(z){ return z.reg.id === r.id; })[0] || calcDest(v, r);
-        b = b.concat([(v.extra&&v.extra.lote)||'', o.sexo, o.madre, o.padre, d.peso||'', o.dias!=null?o.dias:'', o.aj!=null?o.aj.toFixed(1):''])
+        b = b.concat([(v.extra&&v.extra.lote)||'', o.sexo, o.madre, o.padre, d.peso||'', d.pesoMadre||'', o.pctMadre!=null?o.pctMadre.toFixed(1):'', o.dias!=null?o.dias:'', o.aj!=null?o.aj.toFixed(1):''])
           .concat(RASGOS.map(function(x){ return d.scores && d.scores[x[0]] != null ? d.scores[x[0]] : ''; }))
           .concat([o.conf!=null?b100(o.conf):'', o.indice!=null?o.indice.toFixed(1):'', o.calif!=null?b100(o.calif):'', o.puesto||'', o.de||'', o.estado==='reserva'?'POSIBLE RESERVA':(o.estado==='bandera'?'BANDERA NEGRA: '+(o.motivo||''):'')]); }
       return b.map(c).join(';'); });
@@ -17774,7 +17788,7 @@ window.__irAFicha = function(id, soloSiHayVentana){
     c.querySelector('[data-a="rep"]').onclick = function(){ cerrarCard(); reporte(S, true); };
     var bf = c.querySelector('[data-a="ficha"]'); if(bf) bf.onclick = function(){ var r = byNum(ev.vaca || ev.numero); cerrarCard(); if(!r) return; if(window.__irAFicha && window.__irAFicha(r.id, true)) return; if(window.__abrirFicha) window.__abrirFicha(r.id); };
     clearTimeout(tmr);
-    if(!malos.length && !buenos.length && !ev.alertas.some(function(a){ return a.k === 'aviso'; })) tmr = setTimeout(cerrarCard, 12000);
+    /* la tarjeta queda abierta hasta que se cierre con × o Entendido */
   }
   function cerrarCard(){ clearTimeout(tmr); var c = $('saCard'); if(c) c.classList.remove('on'); }
 

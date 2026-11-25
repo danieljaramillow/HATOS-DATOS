@@ -1892,6 +1892,7 @@ window.__renderReproHead = function(o){
 .dst-ctrl{display:flex;flex-wrap:wrap;gap:10px 18px;margin:4px 0 12px}
 .dst-ctrl>div>span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:4px}
 body.vs-lock .sa-chip{display:none!important}
+.dst-socios{margin:0 0 10px;font-weight:600}
 .dst-nota{margin:14px 0 4px;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.04);font-size:12.5px;line-height:1.5;color:var(--ink-soft)}
 </style>
 </head>
@@ -1911,7 +1912,7 @@ body.vs-lock .sa-chip{display:none!important}
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 25 nov 2026 · 3:20 p.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 25 nov 2026 · 3:45 p.m.</b>
     </div>
   </header>
 
@@ -14287,6 +14288,7 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
         T.innerHTML = (pend.length ? '<div class="vs-eb">Crías en edad de destete sin registrar ('+pend.length+')'+(v.finca?' — '+esc(v.finca):'')+'</div><div class="vs-chips">'+pend.slice(0,120).map(function(r){ var dd = Math.round((new Date(v.fecha) - new Date(r.fecha_nac))/864e5); return '<button class="vs-chip" data-agregar="'+r.id+'"><b>'+esc(r.numero)+'</b> <small>'+(r.sexo==='H'?'♀':'♂')+' '+(dd/30).toFixed(1)+' m'+(r.madre?' · madre '+esc(r.madre):'')+'</small></button>'; }).join('')+'</div>' : '')+
           listaRegs(v, regs.slice().reverse());   // lo último registrado arriba
       } else T.innerHTML = resumen(v, regs);
+      T.querySelectorAll('[data-socios]').forEach(function(b){ b.onclick = function(){ abrirSocios(v); }; });
       T.querySelectorAll('[data-pct]').forEach(function(b){ b.onclick = function(){ v.extra = v.extra || {}; v.extra.pct = +b.getAttribute('data-pct'); v.ts = Date.now(); guardarS(); pintar(); }; });
       T.querySelectorAll('[data-grp]').forEach(function(b){ b.onclick = function(){ v.extra = v.extra || {}; v.extra.grupo = b.getAttribute('data-grp'); v.ts = Date.now(); guardarS(); pintar(); }; });
       T.querySelectorAll('[data-reserva]').forEach(function(b){ b.onclick = function(){
@@ -14310,6 +14312,58 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
     };
   }
   function RKcache(v){ return rankingDestete(v, regsDe(v.id)); }
+  /* ---------- Resumen del destete para compartir con los socios (página limpia para imprimir o guardar en PDF) ---------- */
+  function resumenSocios(v){
+    var regs = regsDe(v.id), RK = rankingDestete(v, regs), x = v.extra || {}, pc = Math.round(RK.pct*100), R = RK.rows;
+    function pr(a){ a = a.filter(function(z){ return z != null; }); return a.length ? a.reduce(function(s,z){ return s+z; }, 0) / a.length : null; }
+    function f0(z, u){ return z == null ? '—' : Math.round(z) + (u || ''); }
+    function e(t){ return esc(t == null ? '' : String(t)); }
+    function nPadre(t){ return String(t || '').split(' ')[0] || '—'; }
+    var res = R.filter(function(o){ return o.estado === 'reserva'; }).sort(function(a,b){ return b.calif - a.calif; });
+    var bn = R.filter(function(o){ return o.estado === 'bandera'; }).sort(function(a,b){ return (a.calif||0) - (b.calif||0); });
+    var kp = [[R.length, 'crías destetadas'], [R.filter(function(o){ return o.sexo==='M'; }).length+' ♂ · '+R.filter(function(o){ return o.sexo==='H'; }).length+' ♀', 'machos · hembras'],
+      [f0(pr(R.map(function(o){ return o.peso; })), ' kg'), 'peso promedio'], [f0(pr(R.map(function(o){ return o.aj; })), ' kg'), 'ajustado a 8 meses'],
+      [f0(pr(R.map(function(o){ return o.dias != null ? o.dias/30 : null; })) != null ? pr(R.map(function(o){ return o.dias != null ? o.dias/30 : null; })).toFixed(1) : null) , 'meses de edad prom.'],
+      [pr(R.map(function(o){ return o.conf; })) != null ? b100(pr(R.map(function(o){ return o.conf; }))) : '—', 'conformación /100'],
+      [pr(R.map(function(o){ return o.pctMadre; })) != null ? pr(R.map(function(o){ return o.pctMadre; })).toFixed(0)+' %' : '—', 'destetado / peso madre']];
+    kp[4][0] = pr(R.map(function(o){ return o.dias != null ? o.dias/30 : null; })) != null ? pr(R.map(function(o){ return o.dias != null ? o.dias/30 : null; })).toFixed(1) : '—';
+    var H = '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Destete '+e(v.finca||'')+' '+fmt(v.fecha)+'</title><style>'+
+      'body{font-family:Georgia,serif;color:#2b2a24;margin:28px auto;max-width:980px;padding:0 18px;font-size:13px}h1{font-size:24px;margin:0}h2{font-size:16px;margin:22px 0 6px;border-bottom:2px solid #2E4A2E;padding-bottom:3px;color:#2E4A2E}'+
+      '.sub{color:#6b6450;margin:4px 0 14px;font-family:Arial,sans-serif}.k{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.k div{flex:1 1 120px;border:1px solid #d8d0bc;border-radius:8px;padding:8px 10px;background:#faf7ef}'+
+      '.k b{display:block;font-size:19px;color:#2E4A2E}.k span{font-family:Arial,sans-serif;font-size:11px;color:#6b6450}table{width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:11.5px}'+
+      'th{background:#2E4A2E;color:#fff;text-align:left;padding:5px 6px;font-weight:600}td{padding:4px 6px;border-bottom:1px solid #e5dfcf}tr.r td{background:#fbf3d4}tr.b td{background:#eee}'+
+      '.tag{font-weight:700}.tag.b{background:#1b1b1b;color:#fff;border-radius:4px;padding:0 4px}.nota{font-family:Arial,sans-serif;font-size:11px;color:#6b6450;margin-top:18px;line-height:1.5}'+
+      '.btn{font-family:Arial,sans-serif;background:#2E4A2E;color:#fff;border:0;border-radius:6px;padding:9px 16px;font-size:14px;cursor:pointer;margin:0 0 14px}@media print{.btn{display:none}body{margin:10mm auto}h2{break-after:avoid}tr{break-inside:avoid}}'+
+      '</style></head><body><button class="btn" onclick="window.print()">🖨 Imprimir o guardar en PDF</button>'+
+      '<h1>Resumen de destete — Hatos DJW</h1><div class="sub">Finca '+e(v.finca||'—')+' · '+fmt(v.fecha)+(x.lote?' · lote contemporáneo '+e(x.lote):'')+(v.obs?' · '+e(v.obs):'')+'</div>'+
+      '<div class="k">'+kp.map(function(k){ return '<div><b>'+k[0]+'</b><span>'+k[1]+'</span></div>'; }).join('')+'</div>';
+    Object.keys(RK.grupos).sort().forEach(function(k){
+      var G = RK.grupos[k], orden = G.orden.concat(G.filter(function(o){ return o.calif == null; }));
+      H += '<h2>'+nombreGrupo(k)+' ('+G.length+') — promedio '+f0(G.promPeso,' kg')+' · ajustado '+f0(G.promAj,' kg')+'</h2><table><tr><th>#</th><th>Cría</th><th>Padre</th><th>Madre</th><th>Edad</th><th>Peso</th><th>Aj. 8 m</th><th>Índice</th><th>Conf.</th><th>Calif.</th><th>Peso madre</th><th>% madre</th><th></th><th>Observación</th></tr>'+
+        orden.map(function(o){ var dd = o.reg.datos || {};
+          return '<tr class="'+(o.estado==='reserva'?'r':(o.estado==='bandera'?'b':''))+'"><td>'+(o.puesto||'')+'</td><td><b>'+e(o.numero)+'</b></td><td>'+e(nPadre(o.padre))+'</td><td>'+e(o.madre||'—')+'</td><td>'+(o.dias!=null?(o.dias/30).toFixed(1)+' m':'')+'</td><td>'+(o.peso!=null?o.peso+' kg':'')+'</td><td>'+f0(o.aj,' kg')+'</td><td>'+(o.indice!=null?o.indice.toFixed(0):'')+'</td><td>'+(o.conf!=null?b100(o.conf):'')+'</td><td><b>'+(o.calif!=null?b100(o.calif):'')+'</b></td><td>'+(o.pesoMadre?o.pesoMadre+' kg':'')+'</td><td>'+(o.pctMadre!=null?o.pctMadre.toFixed(0)+' %':'')+'</td><td>'+(o.estado==='reserva'?'<span class="tag">⭐ Reserva</span>':(o.estado==='bandera'?'<span class="tag b">⚑</span>':''))+'</td><td>'+e(dd.obs||'')+'</td></tr>'; }).join('')+'</table>';
+    });
+    var porP = {};
+    R.forEach(function(o){ var k = nPadre(o.padre); (porP[k] = porP[k] || []).push(o); });
+    H += '<h2>Por padre</h2><table><tr><th>Padre</th><th>Crías</th><th>Peso prom.</th><th>Aj. 8 m prom.</th><th>Conf. prom.</th><th>Calif. prom.</th><th>⭐</th><th>⚑</th></tr>'+
+      Object.keys(porP).map(function(k){ var a = porP[k]; return [k, a, pr(a.map(function(o){ return o.calif; }))]; }).sort(function(a,b){ return (b[2]||0) - (a[2]||0); }).map(function(z){ var a = z[1];
+        return '<tr><td><b>'+e(z[0])+'</b></td><td>'+a.length+'</td><td>'+f0(pr(a.map(function(o){ return o.peso; })),' kg')+'</td><td>'+f0(pr(a.map(function(o){ return o.aj; })),' kg')+'</td><td>'+(pr(a.map(function(o){ return o.conf; }))!=null?b100(pr(a.map(function(o){ return o.conf; }))):'')+'</td><td><b>'+(z[2]!=null?b100(z[2]):'')+'</b></td><td>'+a.filter(function(o){ return o.estado==='reserva'; }).length+'</td><td>'+a.filter(function(o){ return o.estado==='bandera'; }).length+'</td></tr>'; }).join('')+'</table>';
+    H += '<h2>⭐ Posible reserva</h2><p style="font-family:Arial,sans-serif">'+(res.length ? res.map(function(o){ return '<b>'+e(o.numero)+'</b> ('+nombreGrupo(o.grupo).toLowerCase()+', '+b100(o.calif)+')'; }).join(' · ') : 'Ninguna todavía.')+'</p>';
+    H += '<h2>⚑ Bandera negra</h2><p style="font-family:Arial,sans-serif">'+(bn.length ? bn.map(function(o){ return '<b>'+e(o.numero)+'</b> — '+e(o.motivo||''); }).join('<br>') : 'Ninguna.')+'</p>';
+    H += '<div class="nota"><b>Cómo leerlo.</b> Peso ajustado a 8 meses = peso ÷ días de edad × 235. Índice = peso ajustado frente al promedio de su grupo (100 = promedio). '+
+      'Conformación (base 100) = 9 rasgos calificados de 1 a 5 con los pesos del programa (10 % cada uno; conformación y musculatura 15 %). '+
+      'Calificación de destete = mitad peso frente al grupo y mitad conformación. ⭐ = el '+pc+' % mejor de cada grupo; ⚑ = el '+pc+' % más bajo o con temperamento, ombligo o aplomos en 2 o menos. '+
+      '% madre = peso de la cría ÷ peso de la madre el día del destete.<br>Generado desde la app Hatos Datos el '+fmt(hoy())+'.</div></body></html>';
+    return H;
+  }
+  function abrirSocios(v){
+    var html = resumenSocios(v), w = null;
+    try{ w = window.open('', '_blank'); }catch(e){}
+    if(w && w.document){ w.document.open(); w.document.write(html); w.document.close(); return; }
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], { type:'text/html' }));
+    a.download = 'Destete_'+(v.finca||'')+'_'+v.fecha+'.html'; document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); }, 500);
+  }
+  window.__resumenSociosDestete = function(id){ S = cargar(); var v = S.visitas[id]; return v ? resumenSocios(v) : ''; };
   function listaRegs(v, regs){
     if(!regs.length) return '<div class="vs-vacio">Todavía no hay animales. Búscalos arriba o usa <b>📋 Agregar a visita</b> en la ficha.</div>';
     return regs.map(function(rg){ var d = rg.datos || {}, pill = '';
@@ -14371,6 +14425,7 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
     if(v.tipo === 'destete'){
       var RK = rankingDestete(v, regs), xx = v.extra || {}, pc = Math.round(RK.pct*100);
       var pesos = RK.rows.map(function(o){ return o.peso; }), ajs = RK.rows.map(function(o){ return o.aj; }), cfs = RK.rows.map(function(o){ return o.conf; });
+      H += '<button type="button" class="vs-chip dst-socios" data-socios="1">📤 Resumen para socios (PDF)</button>';
       H += '<div class="dst-ctrl"><div><span>Comparar</span><div class="vs-seg">'+[['sexo','Machos / hembras aparte'],['todos','Todos juntos']].map(function(g){ return '<button type="button" data-grp="'+g[0]+'" class="'+(((xx.grupo||'sexo')===g[0])?'on':'')+'">'+g[1]+'</button>'; }).join('')+'</div></div>'+
         '<div><span>Reserva y bandera negra</span><div class="vs-seg">'+[10,20,25,33].map(function(p){ return '<button type="button" data-pct="'+p+'" class="'+(pc===p?'on':'')+'">'+p+' %</button>'; }).join('')+'</div></div></div>';
       H += kpis([[regs.length,'destetados'],[RK.rows.filter(function(o){ return o.sexo==='M'; }).length+' ♂ · '+RK.rows.filter(function(o){ return o.sexo==='H'; }).length+' ♀','sexo'],

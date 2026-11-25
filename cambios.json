@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-25T20:05:43.693Z",
+ "actualizado": "2026-11-25T20:11:15.000Z",
  "edits": [
   {
    "id": 1560,
@@ -2896,7 +2896,7 @@
    "numero": "316/2",
    "detalle": {
     "fecha": "2026-11-25",
-    "peso": 215,
+    "peso": 207,
     "lote": "151",
     "finca": "OK",
     "scores": {
@@ -2913,7 +2913,7 @@
     "obs": "",
     "nota": "DESTETE"
    },
-   "detalle_texto": "2026-11-25 · DESTETE 215 kg · lote 151 · aj. 8 m 242 kg · conf. 93.0",
+   "detalle_texto": "2026-11-25 · DESTETE 207 kg · lote 151 · aj. 8 m 233 kg · conf. 93.0",
    "fecha": "2026-11-25"
   },
   {
@@ -2940,6 +2940,150 @@
     "nota": "DESTETE"
    },
    "detalle_texto": "2026-11-25 · DESTETE 221 kg · lote 151 · aj. 8 m 187 kg · conf. 54.5 · GOL GZ X BR DESCARTE",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952905,
+   "tipo": "peso",
+   "numero": "701/1",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 482,
+    "nota": "DESTETE CRÍA 307/2"
+   },
+   "detalle_texto": "2026-11-25 · 482 kg · DESTETE de su cría 307/2",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952906,
+   "tipo": "peso",
+   "numero": "966/1",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 528,
+    "nota": "DESTETE CRÍA 306/2"
+   },
+   "detalle_texto": "2026-11-25 · 528 kg · DESTETE de su cría 306/2",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952907,
+   "tipo": "peso",
+   "numero": "669/1",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 450,
+    "nota": "DESTETE CRÍA 315/2"
+   },
+   "detalle_texto": "2026-11-25 · 450 kg · DESTETE de su cría 315/2",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952908,
+   "tipo": "peso",
+   "numero": "938/1",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 435,
+    "nota": "DESTETE CRÍA 308/2"
+   },
+   "detalle_texto": "2026-11-25 · 435 kg · DESTETE de su cría 308/2",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952909,
+   "tipo": "peso",
+   "numero": "883/1",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 474,
+    "nota": "DESTETE CRÍA 314/2"
+   },
+   "detalle_texto": "2026-11-25 · 474 kg · DESTETE de su cría 314/2",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952910,
+   "tipo": "peso",
+   "numero": "677/10",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 500,
+    "nota": "DESTETE CRÍA 312/2"
+   },
+   "detalle_texto": "2026-11-25 · 500 kg · DESTETE de su cría 312/2",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952911,
+   "tipo": "peso",
+   "numero": "455/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 417,
+    "nota": "DESTETE CRÍA 302/2"
+   },
+   "detalle_texto": "2026-11-25 · 417 kg · DESTETE de su cría 302/2",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952912,
+   "tipo": "peso",
+   "numero": "803/1",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 515,
+    "nota": "DESTETE CRÍA 317/2"
+   },
+   "detalle_texto": "2026-11-25 · 515 kg · DESTETE de su cría 317/2",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952913,
+   "tipo": "peso",
+   "numero": "924/1",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 503,
+    "nota": "DESTETE CRÍA 300/2"
+   },
+   "detalle_texto": "2026-11-25 · 503 kg · DESTETE de su cría 300/2",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952914,
+   "tipo": "peso",
+   "numero": "962/1",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 478,
+    "nota": "DESTETE CRÍA 310/2"
+   },
+   "detalle_texto": "2026-11-25 · 478 kg · DESTETE de su cría 310/2",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952915,
+   "tipo": "peso",
+   "numero": "57/22",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 395,
+    "nota": "DESTETE CRÍA 316/2"
+   },
+   "detalle_texto": "2026-11-25 · 395 kg · DESTETE de su cría 316/2",
+   "fecha": "2026-11-25"
+  },
+  {
+   "id": 179563630952916,
+   "tipo": "peso",
+   "numero": "58/2",
+   "detalle": {
+    "fecha": "2026-11-25",
+    "peso": 353,
+    "nota": "DESTETE CRÍA 304/2"
+   },
+   "detalle_texto": "2026-11-25 · 353 kg · DESTETE de su cría 304/2",
    "fecha": "2026-11-25"
   }
  ],
@@ -8627,12 +8771,14 @@
       "dorso": 5,
       "longitud_corp": 4
      },
-     "obs": ""
+     "obs": "",
+     "pesoMadre": "500"
     },
-    "ts": 1795631658694,
+    "ts": 1795637475610,
     "deleted": false,
     "updIds": [
-     179563165894737
+     179563165894737,
+     179563630952910
     ]
    },
    "rmwwgsqud52fi": {
@@ -8654,12 +8800,14 @@
       "dorso": 4,
       "longitud_corp": 3.5
      },
-     "obs": ""
+     "obs": "",
+     "pesoMadre": "515"
     },
-    "ts": 1795631777509,
+    "ts": 1795637475610,
     "deleted": false,
     "updIds": [
-     179563177775005
+     179563177775005,
+     179563630952912
     ]
    },
    "rmwwgwi63zshs": {
@@ -8681,12 +8829,14 @@
       "dorso": 5,
       "longitud_corp": 4.5
      },
-     "obs": ""
+     "obs": "",
+     "pesoMadre": "435"
     },
-    "ts": 1795631952891,
+    "ts": 1795637475610,
     "deleted": false,
     "updIds": [
-     179563195311979
+     179563195311979,
+     179563630952908
     ]
    },
    "rmwwgys1idizi": {
@@ -8708,12 +8858,14 @@
       "dorso": 4,
       "longitud_corp": 5
      },
-     "obs": ""
+     "obs": "",
+     "pesoMadre": "417"
     },
-    "ts": 1795632058998,
+    "ts": 1795637475610,
     "deleted": false,
     "updIds": [
-     179563205926138
+     179563205926138,
+     179563630952911
     ]
    },
    "rmwwh2zl4wibj": {
@@ -8735,12 +8887,14 @@
       "dorso": 4.5,
       "longitud_corp": 5
      },
-     "obs": "SHANFRO TORTO"
+     "obs": "SHANFRO TORTO",
+     "pesoMadre": "503"
     },
-    "ts": 1795632255400,
+    "ts": 1795637475610,
     "deleted": false,
     "updIds": [
-     179563225573297
+     179563225573297,
+     179563630952913
     ]
    },
    "rmwwh5fh5q3v7": {
@@ -8789,12 +8943,14 @@
       "dorso": 4.5,
       "longitud_corp": 5
      },
-     "obs": ""
+     "obs": "",
+     "pesoMadre": "474"
     },
-    "ts": 1795632480201,
+    "ts": 1795637475610,
     "deleted": false,
     "updIds": [
-     179563248052485
+     179563248052485,
+     179563630952909
     ]
    },
    "rmwwhaa8po8ys": {
@@ -8816,12 +8972,14 @@
       "dorso": 4.5,
       "longitud_corp": 5
      },
-     "obs": ""
+     "obs": "",
+     "pesoMadre": "450"
     },
-    "ts": 1795632595801,
+    "ts": 1795637475610,
     "deleted": false,
     "updIds": [
-     179563259608735
+     179563259608735,
+     179563630952907
     ]
    },
    "rmwwheia517zx": {
@@ -8843,12 +9001,14 @@
       "dorso": 4,
       "longitud_corp": 5
      },
-     "obs": "PATIANO"
+     "obs": "PATIANO",
+     "pesoMadre": "478"
     },
-    "ts": 1795632792845,
+    "ts": 1795637475610,
     "deleted": false,
     "updIds": [
-     179563279314922
+     179563279314922,
+     179563630952914
     ]
    },
    "rmwwhhjptu76u": {
@@ -8924,12 +9084,14 @@
       "dorso": 5,
       "longitud_corp": 5
      },
-     "obs": "MB POSIBLE RESERVA"
+     "obs": "MB POSIBLE RESERVA",
+     "pesoMadre": "482"
     },
-    "ts": 1795633202413,
+    "ts": 1795637475610,
     "deleted": false,
     "updIds": [
-     179563320269847
+     179563320269847,
+     179563630952905
     ]
    },
    "rmwwhpt6iouud": {
@@ -8951,12 +9113,14 @@
       "dorso": 5,
       "longitud_corp": 5
      },
-     "obs": "MB RESERVA"
+     "obs": "MB RESERVA",
+     "pesoMadre": "528"
     },
-    "ts": 1795633320186,
+    "ts": 1795637475610,
     "deleted": false,
     "updIds": [
-     179563332055392
+     179563332055392,
+     179563630952906
     ]
    },
    "rmwwjdc70csea": {
@@ -8977,12 +9141,14 @@
       "dorso": 4.5,
       "longitud_corp": 5
      },
-     "obs": ""
+     "obs": "",
+     "pesoMadre": "353"
     },
-    "ts": 1795636097532,
+    "ts": 1795637475610,
     "deleted": false,
     "updIds": [
-     179563609786122
+     179563609786122,
+     179563630952916
     ]
    },
    "rmwwjfz5g033r": {
@@ -8992,7 +9158,7 @@
     "numero": "316/2",
     "ts0": 1795636220596,
     "datos": {
-     "peso": "215",
+     "peso": "207",
      "scores": {
       "temp": 5,
       "ombligo": 4,
@@ -9004,12 +9170,14 @@
       "dorso": 5,
       "longitud_corp": 5
      },
-     "obs": ""
+     "obs": "",
+     "pesoMadre": "395"
     },
-    "ts": 1795636220596,
+    "ts": 1795637475610,
     "deleted": false,
     "updIds": [
-     179563622092986
+     179563622092986,
+     179563630952915
     ]
    },
    "rmwwjhvifjo97": {

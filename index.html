@@ -1880,6 +1880,19 @@ window.__renderReproHead = function(o){
 };
 </script>
 
+<style>
+.vs-pill.dst-bn{background:#1b1b1b;color:#fff}
+.vs-pill{white-space:nowrap}
+.dst-ic{display:inline-block;min-width:22px;text-align:center;border-radius:6px;padding:0 3px;font-size:13px}
+.dst-ic.bn{background:#1b1b1b;color:#fff}
+.dst-ic.res{background:#f3e3a8}
+.dst-ctx{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 12px;margin:8px 0 12px;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.04);font-size:13px}
+.dst-ctx span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
+.dst-ctrl{display:flex;flex-wrap:wrap;gap:10px 18px;margin:4px 0 12px}
+.dst-ctrl>div>span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:4px}
+body.vs-lock .sa-chip{display:none!important}
+.dst-nota{margin:14px 0 4px;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.04);font-size:12.5px;line-height:1.5;color:var(--ink-soft)}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -1897,7 +1910,7 @@ window.__renderReproHead = function(o){
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 23 nov 2026 · 6:35 p.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 25 nov 2026 · 10:05 a.m.</b>
     </div>
   </header>
 
@@ -2961,7 +2974,7 @@ window.__renderReproHead = function(o){
 
     <div class="filters" style="margin-bottom:20px;">
       <span class="flabel">Tipo de actualización</span>
-      <div class="cdrop" id="updType" data-key="_type" data-placeholder="Nuevo pesaje" data-static="peso:Nuevo pesaje,salida:Salida del hato,correccion:Corrección de datos,cria:Registrar cría nueva (normal / gemelar / TE),aborto:Registrar aborto"></div>
+      <div class="cdrop" id="updType" data-key="_type" data-placeholder="Nuevo pesaje" data-static="peso:Nuevo pesaje,salida:Salida del hato,correccion:Corrección de datos,cria:Registrar cría nueva (normal / gemelar / TE),aborto:Registrar aborto,destete:Registrar destete (lote · grupo contemporáneo · ranking)"></div>
     </div>
 
     <div class="grid">
@@ -3067,14 +3080,24 @@ window.__renderReproHead = function(o){
     /* Destete pendiente (pesaje con motivo DESTETE de una cría sin peso al destete):
        se usa de una vez como peso al destete provisional, con su ajuste a 8 meses. */
     function aplicarDestete(u){
-      if(!u || u.tipo !== 'peso' || !u.numero) return;
-      var d = u.detalle || {}; if(!/DESTET/i.test(String(d.nota || ''))) return;
-      var r = porNum[N(u.numero)]; if(!r || r.peso_dest != null || !r.fecha_nac) return;
+      if(!u || !u.numero) return;
+      var d = u.detalle || {}, esD = u.tipo === 'destete';
+      if(!esD && !(u.tipo === 'peso' && /DESTET/i.test(String(d.nota || '')))) return;
+      var r = porNum[N(u.numero)]; if(!r || !r.fecha_nac) return;
+      if(r.peso_dest != null && !(esD && r.__prov && ('peso_dest' in r.__prov))) return;
       var f = iso(d.fecha || u.fecha), p = parseFloat(String(d.peso).replace(',','.')); if(!f || isNaN(p)) return;
       var dias = (new Date(f) - new Date(r.fecha_nac)) / 86400000; if(!(dias > 60)) return;
       r.__prov = r.__prov || {};
       ['peso_dest','fecha_dest','edad_dest','peso_aj_8m'].forEach(function(c){ if(!(c in r.__prov)) r.__prov[c] = r[c]; });
       r.peso_dest = p; r.fecha_dest = f; r.edad_dest = dias / 30; r.peso_aj_8m = p / dias * 235;
+      if(esD){
+        var W = { temp:.10, ombligo:.10, caract:.10, conf:.15, musc:.15, aplo:.10, tamano_fs:.10, dorso:.10, longitud_corp:.10 }, sc = d.scores || {}, s = 0, w = 0;
+        ['indice_peso_dest','lote','lote_contemporaneo','calif_conf','calif_conf_justa'].concat(Object.keys(W)).forEach(function(c){ if(!(c in r.__prov)) r.__prov[c] = r[c]; });
+        Object.keys(W).forEach(function(k){ var v = sc[k] != null && sc[k] !== '' ? +sc[k] : null; r[k] = v; if(v != null){ s += v*W[k]; w += W[k]; } });
+        r.calif_conf = w ? s : null; r.calif_conf_justa = w ? s / w : null;
+        r.indice_peso_dest = r.peso_aj_8m / 302 * 100;
+        if(d.lote){ r.lote = String(d.lote); r.lote_contemporaneo = String(d.lote); }
+      }
     }
     U.slice().sort(function(a,b){ return (a.id||0) - (b.id||0); }).forEach(aplicarDestete);
     window.__criasProvisionales = nuevas; window.__salidasProvisionales = salidas;
@@ -8232,7 +8255,7 @@ window.__renderReproHead = function(o){
       '<small>Solo como guía para el consecutivo — no se llena nada automáticamente.</small>';
   }
 
-  var TIPO_LABELS = { peso:'Nuevo pesaje', salida:'Salida del hato', correccion:'Corrección de datos', cria:'Registrar cría nueva', palpacion:'Palpación', servicio:'Entore / servicio', aborto:'Aborto' };
+  var TIPO_LABELS = { peso:'Nuevo pesaje', salida:'Salida del hato', correccion:'Corrección de datos', cria:'Registrar cría nueva', palpacion:'Palpación', servicio:'Entore / servicio', aborto:'Aborto', destete:'Destete' };
   window.__updAdd = function(t, n, d, x, origen){ return addUpdate(t, n, d, x, origen || 'Modo guiado'); };
   window.__updList = function(){ return UPDATES; };
   /* Quita UN solo registro (antes, dos registros de distintos dispositivos con el mismo número se borraban juntos). */
@@ -8420,7 +8443,15 @@ window.__renderReproHead = function(o){
       ['abortoNumero','abortoFecha','abortoMeses','abortoObs'].forEach(function(id){ document.getElementById(id).value=''; });
     });
   }
+  function formDestete(){
+    return '<h3>Registrar destete</h3><p class="hint">El destete se registra por lote: cada cría con su peso y los 9 rasgos de calificación del Excel (temperamento, ombligo, caracterización, conformación, musculatura, aplomos, tamaño, dorso y longitud). '+
+      'A medida que ingresas crías se arma el <b>grupo contemporáneo</b> de ese destete y se ordena: el mejor porcentaje queda como ⭐ <b>posible reserva</b> y el más bajo con ⚑ <b>bandera negra</b>. '+
+      'Todo queda en la lista de pendientes para pasar a la hoja BD (peso, fecha, lote y calificaciones) y se ve de una vez en la ficha.</p>'+
+      '<button class="btn-pdf-prominent" id="desteteAbrir">🍼 Abrir el registro de destete</button>';
+  }
+  function wireDestete(){ document.getElementById('desteteAbrir').addEventListener('click', function(){ if(window.__visitas && window.__visitas.nuevaDestete) window.__visitas.nuevaDestete(); }); }
   var FORMS = {
+    destete:{ build:formDestete, wire:wireDestete },
     peso:{ build:formPeso, wire:wirePeso },
     salida:{ build:formSalida, wire:wireSalida },
     correccion:{ build:formCorreccion, wire:wireCorreccion },
@@ -8472,7 +8503,8 @@ window.__renderReproHead = function(o){
       var headers = ['Tipo','Numero','Fecha_fecha_evento','Peso','Nota','Causa_salida','Vendido_a_obs',
         'Campo_a_corregir','Valor_correcto','Observacion_correccion',
         'Nombre_nuevo','Sexo_nuevo','Raza_nueva','Finca_nueva','Lote_nuevo','Padre_nuevo','Madre_nueva',
-        'Fecha_registrado_en_dashboard','Peso_al_nacer','Resultado_palpacion','Dias_gestacion','Fecha_probable_parto','Hallazgo','Tipo_servicio','Toro_o_pajilla','Tipo_parto','Receptora_TE','Gemelo_de','Meses_prenez_aborto'];
+        'Fecha_registrado_en_dashboard','Peso_al_nacer','Resultado_palpacion','Dias_gestacion','Fecha_probable_parto','Hallazgo','Tipo_servicio','Toro_o_pajilla','Tipo_parto','Receptora_TE','Gemelo_de','Meses_prenez_aborto',
+        'Lote_destete_N','TEMP_O','OMBLIGO_P','CARACT_Q','CONF_R','MUSC_S','APLO_T','TAMANO_FS_U','DORSO_V','LONGITUD_CORP_W'];
       function esc(v){ if(v===null||v===undefined) return ''; var s=String(v); if(/[";\n]/.test(s)) s='"'+s.replace(/"/g,'""')+'"'; return s; }
       var rows = UPDATES.map(function(u){
         var d = u.detalle || {};
@@ -8486,7 +8518,10 @@ window.__renderReproHead = function(o){
         else if(u.tipo==='aborto'){ row[2]=d.fecha; row[4]=d.obs||''; ext[7]='ABORTO'; ext[10]=d.meses||''; }
         else if(u.tipo==='palpacion'){ row[2]=d.fecha; ext[1]=d.resultado; ext[2]=d.dias||''; ext[3]=d.parto_probable||''; ext[4]=d.hallazgo||''; ext[6]=d.toro||''; }
         else if(u.tipo==='servicio'){ row[2]=d.fecha; ext[5]=d.tipo_servicio||''; ext[6]=d.toro||''; }
-        return row.concat(ext).map(esc).join(';');
+        var dst = ['','','','','','','','','',''];
+        if(u.tipo==='destete'){ row[2]=d.fecha; row[3]=d.peso; row[4]=d.obs||''; row[13]=d.finca||''; var sc = d.scores||{};
+          dst = [d.lote||''].concat(['temp','ombligo','caract','conf','musc','aplo','tamano_fs','dorso','longitud_corp'].map(function(k){ return sc[k]!=null ? sc[k] : ''; })); }
+        return row.concat(ext).concat(dst).map(esc).join(';');
       });
       var csv = '\uFEFF' + headers.join(';') + '\r\n' + rows.join('\r\n');
       var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
@@ -11390,7 +11425,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       {icon:'🐮', label:'Nació un ternero (o abortó una vaca)', sub:'Parto normal, gemelar, transferencia de embrión (TE) o aborto', onClick:function(){ ctx={}; go(nacTipo, 'Nacimiento', 'rama'); }},
       {icon:'🩺', label:'Palpé una vaca', sub:'Preñada, vacía o dudosa', onClick:function(){ ctx={}; go(palp1, 'Palpación', 'rama'); }},
       {icon:'❤', label:'Serví una vaca', sub:'Entore: monta natural o inseminación', onClick:function(){ ctx={}; go(ent1, 'Entore', 'rama'); }},
-      {icon:'⚖', label:'Pesé un animal', sub:'Control de peso o destete', onClick:function(){ ctx={}; go(pes1, 'Pesaje', 'rama'); }},
+      {icon:'🍼', label:'Desteté un lote', sub:'Peso y calificación de cada cría · grupo contemporáneo · reserva y bandera negra', onClick:function(){ if(window.__visitas && window.__visitas.nuevaDestete) window.__visitas.nuevaDestete(); }},
+      {icon:'⚖', label:'Pesé un animal', sub:'Control de peso', onClick:function(){ ctx={}; go(pes1, 'Pesaje', 'rama'); }},
       {icon:'🚚', label:'Salió un animal', sub:'Venta, muerte o descarte', onClick:function(){ ctx={}; go(sal1, 'Salida', 'rama'); }},
       {icon:'🚛', label:'Salieron varios animales', sub:'Venta de varios animales a un mismo cliente, el mismo día', onClick:function(){ ctx={lista:[]}; go(salM1, 'Venta múltiple', 'rama'); }},
       {icon:'✏', label:'Corregir un dato', sub:'Un dato equivocado de un animal', onClick:function(){ ctx={}; go(cor1, 'Corrección', 'rama'); }},
@@ -12039,7 +12075,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var l = window.__updList ? window.__updList() : [];
     var c = pregunta(el, l.length ? 'Tiene '+l.length+' registro(s) pendientes' : 'No hay registros pendientes', l.length ? 'Descargue el resumen y envíelo (WhatsApp o correo) a quien actualiza el Excel. Después puede vaciar la lista.' : 'Cuando registre algo, aparecerá aquí.');
     if(!l.length){ botonGrande(c, '📝  Registrar algo', function(){ go(scrRegistrar, 'Registrar', 'rama'); }); return; }
-    var etiquetas = {peso:'⚖ Pesaje', salida:'🚚 Salida', correccion:'✏ Corrección', cria:'🐮 Nacimiento', palpacion:'🩺 Palpación', servicio:'❤ Servicio', aborto:'⚠ Aborto'};
+    var etiquetas = {peso:'⚖ Pesaje', salida:'🚚 Salida', correccion:'✏ Corrección', cria:'🐮 Nacimiento', palpacion:'🩺 Palpación', servicio:'❤ Servicio', aborto:'⚠ Aborto', destete:'🍼 Destete'};
     var box = document.createElement('div'); box.className='g-pend';
     l.slice().reverse().forEach(function(u){
       var row = document.createElement('div'); row.className='g-pend-row';
@@ -13768,7 +13804,8 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     palpacion:{ i:'🩺', n:'Palpación', d:'Preñada o vacía, tiempo, toro posible, diagnóstico' },
     pesaje:{ i:'⚖', n:'Pesaje', d:'Peso de cada animal' },
     cliente:{ i:'🤝', n:'Cliente', d:'Animales que vio, interés y precio, comparación y PDF' },
-    inventario:{ i:'📋', n:'Inventario', d:'Presente o no, lote, peso, condición, descarte' }
+    inventario:{ i:'📋', n:'Inventario', d:'Presente o no, lote, peso, condición, descarte' },
+    destete:{ i:'🍼', n:'Destete', d:'Peso y calificación de cada cría · grupo contemporáneo · posible reserva y bandera negra' }
   };
   var RASGOS = [['temp','Temperamento'],['ombligo','Ombligo'],['caract','Caracterización racial'],['conf','Conformación'],['musc','Musculatura'],['aplo','Aplomos'],['tamano_fs','Tamaño'],['dorso','Dorso'],['longitud_corp','Longitud corporal']];
   var RESULTADOS = ['Inscrita','Calificada','Aprobada registro definitivo','Observada / condicionada','Pendiente','Rechazada'];
@@ -13813,6 +13850,71 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     return a[0] || null;
   }
   function califDe(d){ var s = 0, n = 0; RASGOS.forEach(function(x){ var v = num(d.scores && d.scores[x[0]]); if(v != null){ s += v; n++; } }); return n ? s/n : null; }
+  /* ---------- DESTETE: mismos parámetros del Excel (hoja BD, columnas L a W) ----------
+     Pesos de cada rasgo = fila 1 del Excel: 10 % cada uno, salvo Conformación y Musculatura (15 %).
+     Calificación de conformación = promedio ponderado SOLO de los rasgos calificados (igual a calif_conf_justa).
+     Peso ajustado a 8 meses = peso ÷ días de edad × 235 (igual al Excel).
+     Grupo contemporáneo = las crías de este mismo destete (machos y hembras por separado, o juntos).
+     Índice de grupo = peso ajustado ÷ promedio ajustado del grupo × 100.
+     Puntos de peso (1 a 5) = 3 + (índice − 100) ÷ 10  → promedio del grupo = 3; +10 % = 4; +20 % = 5.
+     Calificación de destete = (puntos de peso + conformación) ÷ 2 — igual que la calificación final del Excel. */
+  var PESO_R = { temp:.10, ombligo:.10, caract:.10, conf:.15, musc:.15, aplo:.10, tamano_fs:.10, dorso:.10, longitud_corp:.10 };
+  var ELIM = [['temp','temperamento'],['ombligo','ombligo'],['aplo','aplomos']];
+  function lab(k){ var x = RASGOS.filter(function(y){ return y[0]===k; })[0]; return x ? x[1] : k; }
+  function califConfDest(sc){ var s = 0, w = 0; RASGOS.forEach(function(x){ var v = num(sc && sc[x[0]]); if(v != null){ s += v*PESO_R[x[0]]; w += PESO_R[x[0]]; } }); return w ? s/w : null; }
+  function calcDest(v, reg, datos){
+    var d = datos || reg.datos || {}, r = byNum[N(reg.numero)] || {}, p = num(d.peso), fn = r.fecha_nac;
+    var dias = fn ? Math.round((new Date(v.fecha) - new Date(fn)) / 864e5) : null;
+    var aj = (p != null && dias > 60) ? p / dias * 235 : null;
+    var def = ELIM.filter(function(e){ var x = num(d.scores && d.scores[e[0]]); return x != null && x <= 2; }).map(function(e){ return e[1]; });
+    return { reg:reg, r:r, numero:reg.numero, sexo:r.sexo || '', peso:p, dias:dias, aj:aj, conf:califConfDest(d.scores), defectos:def,
+             madre:r.madre || '', padre:r.padre || '', edadRara:(dias != null && (dias < 150 || dias > 330)) };
+  }
+  function rankingDestete(v, regs, extra){
+    var x = v.extra || {}, pct = (+x.pct || 20) / 100, porSexo = x.grupo !== 'todos';
+    var rows = regs.map(function(g){ return calcDest(v, g); });
+    if(extra) rows.push(calcDest(v, extra.reg, extra.datos));
+    var grupos = {};
+    rows.forEach(function(o){ var k = porSexo ? (o.sexo === 'H' ? 'H' : (o.sexo === 'M' ? 'M' : '?')) : 'T'; (grupos[k] = grupos[k] || []).push(o); o.grupo = k; });
+    Object.keys(grupos).forEach(function(k){
+      var G = grupos[k], aj = G.map(function(o){ return o.aj; }).filter(function(z){ return z != null; });
+      var m = aj.length ? aj.reduce(function(a,b){ return a+b; }, 0) / aj.length : null;
+      G.promAj = m; G.promPeso = prom(G.map(function(o){ return o.peso; }));
+      G.forEach(function(o){
+        o.indice = (o.aj != null && m) ? o.aj / m * 100 : null;
+        o.ptsPeso = o.indice != null ? Math.max(1, Math.min(5, 3 + (o.indice - 100) / 10)) : null;
+        o.calif = o.ptsPeso != null && o.conf != null ? (o.ptsPeso + o.conf) / 2 : (o.ptsPeso != null ? o.ptsPeso : o.conf);
+      });
+      var orden = G.filter(function(o){ return o.calif != null; }).sort(function(a,b){ return b.calif - a.calif || (b.aj||0) - (a.aj||0); });
+      orden.forEach(function(o, i){ o.puesto = i + 1; o.de = orden.length; });
+      var n = orden.length, kk = n >= 3 ? Math.max(1, Math.round(n * pct)) : 0;
+      var top = orden.filter(function(o){ return !o.defectos.length; }).slice(0, kk);
+      top.forEach(function(o){ o.estado = 'reserva'; });
+      var bajos = orden.filter(function(o){ return o.estado !== 'reserva'; }).slice(-kk);
+      if(kk) bajos.forEach(function(o){ o.estado = 'bandera'; o.motivo = 'Calificación entre el '+Math.round(pct*100)+' % más bajo del grupo'; });
+      G.forEach(function(o){ if(o.defectos.length){ o.estado = 'bandera'; o.motivo = [o.motivo, 'Defecto: '+o.defectos.join(', ')+' calificado 2 o menos'].filter(Boolean).join(' · '); } });
+      G.orden = orden; G.k = kk;
+    });
+    return { rows:rows, grupos:grupos, porSexo:porSexo, pct:pct };
+  }
+  function nombreGrupo(k){ return k === 'M' ? 'Machos' : (k === 'H' ? 'Hembras' : (k === 'T' ? 'Todo el destete' : 'Sin sexo registrado')); }
+  function b100(x){ return x == null ? '' : (x*20).toFixed(1); }
+  function estadoTag(o){ return o.estado === 'reserva' ? '<span class="vs-pill ok">⭐ Posible reserva</span>' : (o.estado === 'bandera' ? '<span class="vs-pill dst-bn">⚑ Bandera negra</span>' : ''); }
+  function siguienteLote(){
+    var mx = 0;
+    BD.forEach(function(r){ var n = parseInt(r.lote_contemporaneo, 10); if(!isNaN(n) && n > mx && n < 100000) mx = n; });
+    Object.keys(S.visitas).forEach(function(k){ var v = S.visitas[k]; if(v && !v.deleted && v.tipo === 'destete'){ var n = parseInt(v.extra && v.extra.lote, 10); if(!isNaN(n) && n > mx) mx = n; } });
+    return mx + 1;
+  }
+  function porDestetar(v){
+    var ya = {}; regsDe(v.id).forEach(function(g){ ya[N(g.numero)] = 1; });
+    return BD.filter(function(r){
+      if(r.activo !== 'ACTIVO' || r.peso_dest != null || !r.fecha_nac || ya[N(r.numero)]) return false;
+      if(v.finca && r.finca !== v.finca) return false;
+      var dias = (new Date(v.fecha) - new Date(r.fecha_nac)) / 864e5; return dias >= 150 && dias <= 330;
+    }).sort(function(a,b){ return (a.fecha_nac||'').localeCompare(b.fecha_nac||''); });
+  }
+
   function letraTag(p){ var A = window.__asoc; if(!A || p == null) return ''; var l = A.letra(p); return '<span class="vs-letra" style="background:'+A.COLOR[l]+(l==='R'||l==='R+'?';color:#241D14':'')+'">'+l+'</span>'; }
 
   /* ---------- textos de un registro ---------- */
@@ -13822,6 +13924,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     else if(v.tipo === 'palpacion'){ if(d.estado === 'PREÑADA'){ t.push('Preñada'+(d.dias?' '+d.dias+' días':'')+(d.toro?' · toro '+d.toro:'')+(d.parto?' · parto probable '+fmt(d.parto):'')); } else if(d.estado === 'VACIA'){ t.push('Vacía'+(d.diag?' · '+d.diag:'')); } }
     else if(v.tipo === 'pesaje'){ if(d.peso) t.push(d.peso+' kg'); if(d.nota) t.push(d.nota); }
     else if(v.tipo === 'cliente'){ if(d.interes) t.push('Interés '+d.interes); if(d.precioPedido) t.push('Pide $'+fmtPrecio(d.precioPedido)); if(d.precioOfrecido) t.push('Ofrece $'+fmtPrecio(d.precioOfrecido)); }
+    else if(v.tipo === 'destete'){ var o = calcDest(v, r); if(o.peso != null) t.push(o.peso+' kg'); if(o.aj != null) t.push('ajustado 8 m '+o.aj.toFixed(0)+' kg'); if(o.conf != null) t.push('conformación '+b100(o.conf)+' /100'); if(o.defectos.length) t.push('⚑ '+o.defectos.join(', ')+' ≤ 2'); }
     else if(v.tipo === 'inventario'){ t.push(d.presente === 'no' ? 'NO ESTÁ' : 'Presente'); if(d.lote) t.push('Lote '+d.lote); if(d.peso) t.push(d.peso+' kg'); if(d.cc) t.push('CC '+d.cc); if(d.descarte) t.push('⚑ marcado para descarte'+(d.motivo?' ('+d.motivo+')':'')); }
     return t.join(' · ');
   }
@@ -13851,6 +13954,12 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       add(reg, 'peso', { fecha:f, peso:peso, nota:nota }, f+' · '+peso+' kg · '+nota);
       if(window.__provisional) window.__provisional('peso', reg.numero, { fecha:f, peso:peso, nota:nota, provisional:true, __key:reg.id });
     }
+    if(v.tipo === 'destete' && num(d.peso) != null){
+      var od = calcDest(v, reg), lt = (v.extra && v.extra.lote) || '';
+      var det = { fecha:f, peso:num(d.peso), lote:lt, finca:v.finca||'', scores:d.scores||{}, obs:d.obs||'', nota:'DESTETE' };
+      add(reg, 'destete', det, f+' · DESTETE '+num(d.peso)+' kg'+(lt?' · lote '+lt:'')+(od.aj!=null?' · aj. 8 m '+od.aj.toFixed(0)+' kg':'')+(od.conf!=null?' · conf. '+b100(od.conf):'')+(d.obs?' · '+d.obs:''));
+      if(window.__provisional) window.__provisional('peso', reg.numero, { fecha:f, peso:num(d.peso), nota:'DESTETE (visita '+fmt(f)+')', provisional:true, __key:reg.id });
+    }
     if(v.tipo === 'inventario' && d.lote){
       var r = byNum[N(reg.numero)];
       if(r && String(r.lote == null ? '' : r.lote).trim() !== String(d.lote).trim()){
@@ -13874,7 +13983,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
   /* ---- inicio: lista de visitas ---- */
   function scrInicio(c){
     var act = activaId(), vs = visitasOrden();
-    var h = '<p class="vs-sub">Registra lo que pasa en el corral: una calificación ASOCEBU, una palpación, un pesaje, la visita de un cliente o un inventario. Cada animal se agrega desde su ficha con <b>📋 Agregar a visita</b>, o desde aquí.</p>'+
+    var h = '<p class="vs-sub">Registra lo que pasa en el corral: una calificación ASOCEBU, una palpación, un pesaje, un destete, la visita de un cliente o un inventario. Cada animal se agrega desde su ficha con <b>📋 Agregar a visita</b>, o desde aquí.</p>'+
       '<div class="vs-btns"><button class="vs-btn verde" id="vsNueva">＋ Registrar nueva visita</button></div>';
     h += vs.length ? '<div class="vs-eb">Visitas registradas</div><div class="vs-lista-v">'+vs.map(function(v){ var n = regsDe(v.id).length;
       return '<button class="vs-v'+(v.id===act?' activa':'')+'" data-v="'+v.id+'"><span class="i">'+TIPOS[v.tipo].i+'</span><span><b>'+TIPOS[v.tipo].n+' · '+fmt(v.fecha)+'</b><small>'+esc([v.finca, encabezado(v), n+' animal'+(n===1?'':'es')].filter(Boolean).join(' · '))+'</small></span>'+(v.id===act?'<span class="tag">EN CURSO</span>':(v.cerrada?'<span class="tag" style="background:#8a8f87">CERRADA</span>':''))+'</button>'; }).join('')+'</div>'
@@ -13891,6 +14000,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
     if(v.tipo === 'cliente') return [x.cliente, x.empresa].filter(Boolean).join(' — ');
     if(v.tipo === 'inventario') return x.lote ? 'Lote/potrero '+x.lote : '';
     if(v.tipo === 'palpacion') return x.veterinario ? 'Veterinario '+x.veterinario : '';
+    if(v.tipo === 'destete') return x.lote ? 'Lote contemporáneo '+x.lote : '';
     return '';
   }
 
@@ -13898,7 +14008,8 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
   function fincas(){ var c = {}; BD.forEach(function(r){ if(r.finca) c[r.finca] = 1; }); var p = ['OK','CACHO','TNJ'].filter(function(f){ return c[f]; }); return p.concat(Object.keys(c).filter(function(f){ return p.indexOf(f) < 0; }).sort()); }
   function scrNueva(editId, animalId){
     return function(c){
-      var v = editId ? S.visitas[editId] : null, tipo = v ? v.tipo : null, x = v ? (v.extra || {}) : {};
+      var v = editId ? S.visitas[editId] : null, tipo = v ? v.tipo : (window.__vsTipoInicial || null), x = v ? (v.extra || {}) : {};
+      window.__vsTipoInicial = null;
       var animal = animalId != null ? byId[animalId] : null;
       var h = (animal ? '<div class="vs-animal"><span style="font-size:22px">🐄</span><div><b>'+esc(animal.numero)+'</b><small>Se agregará a la visita apenas la crees</small></div></div>' : '')+
         '<div class="vs-eb">Tipo de visita</div><div class="vs-tipos">'+Object.keys(TIPOS).map(function(k){ return '<button class="vs-tipo'+(tipo===k?' on':'')+'" data-t="'+k+'"'+(v?' disabled':'')+'><span class="i">'+TIPOS[k].i+'</span><b>'+TIPOS[k].n+'</b><small>'+TIPOS[k].d+'</small></button>'; }).join('')+'</div>'+
@@ -13913,6 +14024,9 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
         if(t === 'asocebu') H = '<div class="vs-grid"><div class="full"><label>Técnico ASOCEBU</label><input id="vxTecnico" value="'+esc(x.tecnico||'')+'"></div></div>';
         else if(t === 'palpacion') H = '<div class="vs-grid"><div class="full"><label>Veterinario</label><input id="vxVeterinario" value="'+esc(x.veterinario||'')+'" placeholder="Opcional"></div></div>';
         else if(t === 'cliente') H = '<div class="vs-grid"><div><label>Nombre del cliente</label><input id="vxCliente" value="'+esc(x.cliente||'')+'"></div><div><label>Finca o empresa</label><input id="vxEmpresa" value="'+esc(x.empresa||'')+'"></div><div><label>Teléfono / WhatsApp</label><input id="vxTel" inputmode="tel" value="'+esc(x.tel||'')+'"></div><div><label>Ciudad / región</label><input id="vxCiudad" value="'+esc(x.ciudad||'')+'"></div></div>';
+        else if(t === 'destete') H = '<div class="vs-grid"><div><label>Lote contemporáneo (columna LOTE)</label><input id="vxLote" inputmode="numeric" value="'+esc(x.lote || siguienteLote())+'"></div>'+
+          '<div><label>Comparar</label><select id="vxGrupo"><option value="sexo"'+(x.grupo!=='todos'?' selected':'')+'>Machos y hembras por separado</option><option value="todos"'+(x.grupo==='todos'?' selected':'')+'>Todos juntos</option></select></div>'+
+          '<div class="full" style="font-size:12.5px;color:var(--ink-soft)">El lote se propone con el número siguiente al último destete del Excel. Todas las crías de este destete forman el <b>grupo contemporáneo</b>.</div></div>';
         else if(t === 'inventario') H = '<div class="vs-grid"><div class="full"><label>Lote o potrero que se inventaría (opcional)</label><input id="vxLote" value="'+esc(x.lote||'')+'" placeholder="Vacío = toda la finca"></div></div>';
         e.innerHTML = H;
       }
@@ -13920,7 +14034,9 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       extra();
       $('vsCrear').onclick = function(){
         if(!tipo){ toast('Elige el tipo de visita.'); return; }
-        var ex = {}; [['vxTecnico','tecnico'],['vxVeterinario','veterinario'],['vxCliente','cliente'],['vxEmpresa','empresa'],['vxTel','tel'],['vxCiudad','ciudad'],['vxLote','lote']].forEach(function(p){ var i = $(p[0]); if(i) ex[p[1]] = i.value.trim(); });
+        var ex = {}; [['vxTecnico','tecnico'],['vxVeterinario','veterinario'],['vxCliente','cliente'],['vxEmpresa','empresa'],['vxTel','tel'],['vxCiudad','ciudad'],['vxLote','lote'],['vxGrupo','grupo']].forEach(function(p){ var i = $(p[0]); if(i) ex[p[1]] = i.value.trim(); });
+        if(v && v.extra && v.extra.pct) ex.pct = v.extra.pct;
+        if(tipo === 'destete' && !ex.lote){ toast('Escribe el lote contemporáneo.'); return; }
         if(tipo === 'cliente' && !ex.cliente){ toast('Escribe el nombre del cliente.'); return; }
         var nv = v || { id:uid('v'), tipo:tipo, ts0:Date.now() };
         nv.fecha = $('vsFecha').value || hoy(); nv.finca = $('vsFinca').value; nv.extra = ex; nv.obs = $('vsObs').value.trim(); nv.ts = Date.now(); nv.equipo = ES_CEL ? 'Celular' : 'Computador';
@@ -13970,6 +14086,20 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
         H += '<div class="vs-eb">Interés del cliente</div>'+seg('vfInteres', INTERES, d.interes||'')+
           '<div class="vs-grid vs-f" style="margin-top:10px"><div><label>Precio pedido ($)</label><input id="vfPP" inputmode="numeric" value="'+esc(d.precioPedido||'')+'"></div><div><label>Precio ofrecido ($)</label><input id="vfPO" inputmode="numeric" value="'+esc(d.precioOfrecido||'')+'"></div>'+
           '<div class="full"><label>Comentarios</label><textarea id="vfObs" placeholder="Qué le gustó, condiciones, etc.">'+esc(d.obs||'')+'</textarea></div></div>';
+      } else if(v.tipo === 'destete'){
+        d.scores = d.scores || {};
+        var o0 = calcDest(v, { numero:r.numero, datos:{} });
+        H += '<div class="dst-ctx">'+[
+            ['Destete', fmt(v.fecha)+(v.extra && v.extra.lote ? ' · lote '+esc(v.extra.lote) : '')],
+            ['Edad', o0.dias != null ? o0.dias+' días ('+(o0.dias/30).toFixed(1)+' meses)'+(o0.edadRara ? ' <b style="color:var(--rust-deep)">⚠ fuera de 5 a 11 meses</b>' : '') : '<b style="color:var(--rust-deep)">sin fecha de nacimiento</b>'],
+            ['Madre', esc(r.madre||'—')], ['Padre', esc(r.padre||'—')],
+            (r.peso_dest != null && !(r.__prov && 'peso_dest' in r.__prov) ? ['Ya tiene destete', '<b style="color:var(--rust-deep)">'+r.peso_dest+' kg el '+fmt(r.fecha_dest)+'</b>'] : null)
+          ].filter(Boolean).map(function(z){ return '<div><span>'+z[0]+'</span><b>'+z[1]+'</b></div>'; }).join('')+'</div>';
+        var op2 = '<option value="">—</option>'+[1,1.5,2,2.5,3,3.5,4,4.5,5].map(function(n){ return '<option>'+n+'</option>'; }).join('');
+        H += '<div class="vs-grid vs-f"><div><label>Peso al destete (kg)</label><input id="vfPeso" inputmode="decimal" value="'+esc(d.peso||'')+'"></div><div></div></div>'+
+          '<div class="vs-eb">Calificación (1 a 5) — mismos rasgos y pesos del Excel</div><div class="vs-rasgos">'+RASGOS.map(function(x){ return '<div class="vs-rasgo"><span>'+x[1]+' <small style="color:var(--ink-soft)">'+Math.round(PESO_R[x[0]]*100)+' %</small></span><select data-r="'+x[0]+'">'+op2+'</select></div>'; }).join('')+'</div>'+
+          '<div class="vs-score" id="vfDst"></div>'+
+          '<div class="vs-grid vs-f"><div class="full"><label>Comentarios</label><textarea id="vfObs">'+esc(d.obs||'')+'</textarea></div></div>';
       } else if(v.tipo === 'inventario'){
         H += '<div class="vs-eb">¿Está el animal?</div>'+seg('vfPres', [['si','Presente'],['no','No está']], d.presente||'si')+
           '<div class="vs-grid vs-f" style="margin-top:10px"><div><label>Lote / potrero actual</label><input id="vfLote" value="'+esc(d.lote != null ? d.lote : (r.lote && String(r.lote).trim()!=='0' ? r.lote : (v.extra && v.extra.lote) || ''))+'"></div>'+
@@ -14037,6 +14167,26 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       if(v.tipo === 'pesaje' && $('vfGan')){ var up2 = ultimoPeso(r, v.fecha); $('vfPeso').oninput = function(){ var p = num($('vfPeso').value); if(p == null){ $('vfGan').textContent=''; return; } var dias = Math.round((new Date(v.fecha) - new Date(up2.fecha))/864e5), dif = p - up2.peso;
         $('vfGan').innerHTML = ' → diferencia <b>'+(dif>=0?'+':'')+dif.toFixed(0)+' kg</b>'+(dias>0?' en '+dias+' días ('+(dif*1000/dias).toFixed(0)+' g/día)':''); }; $('vfPeso').oninput(); }
       if(v.tipo === 'cliente') wireSeg('vfInteres');
+      if(v.tipo === 'destete'){
+        c.querySelectorAll('select[data-r]').forEach(function(s){ var x = d.scores[s.getAttribute('data-r')]; if(x != null) s.value = String(x); s.onchange = vivo; });
+        $('vfPeso').oninput = vivo;
+        function vivo(){
+          var sc = {}; c.querySelectorAll('select[data-r]').forEach(function(s){ if(s.value) sc[s.getAttribute('data-r')] = +s.value; });
+          var datos = { peso:$('vfPeso').value.trim(), scores:sc };
+          var otros = regsDe(vid).filter(function(g){ return !reg || g.id !== reg.id; });
+          var rk = rankingDestete(v, otros, { reg:{ id:'__nuevo', numero:r.numero }, datos:datos });
+          var o = rk.rows[rk.rows.length-1], G = rk.grupos[o.grupo];
+          var h = [];
+          if(o.aj != null) h.push('Ajustado a 8 meses <b>'+o.aj.toFixed(0)+' kg</b>');
+          if(o.conf != null) h.push('Conformación <b>'+b100(o.conf)+'</b> /100 '+letraTag(o.conf*20));
+          if(o.indice != null && G.length > 1) h.push('Índice frente al grupo <b>'+o.indice.toFixed(0)+'</b> (promedio '+G.promAj.toFixed(0)+' kg aj.)');
+          if(o.calif != null) h.push('Calificación de destete <b>'+b100(o.calif)+'</b> /100');
+          if(o.puesto) h.push('Puesto provisional <b>'+o.puesto+' de '+o.de+'</b> en '+nombreGrupo(o.grupo).toLowerCase()+' '+estadoTag(o));
+          if(o.defectos.length) h.push('<b style="color:var(--rust-deep)">⚑ '+o.defectos.join(', ')+' con 2 o menos: queda con bandera negra</b>');
+          $('vfDst').innerHTML = h.length ? h.join('<br>') : 'Escribe el peso y las calificaciones para ver el resultado y su puesto en el grupo.';
+        }
+        vivo();
+      }
       if(v.tipo === 'inventario'){ wireSeg('vfPres'); $('vfDesc').onchange = function(){ $('vfMotivo').style.display = this.checked ? '' : 'none'; }; }
 
       function leer(){
@@ -14048,6 +14198,9 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
           else { o.diag = $('vfDiag').value; } }
         if(v.tipo === 'pesaje'){ o.peso = $('vfPeso').value.trim(); if(num(o.peso) == null){ toast('Escribe el peso.'); return null; } o.nota = $('vfNota').value.trim(); o.obs = $('vfObs').value.trim(); }
         if(v.tipo === 'cliente'){ o.interes = segVal('vfInteres'); o.precioPedido = $('vfPP').value.trim(); o.precioOfrecido = $('vfPO').value.trim(); o.obs = $('vfObs').value.trim(); }
+        if(v.tipo === 'destete'){ o.peso = $('vfPeso').value.trim(); if(num(o.peso) == null){ toast('Escribe el peso al destete.'); return null; }
+          o.scores = {}; c.querySelectorAll('select[data-r]').forEach(function(s){ if(s.value) o.scores[s.getAttribute('data-r')] = +s.value; }); o.obs = $('vfObs').value.trim();
+          if(d.reservaMarcada) o.reservaMarcada = d.reservaMarcada; }
         if(v.tipo === 'inventario'){ o.presente = segVal('vfPres') || 'si'; o.lote = $('vfLote').value.trim(); o.peso = $('vfPeso').value.trim(); o.cc = $('vfCC').value; o.obs = $('vfObs').value.trim(); o.descarte = $('vfDesc').checked; o.motivo = o.descarte ? $('vfMotivo').value.trim() : ''; }
         return o;
       }
@@ -14056,7 +14209,9 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
         var nr = reg || { id:uid('r'), visitaId:vid, animalId:r.id, numero:r.numero, ts0:Date.now() };
         nr.datos = o; nr.ts = Date.now(); nr.deleted = false;
         S.regs[nr.id] = nr; efectos(v, nr); S.regs[nr.id] = nr; guardarS();
-        toast(r.numero+' guardado en la visita.');
+        if(v.tipo === 'destete'){ var rk2 = rankingDestete(v, regsDe(vid)), o2 = rk2.rows.filter(function(z){ return z.reg.id === nr.id; })[0];
+          toast(r.numero+' guardado'+(o2 && o2.puesto ? ' — puesto '+o2.puesto+' de '+o2.de+' '+nombreGrupo(o2.grupo).toLowerCase()+(o2.estado==='reserva'?' ⭐ posible reserva':(o2.estado==='bandera'?' ⚑ bandera negra':'')) : '')+'.'); }
+        else toast(r.numero+' guardado en la visita.');
         if(otro){ irRaiz(scrVisita(vid, 'buscar'), TIPOS[v.tipo].i+' '+TIPOS[v.tipo].n+'<small>'+fmt(v.fecha)+(v.finca?' · '+esc(v.finca):'')+'</small>'); }
         else { irRaiz(scrVisita(vid), TIPOS[v.tipo].i+' '+TIPOS[v.tipo].n+'<small>'+fmt(v.fecha)+(v.finca?' · '+esc(v.finca):'')+'</small>'); }
         if(window.__refrescarFichaVisitas) window.__refrescarFichaVisitas();
@@ -14075,7 +14230,7 @@ if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
       var tab = vista.tab || (foco === 'buscar' ? 'animales' : 'animales');
       var H = '<p class="vs-sub">'+esc([fmt(v.fecha), v.finca, encabezado(v)].filter(Boolean).join(' · '))+(v.obs?'<br>'+esc(v.obs):'')+'</p>'+
         '<div class="vs-buscar"><input type="search" id="vsBuscar" placeholder="＋ Agregar animal: escribe el número…" autocomplete="off"><div id="vsSug"></div></div>'+
-        '<div class="vs-tabs"><button data-t="animales" class="'+(tab==='animales'?'on':'')+'">Animales ('+regs.length+')</button><button data-t="resumen" class="'+(tab==='resumen'?'on':'')+'">Resumen</button></div><div id="vsTab"></div>'+
+        '<div class="vs-tabs"><button data-t="animales" class="'+(tab==='animales'?'on':'')+'">Animales ('+regs.length+')</button><button data-t="resumen" class="'+(tab==='resumen'?'on':'')+'">'+(v.tipo==='destete'?'🏆 Grupo contemporáneo y ranking':'Resumen')+'</button></div><div id="vsTab"></div>'+
         '<div class="vs-btns">'+(act ? '<button class="vs-btn ghost" id="vsTerminar">Terminar visita</button>' : '<button class="vs-btn verde" id="vsActivar">Continuar esta visita</button>')+
         '<button class="vs-btn ghost" id="vsEditar">Editar datos de la visita</button><button class="vs-btn ghost" id="vsCsv">⬇ Excel de la visita</button>'+
         (regs.length ? '<button class="vs-btn ghost" id="vsComparar">⚖ Comparar animales</button>' : '')+
@@ -14095,7 +14250,20 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
       if(foco === 'buscar') setTimeout(function(){ inp.focus(); }, 50);
       c.querySelectorAll('.vs-tabs button').forEach(function(b){ b.onclick = function(){ vista.tab = b.getAttribute('data-t'); pintar(); }; });
       var T = $('vsTab');
-      if(tab === 'animales') T.innerHTML = listaRegs(v, regs.slice().reverse()); else T.innerHTML = resumen(v, regs);   // lo último registrado arriba
+      if(tab === 'animales'){
+        var pend = v.tipo === 'destete' ? porDestetar(v) : [];
+        T.innerHTML = (pend.length ? '<div class="vs-eb">Crías en edad de destete sin registrar ('+pend.length+')'+(v.finca?' — '+esc(v.finca):'')+'</div><div class="vs-chips">'+pend.slice(0,120).map(function(r){ var dd = Math.round((new Date(v.fecha) - new Date(r.fecha_nac))/864e5); return '<button class="vs-chip" data-agregar="'+r.id+'"><b>'+esc(r.numero)+'</b> <small>'+(r.sexo==='H'?'♀':'♂')+' '+(dd/30).toFixed(1)+' m'+(r.madre?' · madre '+esc(r.madre):'')+'</small></button>'; }).join('')+'</div>' : '')+
+          listaRegs(v, regs.slice().reverse());   // lo último registrado arriba
+      } else T.innerHTML = resumen(v, regs);
+      T.querySelectorAll('[data-pct]').forEach(function(b){ b.onclick = function(){ v.extra = v.extra || {}; v.extra.pct = +b.getAttribute('data-pct'); v.ts = Date.now(); guardarS(); pintar(); }; });
+      T.querySelectorAll('[data-grp]').forEach(function(b){ b.onclick = function(){ v.extra = v.extra || {}; v.extra.grupo = b.getAttribute('data-grp'); v.ts = Date.now(); guardarS(); pintar(); }; });
+      T.querySelectorAll('[data-reserva]').forEach(function(b){ b.onclick = function(){
+        var rg = S.regs[b.getAttribute('data-reserva')], rr = byNum[N(rg.numero)]; if(!rg || !rr) return;
+        if(/RESERVA/i.test(rr.comentario||'')){ toast(rr.numero+' ya está marcado como reserva.'); return; }
+        var val = (rr.comentario ? rr.comentario+' · ' : '')+'POSIBLE RESERVA (destete '+fmt(v.fecha)+')';
+        if(window.__updAdd){ var u = window.__updAdd('correccion', rr.numero, { campo:'COMENTARIO', valor:val, obs:'Ranking del destete '+fmt(v.fecha) }, 'COMENTARIO → '+val, 'Visita: Destete'); if(u && u.id) (rg.updIdsReserva = rg.updIdsReserva || []).push(u.id); }
+        if(window.__aplicarCorreccion) window.__aplicarCorreccion(rr.numero, 'COMENTARIO', val);
+        rg.datos = rg.datos || {}; rg.datos.reservaMarcada = true; rg.ts = Date.now(); guardarS(); toast(rr.numero+' marcado como POSIBLE RESERVA.'); pintar(); }; });
       T.querySelectorAll('[data-edit]').forEach(function(b){ b.onclick = function(){ var rg = S.regs[b.getAttribute('data-edit')]; var rr = byNum[N(rg.numero)]; if(rr) ir(scrForm(vid, rr.id), TIPOS[v.tipo].i+' '+esc(rr.numero)+'<small>'+TIPOS[v.tipo].n+' · '+fmt(v.fecha)+'</small>'); }; });
       T.querySelectorAll('a[data-num]').forEach(function(a){ a.onclick = function(){ var rr = byNum[N(a.getAttribute('data-num'))]; if(!rr) return; cerrarModal(); if(window.__guia) window.__guia.cerrar(); if(window.__abrirFicha) window.__abrirFicha(rr.id); }; });
       T.querySelectorAll('[data-agregar]').forEach(function(b){ b.onclick = function(){ ir(scrForm(vid, +b.getAttribute('data-agregar')), TIPOS[v.tipo].i+' '+esc(byId[+b.getAttribute('data-agregar')].numero)+'<small>'+TIPOS[v.tipo].n+'</small>'); }; });
@@ -14109,6 +14277,7 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
       $('vsBorrar').onclick = function(){ if(!confirm('¿Borrar esta visita y sus '+regs.length+' registros? También se quitan sus pendientes para el Excel.')) return; regs.forEach(function(rg){ quitarPendientes(rg); rg.deleted = true; rg.ts = Date.now(); }); v.deleted = true; v.ts = Date.now(); if(activaId()===vid) setActiva(null); guardarS(); toast('Visita borrada.'); atras(); };
     };
   }
+  function RKcache(v){ return rankingDestete(v, regsDe(v.id)); }
   function listaRegs(v, regs){
     if(!regs.length) return '<div class="vs-vacio">Todavía no hay animales. Búscalos arriba o usa <b>📋 Agregar a visita</b> en la ficha.</div>';
     return regs.map(function(rg){ var d = rg.datos || {}, pill = '';
@@ -14116,6 +14285,7 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
       if(v.tipo==='asocebu' && d.resultado) pill = '<span class="vs-pill '+(/Rechaz/.test(d.resultado)?'mal':(/Observ|Pendiente/.test(d.resultado)?'med':'ok'))+'">'+esc(d.resultado)+'</span>';
       if(v.tipo==='cliente' && d.interes) pill = '<span class="vs-pill '+(d.interes==='alto'?'ok':(d.interes==='medio'?'med':''))+'">Interés '+esc(d.interes)+'</span>';
       if(v.tipo==='inventario') pill = d.presente==='no' ? '<span class="vs-pill mal">No está</span>' : '<span class="vs-pill ok">Presente</span>';
+      if(v.tipo==='destete'){ var RK = RKcache(v), o = RK.rows.filter(function(z){ return z.reg.id === rg.id; })[0]; if(o){ pill = (o.puesto ? '<span class="vs-pill">#'+o.puesto+' de '+o.de+' '+(o.grupo==='M'?'♂':(o.grupo==='H'?'♀':''))+'</span>' : '')+' '+estadoTag(o); } }
       if(v.tipo==='asocebu'){ var cal = califDe(d); if(cal != null) pill += ' '+letraTag(cal*20); }
       return '<div class="vs-reg"><div class="vs-reg-h"><a data-num="'+esc(rg.numero)+'">'+esc(rg.numero)+'</a>'+pill+(d.descarte?' <span class="vs-pill mal">⚑ descarte</span>':'')+'<span class="acc"><button data-edit="'+rg.id+'">Corregir</button></span></div>'+
         '<p>'+esc(textoReg(v, rg))+'</p>'+(d.obs?'<p><b>Comentario:</b> '+esc(d.obs)+'</p>':'')+'</div>'; }).join('');
@@ -14166,6 +14336,38 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
         (sinRev.length ? '<div class="vs-chips">'+sinRev.slice(0,150).map(function(r){ return '<button class="vs-chip" data-agregar="'+r.id+'"><b>'+esc(r.numero)+'</b> <small>'+esc([r.sexo, edadTxt(r)].filter(Boolean).join(' · '))+'</small></button>'; }).join('')+(sinRev.length>150?'<small> … y '+(sinRev.length-150)+' más</small>':'')+'</div>' : '<div class="vs-vacio">Todos los animales esperados ya fueron revisados.</div>');
       H += '<div class="vs-eb">Listado</div>'+tabla(['Animal','Estado','Lote','Peso','CC','Comentario'], regs.map(function(r){ var d = r.datos||{}; return [link(r.numero), d.presente==='no'?'No está':'Presente', esc(d.lote||''), esc(d.peso||''), esc(d.cc||''), esc([d.descarte?'⚑ descarte'+(d.motivo?': '+d.motivo:''):'', d.obs].filter(Boolean).join(' · '))]; }));
     }
+    if(v.tipo === 'destete'){
+      var RK = rankingDestete(v, regs), xx = v.extra || {}, pc = Math.round(RK.pct*100);
+      var pesos = RK.rows.map(function(o){ return o.peso; }), ajs = RK.rows.map(function(o){ return o.aj; }), cfs = RK.rows.map(function(o){ return o.conf; });
+      H += '<div class="dst-ctrl"><div><span>Comparar</span><div class="vs-seg">'+[['sexo','Machos / hembras aparte'],['todos','Todos juntos']].map(function(g){ return '<button type="button" data-grp="'+g[0]+'" class="'+(((xx.grupo||'sexo')===g[0])?'on':'')+'">'+g[1]+'</button>'; }).join('')+'</div></div>'+
+        '<div><span>Reserva y bandera negra</span><div class="vs-seg">'+[10,20,25,33].map(function(p){ return '<button type="button" data-pct="'+p+'" class="'+(pc===p?'on':'')+'">'+p+' %</button>'; }).join('')+'</div></div></div>';
+      H += kpis([[regs.length,'destetados'],[RK.rows.filter(function(o){ return o.sexo==='M'; }).length+' ♂ · '+RK.rows.filter(function(o){ return o.sexo==='H'; }).length+' ♀','sexo'],
+        [prom(pesos)!=null?Math.round(prom(pesos))+' kg':'—','peso prom.'],[prom(ajs)!=null?Math.round(prom(ajs))+' kg':'—','ajustado 8 m prom.'],[prom(cfs)!=null?b100(prom(cfs)):'—','conformación prom. /100'],
+        [RK.rows.filter(function(o){ return o.estado==='reserva'; }).length,'⭐ posible reserva'],[RK.rows.filter(function(o){ return o.estado==='bandera'; }).length,'⚑ bandera negra']]);
+      Object.keys(RK.grupos).sort().forEach(function(k){
+        var G = RK.grupos[k];
+        H += '<div class="vs-eb">'+nombreGrupo(k)+' ('+G.length+')'+(G.promAj!=null?' — promedio '+Math.round(G.promPeso)+' kg · ajustado 8 m '+Math.round(G.promAj)+' kg':'')+'</div>';
+        if(G.k === 0) H += '<p class="vs-sub" style="margin:0 0 6px">Con menos de 3 crías calificadas todavía no se marca reserva ni bandera negra en este grupo.</p>';
+        var orden = G.orden.concat(G.filter(function(o){ return o.calif == null; }));
+        H += tabla(['#','Cría','Calif. destete','Peso','Aj. 8 m','Índice','Conf.','Edad','Madre','Padre'], orden.map(function(o){
+          var ic = o.estado==='reserva' ? ' <span class="dst-ic res" title="Posible reserva">⭐</span>' : (o.estado==='bandera' ? ' <span class="dst-ic bn" title="Bandera negra">⚑</span>' : '');
+          return [o.puesto||'', '<span style="white-space:nowrap">'+link(o.numero)+(o.sexo?' '+(o.sexo==='H'?'♀':'♂'):'')+ic+'</span>'+(o.motivo && o.estado==='bandera'?'<br><small style="color:var(--rust-deep)">'+esc(o.motivo)+'</small>':''),
+            o.calif!=null?'<b>'+b100(o.calif)+'</b>':'', o.peso!=null?o.peso+' kg':'', o.aj!=null?o.aj.toFixed(0)+' kg':'', o.indice!=null?o.indice.toFixed(0):'',
+            o.conf!=null?'<span style="white-space:nowrap">'+b100(o.conf)+' '+letraTag(o.conf*20)+'</span>':'', o.dias!=null?(o.dias/30).toFixed(1)+' m'+(o.edadRara?' ⚠':''):'', esc(o.madre), esc(o.padre)]; }));
+      });
+      var res = RK.rows.filter(function(o){ return o.estado==='reserva'; }).sort(function(a,b){ return b.calif - a.calif; });
+      H += '<div class="vs-eb">⭐ Posible reserva — el '+pc+' % mejor de cada grupo</div>'+tabla(['Cría','Grupo','Calif.','Marcar'], res.map(function(o){ var mk = (o.reg.datos||{}).reservaMarcada || /RESERVA/i.test(o.r.comentario||'');
+        return [link(o.numero), nombreGrupo(o.grupo), b100(o.calif), mk ? '✓ marcada en comentario' : '<button class="vs-chip" data-reserva="'+o.reg.id+'">Marcar POSIBLE RESERVA</button>']; }));
+      var bn = RK.rows.filter(function(o){ return o.estado==='bandera'; }).sort(function(a,b){ return (a.calif||0) - (b.calif||0); });
+      H += '<div class="vs-eb">⚑ Bandera negra — el '+pc+' % más bajo, o con defecto</div>'+tabla(['Cría','Grupo','Calif.','Motivo','Madre'], bn.map(function(o){ return [link(o.numero), nombreGrupo(o.grupo), b100(o.calif), esc(o.motivo||''), esc(o.madre)]; }));
+      H += '<div class="vs-eb">Promedio por rasgo</div>'+tabla(['Rasgo','Peso en la nota','Promedio (1 a 5)','Calificados'], RASGOS.map(function(x){ var a = regs.map(function(g){ return num(g.datos && g.datos.scores && g.datos.scores[x[0]]); }).filter(function(z){ return z != null; });
+        return [x[1], Math.round(PESO_R[x[0]]*100)+' %', a.length ? prom(a).toFixed(2) : '', a.length]; }));
+      H += '<div class="dst-nota"><b>Cómo se calcula.</b> Peso ajustado a 8 meses = peso ÷ días de edad × 235, igual que en el Excel. '+
+        'Conformación = promedio de los rasgos calificados con los pesos del Excel (10 % cada uno; conformación y musculatura 15 %), en base 100. '+
+        'El <b>índice</b> compara el peso ajustado de cada cría con el promedio de su grupo (100 = promedio). Cada 10 puntos de índice vale 1 punto de peso (promedio = 3, +20 % = 5). '+
+        '<b>Calificación de destete</b> = mitad peso y mitad conformación. El '+pc+' % de arriba queda como ⭐ posible reserva y el '+pc+' % de abajo con ⚑ bandera negra; '+
+        'también lleva bandera la cría con temperamento, ombligo o aplomos en 2 o menos, y esa nunca entra a reserva. El ranking cambia a medida que se agregan crías.</div>';
+    }
     if(v.tipo === 'cliente'){
       var x = v.extra || {}, porI = {}; D.forEach(function(d){ var k = d.interes || 'sin marcar'; porI[k] = (porI[k]||0)+1; });
       H += '<div class="vs-reg"><b>'+esc(x.cliente||'Cliente')+'</b>'+(x.empresa?' — '+esc(x.empresa):'')+'<p>'+esc([x.tel?'Tel. '+x.tel:'', x.ciudad].filter(Boolean).join(' · '))+'</p></div>';
@@ -14185,12 +14387,18 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
     if(v.tipo === 'pesaje') head = head.concat(['Peso','Nota']);
     if(v.tipo === 'cliente') head = head.concat(['Interes','Precio_pedido','Precio_ofrecido']);
     if(v.tipo === 'inventario') head = head.concat(['Presente','Lote','Peso','Condicion_corporal','Descarte','Motivo_descarte']);
+    if(v.tipo === 'destete') head = head.concat(['Lote','Sexo','Madre','Padre','Peso_destete','Edad_dias','Peso_aj_8m'].concat(RASGOS.map(function(x){ return x[1]; })).concat(['Conformacion_base100','Indice_grupo','Calif_destete_base100','Puesto','De','Ranking']));
+    var RKc = v.tipo === 'destete' ? rankingDestete(v, regs) : null;
     var rows = regs.map(function(r){ var d = r.datos||{}, b = [TIPOS[v.tipo].n, v.fecha, v.finca, r.numero, textoReg(v, r), d.obs||''];
       if(v.tipo === 'asocebu'){ var cal = califDe(d); b = b.concat(RASGOS.map(function(x){ return d.scores && d.scores[x[0]] != null ? d.scores[x[0]] : ''; })).concat([cal!=null?cal.toFixed(2):'', cal!=null?(cal*20).toFixed(1):'', cal!=null&&window.__asoc?window.__asoc.letra(cal*20):'', d.resultado||'', d.registro||'', d.peso||'']); }
       if(v.tipo === 'palpacion') b = b.concat([d.estado||'', d.dias||'', d.toro||'', d.parto||'', d.diag||'']);
       if(v.tipo === 'pesaje') b = b.concat([d.peso||'', d.nota||'']);
       if(v.tipo === 'cliente') b = b.concat([d.interes||'', d.precioPedido||'', d.precioOfrecido||'']);
       if(v.tipo === 'inventario') b = b.concat([d.presente==='no'?'NO':'SI', d.lote||'', d.peso||'', d.cc||'', d.descarte?'SI':'', d.motivo||'']);
+      if(v.tipo === 'destete'){ var o = RKc.rows.filter(function(z){ return z.reg.id === r.id; })[0] || calcDest(v, r);
+        b = b.concat([(v.extra&&v.extra.lote)||'', o.sexo, o.madre, o.padre, d.peso||'', o.dias!=null?o.dias:'', o.aj!=null?o.aj.toFixed(1):''])
+          .concat(RASGOS.map(function(x){ return d.scores && d.scores[x[0]] != null ? d.scores[x[0]] : ''; }))
+          .concat([o.conf!=null?b100(o.conf):'', o.indice!=null?o.indice.toFixed(1):'', o.calif!=null?b100(o.calif):'', o.puesto||'', o.de||'', o.estado==='reserva'?'POSIBLE RESERVA':(o.estado==='bandera'?'BANDERA NEGRA: '+(o.motivo||''):'')]); }
       return b.map(c).join(';'); });
     var blob = new Blob(['﻿'+head.join(';')+'\r\n'+rows.join('\r\n')], {type:'text/csv;charset=utf-8;'});
     var u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = 'visita_'+v.tipo+'_'+v.fecha+'.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 1500);
@@ -14277,6 +14485,13 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
   // Para las banderas negras y otras vistas: comentarios y descarte desde visitas
   window.__visitas = {
     abrir:abrir,
+    nuevaDestete:function(){
+      S = cargar(); abrirModal(); pila = [{ fn:scrInicio, titulo:'Visitas' }]; vista = null;
+      var act = activaId();
+      if(act && S.visitas[act].tipo === 'destete'){ ir(scrVisita(act), '🍼 Destete<small>'+fmt(S.visitas[act].fecha)+'</small>', true); }
+      else { window.__vsTipoInicial = 'destete'; ir(scrNueva(null), '🍼 Nuevo destete', true); }
+      $('vsAtras').style.visibility = 'visible';
+    },
     lista:function(){ S = cargar(); return visitasOrden().map(function(v){ return { id:v.id, tipo:v.tipo, fecha:v.fecha, finca:v.finca, cerrada:!!v.cerrada, encabezado:encabezado(v), n:regsDe(v.id).length }; }); },
     abrirVisita:function(vid){ S = cargar(); if(!S.visitas[vid]) return; abrirModal(); pila = [{ fn:scrInicio, titulo:'Visitas' }]; vista = null; var v = S.visitas[vid]; ir(scrVisita(vid), TIPOS[v.tipo].i+' '+TIPOS[v.tipo].n+'<small>'+fmt(v.fecha)+'</small>', true); $('vsAtras').style.visibility = 'visible'; },
     csv:function(vid){ S = cargar(); var v = S.visitas[vid]; if(v) csv(v, regsDe(vid)); },
@@ -16758,7 +16973,7 @@ window.__irAFicha = function(id, soloSiHayVentana){
     } else if(u.tipo === 'salida' && /MUER/i.test(String(d.causa||'')+' '+String(d.obs||''))){
       res = window.__BN.novedadMuerte(u.numero); titulo = 'Muerte de la cría '+u.numero+(res && res.r ? ' (madre '+res.r.numero+')' : '');
       if(!res) return;
-    } else if(u.tipo === 'peso' && /DESTET/i.test(String(d.nota||''))){
+    } else if((u.tipo === 'peso' && /DESTET/i.test(String(d.nota||''))) || u.tipo === 'destete'){
       res = window.__BN.novedadDestete(u.numero, d.peso, window.fechaAIso ? window.fechaAIso(d.fecha) || d.fecha : d.fecha);
       titulo = 'Destete de '+u.numero+(res && res.r ? ' (madre '+res.r.numero+')' : '');
     } else return;
@@ -17319,7 +17534,7 @@ window.__irAFicha = function(id, soloSiHayVentana){
   function vacaDe(tipo, numero, d){
     if(tipo === 'cria') return N(d.tipo_parto) === 'TE' ? null : byNum(d.madre);
     var r = byNum(numero);
-    if((tipo === 'peso' || tipo === 'salida') && r && r.madre && (tipo === 'salida' || /DESTET/i.test(String(d.nota||'')))) return byNum(r.madre);
+    if((tipo === 'peso' || tipo === 'salida' || tipo === 'destete') && r && r.madre && (tipo === 'salida' || tipo === 'destete' || /DESTET/i.test(String(d.nota||'')))) return byNum(r.madre);
     return r && r.sexo === 'H' ? r : null;
   }
   window.__antesActualizar = function(tipo, numero, d){

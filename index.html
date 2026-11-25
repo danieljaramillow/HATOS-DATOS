@@ -1761,7 +1761,15 @@ window.__renderReproHead = function(o){
   var el = document.getElementById('fh-repro');
   if(!el) return;
   var r = o.r;
-  if(!r || r.sexo !== 'H'){ el.innerHTML = ''; return; }
+  if(!r){ el.innerHTML = ''; return; }
+  if(r.sexo !== 'H'){
+    var dm = window.__visitas && window.__visitas.estadoDestete ? window.__visitas.estadoDestete(r.numero) : null;
+    if(dm && dm.estado){
+      el.innerHTML = '<div class="rp-flags"><div class="rp-flags-tot">'+(dm.estado==='reserva' ? '<b>⭐</b> Posible reserva en su destete' : '<b class="bn-on">⚑</b> Bandera negra en su destete')+
+        ' · puesto <b>'+dm.puesto+' de '+dm.de+'</b></div>'+(dm.estado==='bandera' && dm.motivo ? '<div class="rp-chips"><span class="rp-bn">'+String(dm.motivo).replace(/[&<>"]/g,'')+'</span></div>' : '')+'</div>';
+    } else el.innerHTML = '';
+    return;
+  }
 
   function esc(v){ return String(v==null?'':v).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function fd(d){ if(!d) return '—'; var p = String(d).slice(0,10).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : d; }
@@ -1874,10 +1882,38 @@ window.__renderReproHead = function(o){
     '</div>';
   }
 
-  el.innerHTML = '<div class="rp-top">'+cat+est+'</div>'+
+  // ---- Resumen de banderas negras y estrellas (mismo cálculo del Resumen de partos) ----
+  var band = '';
+  try{
+    var BNh = window.__BN ? window.__BN.analizar(r) : null, chips = [];
+    var nb = BNh ? BNh.banderas.length : 0, ns = BNh ? (BNh.estrellas || []).length : 0;
+    if(BNh){
+      var cnt = {}, cntE = {};
+      BNh.banderas.forEach(function(b){ cnt[b.tipo] = (cnt[b.tipo]||0) + 1; });
+      (BNh.estrellas || []).forEach(function(b){ cntE[b.tipo] = (cntE[b.tipo]||0) + 1; });
+      Object.keys(cnt).forEach(function(t){ chips.push('<span class="rp-bn">⚑ '+esc(window.__BN.ICON[t]||t)+(cnt[t]>1?' ×'+cnt[t]:'')+'</span>'); });
+      Object.keys(cntE).forEach(function(t){ chips.push('<span class="rp-st">⭐ '+esc(window.__BN.ICON_EST[t]||t)+(cntE[t]>1?' ×'+cntE[t]:'')+'</span>'); });
+    }
+    var dst = window.__visitas && window.__visitas.estadoDestete ? window.__visitas.estadoDestete(r.numero) : null;
+    if(dst && dst.estado === 'reserva') chips.push('<span class="rp-st">⭐ Posible reserva en su destete ('+dst.puesto+' de '+dst.de+')</span>');
+    if(dst && dst.estado === 'bandera') chips.push('<span class="rp-bn">⚑ Bandera negra en su destete ('+dst.puesto+' de '+dst.de+')</span>');
+    if(chips.length || nb || ns){
+      band = '<div class="rp-flags"><div class="rp-flags-tot">'+
+        '<b class="'+(nb?'bn-on':'')+'">⚑ '+nb+'</b> bandera'+(nb===1?'':'s')+' negra'+(nb===1?'':'s')+' · <b>⭐ '+ns+'</b> estrella'+(ns===1?'':'s')+
+        (nb >= 2 ? ' <span class="rp-desc">PARA DESCARTE</span>' : '')+
+        (BNh && (nb || ns) ? ' <a href="#" class="rp-ver">ver detalle ↓</a>' : '')+'</div>'+
+        (chips.length ? '<div class="rp-chips">'+chips.join('')+'</div>' : '')+'</div>';
+    } else if(r.sexo === 'H' && nPartos > 0){
+      band = '<div class="rp-flags"><div class="rp-flags-tot">⚑ 0 banderas · ⭐ 0 estrellas</div></div>';
+    }
+  }catch(e){}
+
+  el.innerHTML = '<div class="rp-top">'+cat+est+'</div>'+band+
     '<p class="rp-det">'+det+'</p>'+
     notas.map(function(n){ return '<p class="rp-note">'+n+'</p>'; }).join('')+
     kpis;
+  var ver = el.querySelector('.rp-ver');
+  if(ver) ver.onclick = function(ev){ ev.preventDefault(); var t = document.querySelector('.bn-table') || document.getElementById('fh-fert-wrap'); if(t) t.scrollIntoView({ behavior:'smooth', block:'center' }); };
 };
 </script>
 
@@ -1892,6 +1928,16 @@ window.__renderReproHead = function(o){
 .dst-ctrl{display:flex;flex-wrap:wrap;gap:10px 18px;margin:4px 0 12px}
 .dst-ctrl>div>span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:4px}
 body.vs-lock .sa-chip{display:none!important}
+.fh-repro .rp-flags{margin:8px 0 2px;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.22)}
+.fh-repro .rp-flags-tot{font-size:13.5px}
+.fh-repro .rp-flags-tot b{font-size:15px}
+.fh-repro .rp-flags-tot b.bn-on{background:#111;color:#fff;border-radius:5px;padding:0 6px}
+.fh-repro .rp-desc{margin-left:6px;background:#A9481A;color:#fff;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:700;letter-spacing:.04em}
+.fh-repro .rp-ver{margin-left:6px;color:#E8C875;font-size:12px}
+.fh-repro .rp-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.fh-repro .rp-bn,.fh-repro .rp-st{font-size:11.5px;border-radius:12px;padding:2px 8px;white-space:nowrap}
+.fh-repro .rp-bn{background:#111;color:#fff;border:1px solid rgba(255,255,255,.25)}
+.fh-repro .rp-st{background:#F3E3A8;color:#3b3214}
 .dst-socios{margin:0 0 10px;font-weight:600}
 .dst-nota{margin:14px 0 4px;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.04);font-size:12.5px;line-height:1.5;color:var(--ink-soft)}
 </style>
@@ -1912,7 +1958,7 @@ body.vs-lock .sa-chip{display:none!important}
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 25 nov 2026 · 3:45 p.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 25 nov 2026 · 4:00 p.m.</b>
     </div>
   </header>
 
@@ -14574,6 +14620,15 @@ sug.querySelectorAll('button[data-id]').forEach(function(b){ b.onclick = functio
 
   // Para las banderas negras y otras vistas: comentarios y descarte desde visitas
   window.__visitas = {
+    estadoDestete:function(numero){
+      try{
+        var k = N(numero), best = null;
+        Object.keys(S.regs).forEach(function(id){ var g = S.regs[id]; if(!g || g.deleted || N(g.numero) !== k) return; var v = S.visitas[g.visitaId]; if(!v || v.deleted || v.tipo !== 'destete') return; if(!best || v.fecha > best.v.fecha) best = { v:v, g:g }; });
+        if(!best) return null;
+        var o = rankingDestete(best.v, regsDe(best.v.id)).rows.filter(function(z){ return z.reg.id === best.g.id; })[0];
+        return o ? { estado:o.estado||'', puesto:o.puesto, de:o.de, motivo:o.motivo||'', fecha:best.v.fecha } : null;
+      }catch(e){ return null; }
+    },
     abrir:abrir,
     nuevaDestete:function(){
       S = cargar(); abrirModal(); pila = [{ fn:scrInicio, titulo:'Visitas' }]; vista = null;

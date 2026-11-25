@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-25T14:57:23.129Z",
+ "actualizado": "2026-11-25T15:10:51.000Z",
  "edits": [
   {
    "id": 1560,
@@ -2079,8 +2079,8 @@
    "numero": "379/2",
    "detalle": {
     "nombre": "",
-    "fecha": "2026-10-30",
-    "sexo": "H",
+    "fecha": "2026-10-31",
+    "sexo": "M",
     "raza": "BR",
     "finca": "OK",
     "lote": "",
@@ -2092,7 +2092,7 @@
     "receptora": "",
     "gemelo_de": ""
    },
-   "detalle_texto": "Parto normal · Hembra · 2026-10-30 · 43 kg · Madre: 582/1 · Padre: 34/2",
+   "detalle_texto": "Parto normal · Macho · 2026-10-31 · 43 kg · Madre: 582/1 · Padre: 34/2",
    "fecha": "2026-11-23"
   },
   {
@@ -2390,11 +2390,11 @@
    "tipo": "peso",
    "numero": "582/1",
    "detalle": {
-    "fecha": "2026-10-30",
+    "fecha": "2026-10-31",
     "peso": "550",
     "nota": "PARTO"
    },
-   "detalle_texto": "2026-10-30 · 550 kg · PARTO",
+   "detalle_texto": "2026-10-31 · 550 kg · PARTO",
    "fecha": "2026-11-23"
   },
   {

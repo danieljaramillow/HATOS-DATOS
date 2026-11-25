@@ -1057,6 +1057,7 @@ window.__BN = (function(){
   #quickJumpResults{ max-height:280px; overflow-y:auto; margin-top:6px; }
   #quickJumpResults .qj-item{ padding:8px 10px; border-radius:6px; cursor:pointer; font-size:13px; }
   #quickJumpResults .qj-item:hover{ background:var(--green-pale); }
+  #quickJumpResults .qj-item.qj-sel{ background:var(--green-pale); outline:2px solid var(--green-deep); outline-offset:-2px; }
   #quickJumpResults .qj-item .qj-name{ color:#5F5744; font-size:11.5px; }
   @media (max-width:640px){
     #quickJumpFab{ bottom:16px; right:16px; }
@@ -1910,7 +1911,7 @@ body.vs-lock .sa-chip{display:none!important}
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 25 nov 2026 · 10:30 a.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 25 nov 2026 · 11:35 a.m.</b>
     </div>
   </header>
 
@@ -6584,6 +6585,26 @@ body.vs-lock .sa-chip{display:none!important}
       if(!qjPanel.contains(e.target) && e.target!==qjToggle){ qjPanel.classList.remove('open'); }
     });
     qjInput.addEventListener('click', function(e){ e.stopPropagation(); });
+    /* Teclado: ↑ ↓ recorren la lista (con scroll), Enter abre la ficha, Esc cierra. */
+    var qjSel = -1;
+    function qjMarcar(i){
+      var items = qjResults.querySelectorAll('.qj-item[data-id]');
+      items.forEach(function(it){ it.classList.remove('qj-sel'); });
+      if(!items.length){ qjSel = -1; return; }
+      qjSel = Math.max(0, Math.min(i, items.length - 1));
+      items[qjSel].classList.add('qj-sel');
+      items[qjSel].scrollIntoView({ block:'nearest' });
+    }
+    new MutationObserver(function(){ qjSel = -1; }).observe(qjResults, { childList:true });
+    qjInput.addEventListener('keydown', function(e){
+      var items = qjResults.querySelectorAll('.qj-item[data-id]');
+      if(e.key === 'ArrowDown'){ e.preventDefault(); qjMarcar(qjSel + 1); }
+      else if(e.key === 'ArrowUp'){ e.preventDefault(); qjMarcar(qjSel <= 0 ? 0 : qjSel - 1); }
+      else if(e.key === 'PageDown'){ e.preventDefault(); qjMarcar(qjSel + 6); }
+      else if(e.key === 'PageUp'){ e.preventDefault(); qjMarcar(qjSel - 6); }
+      else if(e.key === 'Enter'){ if(!items.length) return; e.preventDefault(); qjAbrir(parseInt(items[qjSel >= 0 ? qjSel : 0].getAttribute('data-id'), 10)); }
+      else if(e.key === 'Escape'){ qjPanel.classList.remove('open'); qjToggle.focus(); }
+    });
     function qjAbrir(id){
       if(window.__irAFicha && window.__irAFicha(id, true)){ qjPanel.classList.remove('open'); return; }
       document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
@@ -6615,7 +6636,7 @@ body.vs-lock .sa-chip{display:none!important}
       if(q.length<1){ qjRecientes(); return; }
       var matches = BD.filter(function(r){
         return (r.numero && r.numero.toUpperCase().indexOf(q)>=0) || (r.nombre && r.nombre.toUpperCase().indexOf(q)>=0);
-      }).slice(0,10);
+      }).slice(0,40);
       qjResults.innerHTML = matches.map(function(r){
         return '<div class="qj-item" data-id="'+r.id+'"><div>'+(r.numero||'—')+(r.nombre?' — '+r.nombre:'')+'</div>'+
           '<div class="qj-name">'+(r.finca||'—')+' · '+(r.raza||'—')+' · '+(r.sexo==='H'?'Hembra':(r.sexo==='M'?'Macho':'—'))+'</div></div>';

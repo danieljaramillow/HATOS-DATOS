@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-26T18:41:33.092Z",
+ "actualizado": "2026-11-26T18:50:58.000Z",
  "edits": [
   {
    "id": 1560,
@@ -3246,6 +3246,210 @@
     "toro": "31/0"
    },
    "detalle_texto": "2026-10-20 · Preñada 95 días · parto probable 2027-04-26 · Toro: 31/0"
+  },
+  {
+   "id": 179563630952929,
+   "tipo": "programacion",
+   "numero": "98/2",
+   "detalle": {
+    "fecha": "2026-11-26",
+    "toro": "923/1",
+    "por": "DJW"
+   },
+   "detalle_texto": "2026-11-26 · Programada con 923/1 (DJW) — no es entore",
+   "fecha": "2026-11-26"
+  },
+  {
+   "id": 179563630952930,
+   "tipo": "programacion",
+   "numero": "801/1",
+   "detalle": {
+    "fecha": "2026-11-26",
+    "toro": "923/1",
+    "por": "DJW"
+   },
+   "detalle_texto": "2026-11-26 · Programada con 923/1 (DJW) — no es entore",
+   "fecha": "2026-11-26"
+  },
+  {
+   "id": 179563630952931,
+   "tipo": "programacion",
+   "numero": "63/23",
+   "detalle": {
+    "fecha": "2026-11-26",
+    "toro": "119/2",
+    "por": "DJW"
+   },
+   "detalle_texto": "2026-11-26 · Programada con 119/2 (DJW) — no es entore",
+   "fecha": "2026-11-26"
+  },
+  {
+   "id": 179563630952932,
+   "tipo": "programacion",
+   "numero": "823/21",
+   "detalle": {
+    "fecha": "2026-11-26",
+    "toro": "112/2",
+    "por": "DJW"
+   },
+   "detalle_texto": "2026-11-26 · Programada con 112/2 (DJW) — no es entore",
+   "fecha": "2026-11-26"
+  },
+  {
+   "id": 179563630952933,
+   "tipo": "programacion",
+   "numero": "826/1",
+   "detalle": {
+    "fecha": "2026-11-26",
+    "toro": "923/1",
+    "por": "DJW"
+   },
+   "detalle_texto": "2026-11-26 · Programada con 923/1 (DJW) — no es entore",
+   "fecha": "2026-11-26"
+  },
+  {
+   "id": 179563630952934,
+   "tipo": "programacion",
+   "numero": "819/1",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "toro": "112/2",
+    "por": "FJJ"
+   },
+   "detalle_texto": "2026-11-04 · Programada con 112/2 (FJJ) — no es entore",
+   "fecha": "2026-11-04"
+  },
+  {
+   "id": 179563630952935,
+   "tipo": "programacion",
+   "numero": "811/20",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "toro": "112/2",
+    "por": "FJJ"
+   },
+   "detalle_texto": "2026-11-04 · Programada con 112/2 (FJJ) — no es entore",
+   "fecha": "2026-11-04"
+  },
+  {
+   "id": 179563630952936,
+   "tipo": "programacion",
+   "numero": "564/1",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "toro": "119/2",
+    "por": "FJJ"
+   },
+   "detalle_texto": "2026-11-04 · Programada con 119/2 (FJJ) — no es entore",
+   "fecha": "2026-11-04"
+  },
+  {
+   "id": 179563630952937,
+   "tipo": "programacion",
+   "numero": "657/1",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "toro": "923/1",
+    "por": "FJJ"
+   },
+   "detalle_texto": "2026-11-04 · Programada con 923/1 (FJJ) — no es entore",
+   "fecha": "2026-11-04"
+  },
+  {
+   "id": 179563630952938,
+   "tipo": "programacion",
+   "numero": "741/18",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "toro": "119/2",
+    "por": "FJJ"
+   },
+   "detalle_texto": "2026-11-04 · Programada con 119/2 (FJJ) — no es entore",
+   "fecha": "2026-11-04"
+  },
+  {
+   "id": 179563630952939,
+   "tipo": "programacion",
+   "numero": "582/1",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "toro": "923/1",
+    "por": "FJJ"
+   },
+   "detalle_texto": "2026-11-04 · Programada con 923/1 (FJJ) — no es entore",
+   "fecha": "2026-11-04"
+  },
+  {
+   "id": 179563630952940,
+   "tipo": "programacion",
+   "numero": "916/1",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "toro": "183/2",
+    "por": "FJJ"
+   },
+   "detalle_texto": "2026-11-04 · Programada con 183/2 (FJJ) — no es entore",
+   "fecha": "2026-11-04"
+  },
+  {
+   "id": 179563630952941,
+   "tipo": "programacion",
+   "numero": "118/2",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "toro": "119/2",
+    "por": "FJJ"
+   },
+   "detalle_texto": "2026-11-04 · Programada con 119/2 (FJJ) — no es entore",
+   "fecha": "2026-11-04"
+  },
+  {
+   "id": 179563630952942,
+   "tipo": "programacion",
+   "numero": "917/1",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "toro": "112/2",
+    "por": "FJJ"
+   },
+   "detalle_texto": "2026-11-04 · Programada con 112/2 (FJJ) — no es entore",
+   "fecha": "2026-11-04"
+  },
+  {
+   "id": 179563630952943,
+   "tipo": "programacion",
+   "numero": "693/20",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "toro": "119/2",
+    "por": "FJJ"
+   },
+   "detalle_texto": "2026-11-04 · Programada con 119/2 (FJJ) — no es entore",
+   "fecha": "2026-11-04"
+  },
+  {
+   "id": 179563630952944,
+   "tipo": "programacion",
+   "numero": "760/18",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "toro": "119/2",
+    "por": "FJJ"
+   },
+   "detalle_texto": "2026-11-04 · Programada con 119/2 (FJJ) — no es entore",
+   "fecha": "2026-11-04"
+  },
+  {
+   "id": 179563630952945,
+   "tipo": "programacion",
+   "numero": "720/1",
+   "detalle": {
+    "fecha": "2026-11-04",
+    "toro": "923/1",
+    "por": "FJJ"
+   },
+   "detalle_texto": "2026-11-04 · Programada con 923/1 (FJJ) — no es entore",
+   "fecha": "2026-11-04"
   }
  ],
  "visita": null,

@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-25T22:26:42.000Z",
+ "actualizado": "2026-11-26T18:41:33.092Z",
  "edits": [
   {
    "id": 1560,
@@ -68,6 +68,17 @@
    "valor_nuevo": "67/2",
    "fecha": "2026-11-25",
    "ts": 1795618637586
+  },
+  {
+   "id": 1445,
+   "numero": "119/2",
+   "field": "sexo",
+   "field_label": "Sexo",
+   "col": "H",
+   "valor_anterior": "H",
+   "valor_nuevo": "M",
+   "fecha": "2026-11-26",
+   "ts": 1795718487063
   }
  ],
  "updates": [
@@ -6580,6 +6591,16 @@
    "finca": "OK",
    "ts": 1795636309556,
    "equipo": "Computador"
+  },
+  {
+   "tipo": "edicion",
+   "numero": "119/2",
+   "texto": "Sexo: H → M",
+   "origen": "Ficha (✏ Editar datos)",
+   "ref": "e:1445:sexo",
+   "finca": "OK",
+   "ts": 1795718487063,
+   "equipo": "Computador"
   }
  ],
  "muertes": {
@@ -9582,6 +9603,10 @@
   "183/2": {
    "v": true,
    "ts": 1792599575049
+  },
+  "119/2": {
+   "v": true,
+   "ts": 1795718490911
   }
  }
 }

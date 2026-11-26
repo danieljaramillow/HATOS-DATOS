@@ -1890,7 +1890,7 @@ window.__renderReproHead = function(o){
       var eu = entDesp.length ? entDesp[entDesp.length-1] : null, quienE = eu ? (eu.toro || (eu.ia ? eu.ia : (eu.te || ''))) : '';
       var coincide = eu && String(quienE).toUpperCase().indexOf(String(prog.toro).toUpperCase()) >= 0;
       notas.push('📋 Programada con <b>'+esc(prog.toro)+'</b>'+(prog.por ? ' por '+esc(prog.por) : '')+' el '+fd(prog.fecha)+
-        (eu ? (coincide ? ' · <b>✓ entró con ese toro</b> el '+fd(eu.fecha) : ' · <span class="rp-warn">⚠ entró con '+esc(quienE)+' el '+fd(eu.fecha)+'</span>') : ' · todavía sin entore'));
+        (eu ? (coincide ? ' · <b>✓ entró con ese toro</b> el '+fd(eu.fecha) : ' · <span class="rp-warn">⚠ entró con '+esc(quienE)+' el '+fd(eu.fecha)+'</span>') : ' · todavía sin entore'+(prog.obs?' ('+esc(prog.obs)+')':'')));
     }
   }catch(e){}
 
@@ -1972,7 +1972,7 @@ tr.ent-pend td{background:#EEF4EA}
       Fuente: hoja <b>BD</b><br>
       Registros activos e inactivos con historial<br>
       Hoy: <span id="gen-date"></span><br>
-      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 26 nov 2026 · 2:20 p.m.</b>
+      <b id="app-version" style="color:var(--rust,#A9481A)">Versión: 26 nov 2026 · 2:30 p.m.</b>
     </div>
   </header>
 
@@ -6530,7 +6530,7 @@ tr.ent-pend td{background:#EEF4EA}
           if(filas.some(function(f){ return f.fecha === d.fecha && f.quien === (d.toro||''); })) return;
           filas.push({ fecha:d.fecha||'', tipo:tipo, quien:d.toro||'—', salida:'', obs:[d.obs, 'pendiente de pasar al Excel'].filter(Boolean).join(' · '), cls:'ent-pend' });
         } else if(u.tipo === 'programacion'){
-          filas.push({ fecha:d.fecha||'', tipo:'📋 Programación', quien:d.toro||'—', salida:'', obs:'Toro escogido'+(d.por?' por '+d.por:'')+' — no es entore', cls:'ent-prog' });
+          filas.push({ fecha:d.fecha||'', tipo:'📋 Programación', quien:d.toro||'—', salida:'', obs:'Toro escogido'+(d.por?' por '+d.por:'')+' — no es entore'+(d.obs?' · '+d.obs:''), cls:'ent-prog' });
         }
       });
       filas.sort(function(a,b){ return b.fecha.localeCompare(a.fecha) || (a.cls==='ent-prog' ? 1 : -1); });

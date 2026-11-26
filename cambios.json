@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tablero": "Hatos Datos",
- "actualizado": "2026-11-26T18:50:58.000Z",
+ "actualizado": "2026-11-26T18:56:25.000Z",
  "edits": [
   {
    "id": 1560,
@@ -3254,9 +3254,10 @@
    "detalle": {
     "fecha": "2026-11-26",
     "toro": "923/1",
-    "por": "DJW"
+    "por": "DJW",
+    "obs": "entra con el toro el 27/11/2026"
    },
-   "detalle_texto": "2026-11-26 · Programada con 923/1 (DJW) — no es entore",
+   "detalle_texto": "2026-11-26 · Programada con 923/1 (DJW) — no es entore · entra el 27/11/2026",
    "fecha": "2026-11-26"
   },
   {
@@ -3266,9 +3267,10 @@
    "detalle": {
     "fecha": "2026-11-26",
     "toro": "923/1",
-    "por": "DJW"
+    "por": "DJW",
+    "obs": "entra con el toro el 27/11/2026"
    },
-   "detalle_texto": "2026-11-26 · Programada con 923/1 (DJW) — no es entore",
+   "detalle_texto": "2026-11-26 · Programada con 923/1 (DJW) — no es entore · entra el 27/11/2026",
    "fecha": "2026-11-26"
   },
   {
@@ -3278,9 +3280,10 @@
    "detalle": {
     "fecha": "2026-11-26",
     "toro": "119/2",
-    "por": "DJW"
+    "por": "DJW",
+    "obs": "entra con el toro el 27/11/2026"
    },
-   "detalle_texto": "2026-11-26 · Programada con 119/2 (DJW) — no es entore",
+   "detalle_texto": "2026-11-26 · Programada con 119/2 (DJW) — no es entore · entra el 27/11/2026",
    "fecha": "2026-11-26"
   },
   {
@@ -3290,9 +3293,10 @@
    "detalle": {
     "fecha": "2026-11-26",
     "toro": "112/2",
-    "por": "DJW"
+    "por": "DJW",
+    "obs": "entra con el toro el 27/11/2026"
    },
-   "detalle_texto": "2026-11-26 · Programada con 112/2 (DJW) — no es entore",
+   "detalle_texto": "2026-11-26 · Programada con 112/2 (DJW) — no es entore · entra el 27/11/2026",
    "fecha": "2026-11-26"
   },
   {
@@ -3302,9 +3306,10 @@
    "detalle": {
     "fecha": "2026-11-26",
     "toro": "923/1",
-    "por": "DJW"
+    "por": "DJW",
+    "obs": "entra con el toro el 27/11/2026"
    },
-   "detalle_texto": "2026-11-26 · Programada con 923/1 (DJW) — no es entore",
+   "detalle_texto": "2026-11-26 · Programada con 923/1 (DJW) — no es entore · entra el 27/11/2026",
    "fecha": "2026-11-26"
   },
   {
@@ -3350,7 +3355,8 @@
    "detalle": {
     "fecha": "2026-11-04",
     "toro": "923/1",
-    "por": "FJJ"
+    "por": "FJJ",
+    "obs": "no aparece en las hojas de entore del 22/10 ni en las agregadas del 4/11"
    },
    "detalle_texto": "2026-11-04 · Programada con 923/1 (FJJ) — no es entore",
    "fecha": "2026-11-04"
@@ -3386,7 +3392,8 @@
    "detalle": {
     "fecha": "2026-11-04",
     "toro": "183/2",
-    "por": "FJJ"
+    "por": "FJJ",
+    "obs": "no aparece en las hojas de entore del 22/10 ni en las agregadas del 4/11"
    },
    "detalle_texto": "2026-11-04 · Programada con 183/2 (FJJ) — no es entore",
    "fecha": "2026-11-04"
